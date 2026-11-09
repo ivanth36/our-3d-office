@@ -17,7 +17,7 @@ const NODES = [
   [8.4, 3.6],    // 10
   [2.6, -0.1],   // 11
   [2.6, 3.6],    // 12
-  [5.2, 7.3],    // 13 near his statue
+  [5.2, 7.3],    // 13 by the entrance
   [0.5, 7.3],    // 14
   [7.5, -6.2],   // 15
 ];
@@ -26,14 +26,14 @@ const EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [1, 7], [7, 8], [
 const NEXT = NODES.map((_, i) => EDGES.flatMap(([a, b]) => (a === i ? [b] : b === i ? [a] : [])));
 
 const SPEED = 1.0; // m/s
-const SPOTS = { 0: 'nap', 5: 'beg', 13: 'admire' }; // special things Joe likes to do at some nodes
+const SPOTS = { 0: 'nap', 5: 'beg', 13: 'admire' }; // 'admire' = sits and looks up at the street // special things Joe likes to do at some nodes
 
 export function roamingJoe(floor) {
-  const joe = shihTzu(floor, NODES[2][0], 0.02, NODES[2][1], 0, 0.9, { cast: false });
+  const joe = shihTzu(floor, NODES[2][0], 0.02, NODES[2][1], 0, 0.85, { cast: false });
   joe.userData.dynamic = true;
   // soft blob shadow (shadow maps are static for speed, so Joe brings his own)
   const blob = new THREE.Mesh(
-    new THREE.CircleGeometry(0.38, 20),
+    new THREE.CircleGeometry(0.42, 20),
     new THREE.MeshBasicMaterial({ color: '#3b2a1a', transparent: true, opacity: 0.22, depthWrite: false })
   );
   blob.rotation.x = -Math.PI / 2;

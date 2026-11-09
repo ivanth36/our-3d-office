@@ -113,7 +113,6 @@ function addWall(side, group) {
 }
 const MIN_WALL_OPACITY = 0.1;
 const _dir = new THREE.Vector3();
-const _bp = new THREE.Vector3();
 function updateWalls() {
   // direction from the building's centre to the camera
   _dir.set(camera.position.x, camera.position.y - controls.target.y, camera.position.z).normalize();
@@ -280,11 +279,6 @@ function loop() {
     renderer.shadowMap.needsUpdate = true;
   }
   updateWalls();
-  // cut-out standees always turn to face the viewer (upright, spin around Y only)
-  if (anim.billboards) for (const b of anim.billboards) {
-    b.getWorldPosition(_bp);
-    b.rotation.y = Math.atan2(camera.position.x - _bp.x, camera.position.z - _bp.z);
-  }
   // Joe roams the café
   if (anim.joe) anim.joe.update(dt, t);
   // employees: gentle typing / nodding

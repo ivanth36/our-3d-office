@@ -189,25 +189,8 @@ export function floor1(p, anim) {
   for (let i = 0; i < 4; i++) pendant(p, -1.0 + i * 1.75, -5.9, { drop: 1.2 });
   void lt;
 
-  // ---- Joe cut-out standee on the pedestal near the entrance (always turns to face you)
-  cyl(p, 0.55, 0.6, '#e8d6bb', 7.4, 0, 6.0, { seg: 18 });
-  cyl(p, 0.6, 0.08, C.woodDark, 7.4, 0.6, 6.0, { seg: 18 });
+  // plaque used under Joe's framed portrait
   const plaque = canvasTex(256, 64, (ctx, w, h) => { ctx.fillStyle = '#e8b84a'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#4a3020'; ctx.font = 'bold 34px Georgia, serif'; ctx.fillText('JOE  ♥', 70, 44); });
-  panel(p, 0.6, 0.15, plaque, 7.4, 0.35, 6.56);
-  const standee = grp(p, 7.4, 0.68, 6.0);
-  standee.userData.dynamic = true;               // not merged: it rotates every frame
-  const sh = 1.35, sw = sh * JOE_ASPECT;
-  const photo = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), joePhotoMat());
-  photo.position.y = sh / 2 + 0.04;
-  standee.add(photo);
-  box(standee, 0.7, 0.05, 0.22, C.woodDark, 0, 0, 0, { cast: false }); // little stand base
-  box(standee, 0.6, 0.04, 0.03, '#3d2b1f', 0, 0.05, 0.0, { cast: false });
-  anim.billboards = [standee];
-  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.0, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
-  hit.position.set(7.4, 1.0, 6.0);
-  hit.userData.info = { title: "Joe 🐾", text: "The boss of Joe's Café.\nShih Tzu · Chief Happiness Officer" };
-  hit.userData.dynamic = true;
-  p.add(hit);
 
   // ---- framed portrait of Joe on the café's left wall (by the sofa corner)
   const pf = grp(p, -11.7, 1.4, -4.5, Math.PI / 2);
