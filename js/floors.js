@@ -623,10 +623,10 @@ export function floor5(p, anim) {
     box(vm, 0.3, 1.12, 0.2, teal, 0.325, 0.5, 0.275);                 //              right (keypad)
     box(vm, 0.95, 0.06, 0.77, '#1f6b62', 0, 1.95, 0);
     box(vm, 0.6, 1.12, 0.02, mat('#d9f2ee', { emissive: '#bfe9e2', emissiveIntensity: 0.7 }), -0.12, 0.5, 0.185, { cast: false }); // lit back wall
-    for (const sy of [0.62, 0.91, 1.2, 1.49]) box(vm, 0.6, 0.02, 0.18, '#c9ccd0', -0.12, sy, 0.27, { cast: false });              // shelves
+    for (const sy of [0.62, 0.9, 1.18, 1.46]) box(vm, 0.6, 0.02, 0.18, '#c9ccd0', -0.12, sy, 0.27, { cast: false });              // shelves
     box(vm, 0.62, 1.14, 0.02, glassMat(), -0.12, 0.49, 0.37, { cast: false });                                                       // front glass
     const cols = ['#f2f2f2', '#4fb0e0', '#f1c84b', '#e85d3d', '#7ab87a'];
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) cyl(vm, 0.04, 0.2, cols[(r + c) % 5], -0.36 + c * 0.12, 0.64 + r * 0.29, 0.27, { seg: 8, cast: false });
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) cyl(vm, 0.04, 0.19, cols[(r + c) % 5], -0.36 + c * 0.12, 0.64 + r * 0.28, 0.27, { seg: 8, cast: false });
     box(vm, 0.18, 0.7, 0.03, '#1b1b1e', 0.33, 0.95, 0.38, { cast: false });                 // keypad panel
     for (let i = 0; i < 6; i++) box(vm, 0.04, 0.04, 0.02, '#f1c84b', 0.3 + (i % 2) * 0.07, 1.4 - Math.floor(i / 2) * 0.09, 0.4, { cast: false });
     box(vm, 0.5, 0.18, 0.04, '#1b1b1e', -0.1, 0.18, 0.39, { cast: false });                  // pick-up slot
