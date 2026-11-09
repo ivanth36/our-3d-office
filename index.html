@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Joe's Café">
+  <meta name="theme-color" content="#f3dcc0">
+  <title>Joe's Café · Our 3D Office</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./lib/three.module.min.js",
+        "three/addons/": "./lib/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <header id="top">
+    <div class="brand">🐾 <b>Joe's Café</b></div>
+    <div class="floorinfo">
+      <div id="floorTitle">Loading…</div>
+      <div id="floorSub"></div>
+    </div>
+  </header>
+
+  <div id="card"><h3></h3><p></p><small>tap to close</small></div>
+
+  <div id="hint">☝️ Drag to rotate · 🤏 Pinch to zoom · ✌️ Two fingers to move</div>
+
+  <nav id="floors" aria-label="Floors"></nav>
+
+  <div id="loading"><div class="paw">🐾</div><div>Opening Joe's Café…</div><div id="err"></div></div>
+
+  <script>
+    // Show a friendly message if something fails (e.g. very old browser).
+    window.addEventListener('error', function (e) {
+      var el = document.getElementById('err');
+      if (el) el.textContent = 'Oops: ' + (e.message || 'could not start 3D view');
+    });
+    setTimeout(function () { var h = document.getElementById('hint'); if (h) h.classList.add('fade'); }, 6000);
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
