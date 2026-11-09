@@ -87,7 +87,7 @@ export function createFxBoard() {
     ctx.fillStyle = '#dfe9f3'; ctx.font = '600 28px -apple-system, sans-serif';
     ctx.fillText(n.krw >= KRW_TARGET ? `🎯 KRW target ${KRW_TARGET.toLocaleString()} reached!` : `KRW target ${KRW_TARGET.toLocaleString()} · ${(pct * 100).toFixed(1)}% there`, 36, 382);
     ctx.fillStyle = '#7d93aa'; ctx.font = '24px -apple-system, sans-serif';
-    const foot = `Rate as of ${sgtTime(n.at, true)} SGT · ${n.source} · refreshes hourly`;
+    const foot = `As of ${sgtTime(n.at, true)} SGT · ${n.source} · tap the board to refresh`;
     ctx.fillText(foot, 36, 422);
     texture.needsUpdate = true;
   }
@@ -108,6 +108,8 @@ export function createFxBoard() {
   draw();
   return {
     texture,
+    state,
+    refresh,          // returns a promise; used by the "Refresh rates" button
     start() {
       refresh();
       setInterval(refresh, REFRESH_MS);

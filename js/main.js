@@ -162,7 +162,7 @@ const car = liftCar(scene);
 car.traverse((o) => { o.castShadow = false; });   // it moves a lot now; keep the static shadow map valid
 const lift = createLift(car);
 // the AI employees (they work, walk, take the stairs / lift — see js/staff.js)
-const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES });
+const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doors: anim.doors || {} });
 anim.fxBoard.start();
 
 // ---------------------------------------------------------------- camera presets
@@ -251,6 +251,7 @@ function employeeText(e) {
   const lines = [`${e.role} · Floor ${e.floor}`];
   if (e.status) lines.push(`Now: ${e.status}`);
   lines.push('');
+  if (!e.tasks?.length) lines.push('No scheduled tasks yet');
   for (const task of e.tasks ?? []) {
     lines.push(`📋 ${task.name}`);
     lines.push(`     ${task.when} (SGT) · next in ${fmtIn(msUntil(task.at))}`);
@@ -259,18 +260,54 @@ function employeeText(e) {
 }
 let cardInfo = null;
 setInterval(() => { if (cardInfo && card.classList.contains('show')) showCard(cardInfo); }, 1000); // live "Now:" line
+const cardBtn = document.getElementById('cardBtn');
+function fxText() {
+  const s = anim.fxBoard.state, n = s.now;
+  if (s.refreshing) return 'Getting the latest rates…';
+  if (!n) return s.error ? 'Live rates are unavailable right now.' : 'Loading live rates…';
+  const at = new Date(n.at).toLocaleString('en-GB', { timeZone: 'Asia/Singapore', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
+  return `1 SGD = ${n.krw.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW\n1 SGD = ${n.cny.toFixed(4)} CNY\n\nAs of ${at} SGT · ${n.source}${s.error ? '\n(last refresh failed — showing the previous rate)' : ''}\nRefreshes by itself every hour.`;
+}
+cardBtn.addEventListener('click', async (ev) => {
+  ev.stopPropagation();                      // don't close the card
+  cardBtn.disabled = true;
+  cardBtn.textContent = 'Refreshing…';
+  anim.fxBoard.state.refreshing = true;
+  if (cardInfo) showCard(cardInfo);
+  await anim.fxBoard.refresh();
+  anim.fxBoard.state.refreshing = false;
+  if (cardInfo) showCard(cardInfo);
+});
 function showCard(info) {
   cardInfo = info;
   card.querySelector('h3').textContent = info.employee ? `${info.title} 🟢` : info.title;
-  card.querySelector('p').textContent = info.employee ? employeeText(info.employee) : info.text;
+  card.querySelector('p').textContent = info.employee ? employeeText(info.employee) : info.fx ? fxText() : info.text;
+  cardBtn.hidden = !info.fx;
+  if (info.fx && !anim.fxBoard.state.refreshing) { cardBtn.disabled = false; cardBtn.textContent = '🔄 Refresh rates'; }
   card.classList.toggle('emp', !!info.employee);
   card.classList.add('show');
 }
 function hideCard() { card.classList.remove('show'); }
 card.addEventListener('click', hideCard);
 
-// tap (not drag) on a character / Joe to see info
+// tap (not drag) on a character / Joe / the FX board to see info
 const ray = new THREE.Raycaster();
+function pickInfo(clientX, clientY) {
+  const ndc = new THREE.Vector2((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const targets = [];
+  scene.traverseVisible((o) => { if (o.userData.info && o.isMesh) targets.push(o); });
+  return ray.intersectObjects(targets, false)[0]?.object.userData.info ?? null;
+}
+// on a computer: show a hand cursor over things you can click
+let hoverT = 0;
+canvas.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse' || e.buttons) return;
+  const now = performance.now();
+  if (now - hoverT < 120) return;
+  hoverT = now;
+  canvas.style.cursor = pickInfo(e.clientX, e.clientY) ? 'pointer' : '';
+});
 let down = null;
 canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 canvas.addEventListener('pointerup', (e) => {
@@ -279,12 +316,8 @@ canvas.addEventListener('pointerup', (e) => {
   const quick = performance.now() - down.t < 400;
   down = null;
   if (moved > 8 || !quick) return;
-  const ndc = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
-  ray.setFromCamera(ndc, camera);
-  const targets = [];
-  scene.traverseVisible((o) => { if (o.userData.info && o.isMesh) targets.push(o); });
-  const hit = ray.intersectObjects(targets, false)[0];
-  if (hit) showCard(hit.object.userData.info); else hideCard();
+  const info = pickInfo(e.clientX, e.clientY);
+  if (info) showCard(info); else hideCard();
 });
 
 // ---------------------------------------------------------------- resize & loop

@@ -186,3 +186,25 @@ export function officeChair(p, x, z, ry, o = {}) {
   box(g, 0.04, 0.2, 0.3, c, -0.26, 0.54, 0); box(g, 0.04, 0.2, 0.3, c, 0.26, 0.54, 0);
   return g;
 }
+
+/**
+ * Hinged glass door for a gap in a glassWall. The hinge is at (hx, hz); the
+ * closed leaf runs along local +X (ry turns it to match the wall). Adds a
+ * fixed glass transom above the door up to wallH. Returns the moving leaf
+ * (rotate leaf.rotation.y to open/close).
+ */
+export function glassDoor(p, hx, hz, width, wallH, ry, doorH = 2.3) {
+  const t = grp(p, hx, 0, hz, ry);                       // fixed transom + header
+  if (wallH - doorH > 0.05) box(t, width, wallH - doorH, 0.04, glassMat(), width / 2, doorH, 0, { cast: false });
+  box(t, width, 0.07, 0.09, C.black, width / 2, doorH - 0.04, 0, { cast: false });
+  const leaf = grp(p, hx, 0, hz, ry);
+  leaf.userData.dynamic = true;                          // it moves, so it is merged on its own
+  const w = width - 0.03, h = doorH - 0.06;
+  box(leaf, w - 0.08, h - 0.1, 0.03, glassMat(), w / 2, 0.06, 0, { cast: false });
+  box(leaf, 0.05, h, 0.06, C.black, 0.025, 0.01, 0, { cast: false });
+  box(leaf, 0.05, h, 0.06, C.black, w - 0.025, 0.01, 0, { cast: false });
+  box(leaf, w, 0.06, 0.06, C.black, w / 2, 0.01, 0, { cast: false });
+  box(leaf, w, 0.05, 0.06, C.black, w / 2, h - 0.04, 0, { cast: false });
+  for (const s of [-1, 1]) box(leaf, 0.03, 0.4, 0.03, '#c9ccd0', w - 0.13, 0.9, s * 0.05, { cast: false, metalness: 0.7, roughness: 0.3 }); // pull handles
+  return leaf;
+}

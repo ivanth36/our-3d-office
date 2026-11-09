@@ -60,6 +60,7 @@ JOE_EDGES.forEach(([a, b]) => link(`1:j${a}`, `1:j${b}`));
 link('1:coreW', '1:j9');
 link('1:coreFront', '1:j10');
 node(1, 'cashier', -7.4, 7.15); link('1:cashier', '1:j5');
+node(1, 'cashier2', -6.5, 7.35); link('1:cashier2', '1:j5');   // second customer waits beside
 
 const CAFE_SEATS = [];
 function cafeSeat(name, stand, access, x, z, ry, y = 0) {
@@ -74,16 +75,27 @@ for (const [i, acc] of [[3, 'j1'], [6, 'j1'], [10, 'j7'], [14, 'j15']]) {   // h
 cafeSeat('sofa', [-7.6, -6.2], 'j0', -7.7, -7.05, 0, 0.04);                    // sofa corner
 cafeSeat('table5', [3.6, 4.33], 'j12', 3.26, 4.69, 2.39 + Math.PI);             // round tables
 cafeSeat('table0', [-0.16, -0.96], 'j11', -0.51, -1.31, Math.PI / 4 + Math.PI);
+// seats used when Aida and Mary go for coffee together (next to each other)
+const pairSeat = (name, stand, access, x, z, ry, y = 0) => { const id = node(1, name, stand[0], stand[1]); link(id, `1:${access}`); return { node: id, x, z, ry, y }; };
+const byNode = (id) => CAFE_SEATS.find((q) => q.node === id);
+const CAFE_PAIRS = [
+  [byNode('1:bar3'), pairSeat('bar4', [-2.35, -6.1], 'j1', -2.35, -6.85, Math.PI, 0.26)],
+  [byNode('1:table0'), pairSeat('table0b', [-2.24, -0.96], 'j2', -1.89, -1.31, 7 * Math.PI / 4 + Math.PI)],
+];
 
 // ---- Floor 2: music room (glass lounge, front-left)
-chain('2:coreFront', node(2, 'musicOut', -2.8, 7.15), node(2, 'musicIn', -4.0, 7.15), node(2, 'musicMid', -5.0, 4.0), node(2, 'lounge', -8.6, 3.95));
+chain('2:coreFront', node(2, 'musicOut', -2.8, 7.15), node(2, 'musicIn', -4.0, 7.15), node(2, 'musicMid', -5.3, 4.0), node(2, 'lounge', -8.6, 3.95));
+link('2:musicMid', node(2, 'drumStand', -6.6, 5.0));
+link('2:musicMid', node(2, 'pianoStand', -5.25, 4.6));
 const LOUNGE_SEAT = { node: '2:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
+const DRUM_SEAT = { node: '2:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
+const PIANO_SEAT = { node: '2:pianoStand', x: -4.6, z: 4.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
 
 // ---- Floors 3 & 4: aisle behind the shared desk + meeting room
 for (const f of [3, 4]) {
   const aisle = [5, 6, 7, 8, 9].map((i) => node(f, `desk${i}`, deskSeat(i).x, -0.9));
-  chain(...aisle, node(f, 'meetDoorOut', 2.6, -0.9), `${f}:coreW`);
-  chain(`${f}:meetDoorOut`, node(f, 'meetDoorIn', 2.6, -3.0), node(f, 'meetA', 4.15, -3.0), node(f, 'meetB', 5.45, -3.0));
+  chain(...aisle, node(f, 'aisleE', 2.6, -0.9), `${f}:coreW`);
+  chain(`${f}:aisleE`, node(f, 'meetDoorOut', 2.6, -1.8), node(f, 'meetDoorIn', 2.6, -3.0), node(f, 'meetA', 4.15, -3.0), node(f, 'meetB', 5.45, -3.0));
 }
 const deskSeatFor = (f, i) => ({ node: `${f}:desk${i}`, ...deskSeat(i), y: 0, typing: true });
 const MEET_SEATS = { mary: { node: '3:meetA', x: 4.15, z: -3.65, ry: Math.PI, y: 0 }, aida: { node: '3:meetB', x: 5.45, z: -3.65, ry: Math.PI, y: 0 } };
@@ -100,7 +112,18 @@ chain('5:coreW', '5:rMid', '5:smokeJ', '5:smokeE');
 link('5:rMid', '5:rPole');
 link('5:coreW', '5:rPole');
 chain('5:rPole', '5:gymOut', '5:gymIn');
+chain('5:rPole', node(5, 'meetJ', -2.6, 0.6), '5:gymOut');   // JungKook waits here, just outside the gym
+node(5, 'yoga', -9.6, -2.2);
+node(5, 'barbell', -5.9, -2.5);
 const TREAD = { x: -9.0, z: -6.3, y: 0.23 };
+
+// glass doors: walking between these node pairs goes through a door
+const DOOR_EDGES = {};
+const doorEdge = (a, b, id) => { DOOR_EDGES[`${a}|${b}`] = id; DOOR_EDGES[`${b}|${a}`] = id; };
+doorEdge('2:musicOut', '2:musicIn', '2:music');
+doorEdge('3:meetDoorOut', '3:meetDoorIn', '3:meet');
+doorEdge('4:meetDoorOut', '4:meetDoorIn', '4:meet');
+doorEdge('5:gymOut', '5:gymIn', '5:gym');
 
 function route(from, to, via) {
   if (from === to) return [from];
@@ -188,6 +211,7 @@ class Actor {
     this.w = world; this.e = e; this.rig = rig; this.g = rig.group;
     this.task = null; this.anim = 'idle'; this.walkT = 0; this.heading = this.g.rotation.y;
     this.smoking = false; this.holdCup = false; this.talking = false; this.puffT = 0;
+    this.talkFor = 0; this.act = null; // act: 'drum' | 'piano' | 'yoga' | 'barbell'
     // soft blob shadow (shadow maps are static, so moving people bring their own)
     this.g.traverse((o) => { if (o.isMesh) o.castShadow = false; });
     this.blob = new THREE.Mesh(new THREE.CircleGeometry(0.3, 18), new THREE.MeshBasicMaterial({ color: '#3b2a1a', transparent: true, opacity: 0.2, depthWrite: false }));
@@ -263,7 +287,13 @@ class Actor {
           await lift.bring(B.f);
           this.status = old;
         }
+        const door = this.w.doors[DOOR_EDGES[`${A.id}|${B.id}`]];
+        if (door) {                               // open the door, walk through, let it close behind
+          door.users++;
+          await this.waitFor(() => door.isOpen(), 3);
+        }
         await this.moveTo(B.x, B.z);
+        if (door) door.users--;
         if (nextLift) {                      // step into the car and turn to face the door
           lift.car.add(this.g);
           this.g.position.set(0, 0.12, 0);
@@ -290,10 +320,12 @@ class Actor {
     this.g.position.y = seat.y ?? 0;
     this.blob.visible = (seat.y ?? 0) < 0.1;
     this.seat = seat;
+    this.act = seat.act ?? null;
   }
   async stand() {
     if (!this.seat) return;
     const n = nodes.get(this.seat.node);
+    this.act = null;
     this.rig.setPose('stand');
     this.g.position.y = 0;
     this.blob.visible = true;
@@ -305,19 +337,31 @@ class Actor {
   async goStand(id, via) { await this.stand(); await this.go(id, via); }
 
   update(dt, t) {
+    if (this.talkFor > 0) this.talkFor -= dt;
     if (this.task && this.task.fn(dt, t)) { const r = this.task.res; this.task = null; r(); }
     this.animate(dt, t);
   }
   animate(dt, t) {
     const r = this.rig, [hl, hr] = r.hips, [sl, sr] = r.shoulders;
+    const chatting = this.talking || this.talkFor > 0;
+    const ease = (o, k, v) => { o[k] += (v - o[k]) * Math.min(1, dt * 6); };
     if (r.pose === 'sit') {
-      if (r.typing) {
+      if (this.act === 'drum') {                       // drumming: sticks up and down, head bobbing
+        sl.rotation.x = -1.15 + Math.sin(t * 13) * 0.35;
+        sr.rotation.x = -1.15 + Math.sin(t * 13 + Math.PI) * 0.35;
+        r.head.rotation.x = Math.sin(t * 6.5) * 0.09;
+        r.body.position.y = r.baseY + Math.abs(Math.sin(t * 6.5)) * 0.015;
+      } else if (this.act === 'piano') {               // playing the keyboard, swaying
+        r.body.position.y = r.baseY + Math.abs(Math.sin(t * 9 + r.phase)) * 0.012;
+        r.body.rotation.z = Math.sin(t * 1.2) * 0.06;
+        r.head.rotation.z = Math.sin(t * 1.2) * 0.1;
+      } else if (r.typing) {
         r.head.rotation.x = Math.sin(t * 1.3 + r.phase) * 0.06;
         r.head.rotation.y = Math.sin(t * 0.5 + r.phase) * 0.12;
         r.body.position.y = r.baseY + Math.abs(Math.sin(t * 6 + r.phase)) * 0.008;
       } else {
         r.head.rotation.y = Math.sin(t * 0.4 + r.phase) * 0.35;
-        r.head.rotation.x = this.talking ? Math.sin(t * 5) * 0.06 : 0;
+        r.head.rotation.x = chatting ? Math.sin(t * 5) * 0.06 : 0;
         if (this.holdCup) sl.rotation.x = -0.9 - Math.max(0, Math.sin(t * 0.5 + r.phase)) * 1.2; // sip
       }
       return;
@@ -332,12 +376,28 @@ class Actor {
       if (!this.smoking) sr.rotation.x = s * amp * 0.8;
       r.body.position.y = r.baseY + Math.abs(Math.cos(this.walkT)) * (run ? 0.05 : 0.025);
       r.head.position.y = 1.25 + Math.abs(Math.cos(this.walkT)) * (run ? 0.05 : 0.025);
-    } else {
-      hl.rotation.x *= 0.8; hr.rotation.x *= 0.8;
-      sl.rotation.x = this.holdCup ? -0.9 : sl.rotation.x * 0.8;
-      if (!this.smoking) sr.rotation.x *= 0.8;
+    } else if (this.act === 'yoga') {                    // cycle: arms up -> tree pose -> warrior
+      const c = Math.floor(t / 4) % 3;
+      ease(sl.rotation, 'x', c === 2 ? 0 : -3.0); ease(sr.rotation, 'x', c === 2 ? 0 : -3.0);
+      ease(sl.rotation, 'z', c === 2 ? -1.5 : 0); ease(sr.rotation, 'z', c === 2 ? 1.5 : 0);
+      ease(hl.rotation, 'x', c === 2 ? 0.45 : 0); ease(hr.rotation, 'x', c === 1 ? -0.7 : c === 2 ? -0.35 : 0);
+      ease(hr.rotation, 'z', c === 1 ? 0.8 : 0);
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
-      r.head.rotation.x = this.talking ? Math.sin(t * 5 + r.phase) * 0.07 : 0;
+    } else if (this.act === 'barbell') {                 // overhead press
+      const th = -2.1 - 0.8 * Math.sin(t * 1.8);
+      sl.rotation.x = th; sr.rotation.x = th;
+      r.barbell.position.set(0, 0.4 - 0.38 * Math.cos(th), -0.38 * Math.sin(th));
+      hl.rotation.x *= 0.8; hr.rotation.x *= 0.8;
+      r.body.position.y = r.baseY; r.head.position.y = 1.25;
+    } else {
+      hl.rotation.x *= 0.8; hr.rotation.x *= 0.8; hr.rotation.z *= 0.8;
+      sl.rotation.x = this.holdCup ? -0.9 : sl.rotation.x * 0.8;
+      sl.rotation.z *= 0.8;
+      if (!this.smoking) { sr.rotation.x *= 0.8; sr.rotation.z *= 0.8; }
+      r.body.position.y = r.baseY; r.head.position.y = 1.25;
+      r.head.rotation.x = chatting ? Math.sin(t * 5 + r.phase) * 0.07 : 0;
+      // standing still with nothing to do: look around a little
+      r.head.rotation.y = chatting ? r.head.rotation.y * 0.9 : Math.sin(t * 0.45 + r.phase) * 0.45;
     }
     if (this.smoking) {
       const c = (t * 0.22 + r.phase) % 1;               // hand to mouth every ~4.5 s
@@ -357,7 +417,8 @@ class Actor {
 // ======================================================================== routines
 const flags = {
   smokeCall: false, eugeneReady: false, smokeGo: false, smokeDone: false,
-  aidaAtDesk: true, meetingCall: false, aidaInMeeting: false, meetingOver: false,
+  aidaAtDesk: true, maryAtDesk: true, meetingCall: false, aidaInMeeting: false, meetingOver: false,
+  cafeInvite: false, cafePair: null, marySeated: false, cafeDone: false,
 };
 
 async function jungkook(a) {
@@ -366,9 +427,9 @@ async function jungkook(a) {
     a.status = 'Working on the KRW analysis';
     await a.sleep(R(25, 40));
     a.status = 'Walking up the stairs to see Eugene';
-    await a.goStand('5:gymOut', 'stairs');
-    await a.face(-3.6, -1.3);
-    a.status = 'Waiting for Eugene';
+    await a.goStand('5:meetJ', 'stairs');
+    await a.face(-3.6, 0.0);
+    a.status = 'Waiting for Eugene outside the gym';
     flags.smokeCall = true;
     await a.waitFor(() => flags.eugeneReady, 90);
     a.status = 'Chatting with Eugene';
@@ -388,19 +449,19 @@ async function jungkook(a) {
 }
 
 async function eugene(a) {
-  const homeX = a.e.pos[0], homeZ = a.e.pos[1];
+  const bottle = a.g.userData.bottle;
+  const holdBottle = (v) => { if (bottle) bottle.visible = v; };
+  const backHome = async () => { await a.go('5:home'); await a.turnTo(a.e.ry ?? 0); };
   const smokeTime = async () => {
-    a.rig.cig.visible = false;
-    a.status = 'Meeting JungKook';
-    if (a.g.userData.bottle) a.g.userData.bottle.visible = true;
-    await a.go('5:gymIn');
-    await a.face(-3.6, 0.0);
+    a.status = 'Heading out to meet JungKook';
+    await a.go('5:gymOut');                          // through the glass door
+    await a.face(-2.6, 0.6);
     flags.eugeneReady = true;
     a.talking = true;
     await a.waitFor(() => flags.smokeGo, 30);
     a.talking = false;
     a.status = 'Off to the roof garden for a smoke';
-    if (a.g.userData.bottle) a.g.userData.bottle.visible = false;
+    holdBottle(false);
     await a.go('5:smokeE');
     await a.face(3.7, 6.1);
     a.status = 'Smoke break with JungKook';
@@ -409,32 +470,58 @@ async function eugene(a) {
     a.rig.cig.visible = false; a.smoking = false; a.talking = false;
     flags.smokeCall = flags.eugeneReady = flags.smokeGo = flags.smokeDone = false;
     a.status = 'Back to the gym';
-    if (a.g.userData.bottle) a.g.userData.bottle.visible = true;
-    await a.go('5:home');
-    await a.turnTo(a.e.ry ?? 0);
+    holdBottle(true);
+    await backHome();
   };
+  const called = () => flags.smokeCall;
   for (;;) {
     if (flags.smokeCall) { await smokeTime(); continue; }
-    a.status = 'Coaching in the gym';
-    await a.sleep(R(10, 18), () => flags.smokeCall);
-    if (flags.smokeCall) continue;
-    a.status = 'Running on the treadmill';
-    await a.go('5:treadFront');
-    await a.moveTo(TREAD.x, -5.5);
-    a.g.position.y = TREAD.y;
-    await a.moveTo(TREAD.x, TREAD.z, 0.6);
-    await a.turnTo(0);
-    a.anim = 'run';
-    await a.sleep(R(15, 25), () => flags.smokeCall);
-    a.anim = 'idle';
-    await a.moveTo(TREAD.x, -5.5, 0.8);
-    a.g.position.y = 0;
-    await a.moveTo(nodes.get('5:treadFront').x, nodes.get('5:treadFront').z);
-    a.node = '5:treadFront';
-    await a.go('5:home');
-    await a.turnTo(a.e.ry ?? 0);
-    void homeX; void homeZ;
+    const act = pick(['coach', 'treadmill', 'barbell', 'yoga']);
+    if (act === 'coach') {
+      a.status = 'Coaching in the gym';
+      await a.sleep(R(8, 14), called);
+    } else if (act === 'treadmill') {
+      a.status = 'Running on the treadmill';
+      await a.go('5:treadFront');
+      await a.moveTo(TREAD.x, -5.5);
+      a.g.position.y = TREAD.y;
+      await a.moveTo(TREAD.x, TREAD.z, 0.6);
+      await a.turnTo(0);
+      a.anim = 'run';
+      await a.sleep(R(15, 25), called);
+      a.anim = 'idle';
+      await a.moveTo(TREAD.x, -5.5, 0.8);
+      a.g.position.y = 0;
+      await a.moveTo(nodes.get('5:treadFront').x, nodes.get('5:treadFront').z);
+      a.node = '5:treadFront';
+      await backHome();
+    } else if (act === 'barbell') {
+      a.status = 'Lifting the barbell';
+      await a.go('5:barbell');
+      await a.turnTo(0.3);
+      holdBottle(false); a.rig.barbell.visible = true; a.act = 'barbell';
+      await a.sleep(R(12, 18), called);
+      a.act = null; a.rig.barbell.visible = false; holdBottle(true);
+      await backHome();
+    } else {
+      a.status = 'Doing yoga';
+      await a.go('5:yoga');
+      await a.turnTo(0);
+      holdBottle(false); a.act = 'yoga';
+      await a.sleep(R(12, 20), called);
+      a.act = null; holdBottle(true);
+      await backHome();
+    }
   }
+}
+
+async function buyCoffee(a, spot) {
+  await a.goStand(spot, 'lift');
+  await a.turnTo(Math.PI);
+  a.status = 'Buying a coffee from Jennie';
+  a.w.serve();
+  await a.sleep(4);
+  a.rig.cup.visible = true; a.holdCup = true;
 }
 
 async function aida(a) {
@@ -458,18 +545,29 @@ async function aida(a) {
     a.status = 'Writing the AI newsletter';
     await a.sleep(R(20, 35), () => flags.meetingCall);
     if (flags.meetingCall) { await meeting(); continue; }
-    // coffee run
+    // coffee run — sometimes she asks Mary to come along
     flags.aidaAtDesk = false;
-    a.status = "Taking the lift down to Joe's Café for coffee";
-    await a.goStand('1:cashier', 'lift');
-    await a.turnTo(Math.PI);
-    a.status = 'Buying a coffee';
-    await a.sleep(4);
-    a.rig.cup.visible = true; a.holdCup = true;
-    const seat = pick(CAFE_SEATS);
-    a.status = "Enjoying a coffee at Joe's Café";
+    const withMary = flags.maryAtDesk && !flags.meetingCall && Math.random() < 0.6;
+    if (withMary) {
+      flags.cafePair = pick(CAFE_PAIRS);
+      flags.cafeDone = false; flags.marySeated = false;
+      flags.cafeInvite = true;
+      a.status = "Asked Mary along · taking the lift down to Joe's Café";
+    } else {
+      a.status = "Taking the lift down to Joe's Café for coffee";
+    }
+    await buyCoffee(a, '1:cashier');
+    const seat = withMary ? flags.cafePair[0] : pick(CAFE_SEATS);
+    a.status = withMary ? 'Saving seats for Mary' : "Enjoying a coffee at Joe's Café";
     await a.goSit(seat);
+    if (withMary) {
+      await a.waitFor(() => flags.marySeated, 90);
+      a.status = "Coffee with Mary at Joe's Café";
+      a.talking = true;
+    }
     await a.sleep(R(14, 22));
+    a.talking = false;
+    if (withMary) { flags.cafeDone = true; flags.cafeInvite = false; }
     a.status = 'Walking back up the stairs to Floor 3';
     await a.goSit(home, 'stairs');
     a.rig.cup.visible = false; a.holdCup = false;
@@ -485,7 +583,13 @@ async function xiaoming(a) {
     a.status = 'Walking down to the Floor 2 music room';
     await a.goSit(LOUNGE_SEAT, 'stairs');
     a.status = 'Chilling in the music room';
-    await a.sleep(R(15, 25));
+    await a.sleep(R(12, 20));
+    a.status = 'Playing the drums';
+    await a.goSit(DRUM_SEAT);
+    await a.sleep(R(8, 12));
+    a.status = 'Playing the keyboard';
+    await a.goSit(PIANO_SEAT);
+    await a.sleep(R(8, 12));
     a.status = 'Walking back up to Floor 3';
     await a.goSit(home, 'stairs');
   }
@@ -493,10 +597,29 @@ async function xiaoming(a) {
 
 async function mary(a) {
   const home = deskSeatFor(3, a.e.seat);
+  const cafe = async () => {
+    flags.maryAtDesk = false;
+    a.status = "Going for coffee with Aida";
+    await buyCoffee(a, '1:cashier2');
+    a.status = 'Joining Aida';
+    await a.goSit(flags.cafePair[1]);
+    flags.marySeated = true;
+    a.status = "Coffee with Aida at Joe's Café";
+    a.talking = true;
+    await a.waitFor(() => flags.cafeDone, 120);
+    a.talking = false;
+    a.status = 'Walking back up the stairs to Floor 3';
+    await a.goSit(home, 'stairs');
+    a.rig.cup.visible = false; a.holdCup = false;
+    flags.marySeated = false;
+  };
   for (;;) {
+    flags.maryAtDesk = true;
     a.status = 'Working hard at her desk';
-    await a.sleep(R(25, 40));
+    await a.sleep(R(25, 40), () => flags.cafeInvite);
+    if (flags.cafeInvite) { await cafe(); continue; }
     if (!flags.aidaAtDesk) continue;                 // Aida is out: keep working
+    flags.maryAtDesk = false;
     flags.meetingCall = true;
     a.status = 'Going to a meeting with Aida';
     await a.goSit(MEET_SEATS.mary);
@@ -518,20 +641,20 @@ async function mary(a) {
 const ROUTINES = { jungkook, eugene, aida, xiaoming, mary };
 
 // ======================================================================== setup
-export function createStaff({ floors, lift, employees }) {
-  const world = { floors, lift, puffs: createPuffs() };
+export function createStaff({ floors, lift, employees, doors = {} }) {
+  const world = { floors, lift, doors, puffs: createPuffs(), serve() {} };
   const actors = [];
   for (const e of employees) {
     const rig = employee(floors[e.floor - 1], 0, 0, 0, e);
     const a = new Actor(world, e, rig);
-    if (e.pos) {                                    // standing post (Eugene in the gym)
-      const id = node(e.floor, 'home', e.pos[0], e.pos[1]);
-      link(id, `${e.floor}:gymIn`);
-      link(id, `${e.floor}:treadFront`);
+    if (e.pos) {                                    // standing post (Eugene in the gym, Jennie at the till)
+      const id = node(e.floor, e.name === 'Eugene' ? 'home' : `home_${e.name}`, e.pos[0], e.pos[1]);
+      if (e.name === 'Eugene') for (const n of ['gymIn', 'treadFront', 'yoga', 'barbell']) link(id, `5:${n}`);
       a.at(id);
       a.rig.setPose('stand');
       a.heading = e.ry ?? 0; a.g.rotation.y = a.heading;
-      a.status = 'Coaching in the gym';
+      a.status = e.idle ?? 'Here';
+      if (e.name === 'Jennie') world.serve = () => { a.talkFor = 4; a.status = 'Serving a coffee'; setTimeout(() => { a.status = e.idle; }, 4000); };
     } else {                                        // desk seat
       const s = deskSeatFor(e.floor, e.seat);
       a.at(s.node);
@@ -553,6 +676,7 @@ export function createStaff({ floors, lift, employees }) {
     actors,
     update(dt, t) {
       for (const a of actors) a.update(dt, t);
+      for (const id in world.doors) world.doors[id].update(dt);
       world.puffs.update(dt);
     },
   };

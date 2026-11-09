@@ -2,12 +2,12 @@
 // Rooms live in x -12..9.6, z -8..8 (front/street = +Z).
 import * as THREE from 'three';
 import {
-  CEIL, box, cyl, sphere, grp, mat, glowMat, glassMat, canvasTex, panel, roundRect,
+  CEIL, optimize, box, cyl, sphere, grp, mat, glowMat, glassMat, canvasTex, panel, roundRect,
   plankTex, carpetTex, tileTex, floorSurface, faceTo,
 } from './helpers.js';
 import {
   C, chair, stool, roundTable, rectTable, sofa, plant, pendant, floorLamp, rug,
-  bookshelf, frame, glassWall, monitor, laptop, officeChair,
+  bookshelf, frame, glassWall, glassDoor, monitor, laptop, officeChair,
 } from './furniture.js';
 import { roamingJoe } from './joe.js';
 import { CORE_X } from './building.js';
@@ -22,6 +22,24 @@ function joePhotoMat() {
     joeTex.anisotropy = 4;
   }
   return new THREE.MeshBasicMaterial({ map: joeTex, alphaTest: 0.45, toneMapped: false, side: THREE.DoubleSide });
+}
+
+// ---- doors that people open / close (see js/staff.js). closed/open = leaf rotation.
+function addDoor(anim, id, leaf, closed, open) {
+  optimize(leaf);
+  leaf.rotation.y = closed;
+  anim.doors = anim.doors || {};
+  anim.doors[id] = {
+    leaf, closed, open, angle: closed, users: 0, idle: 0,
+    isOpen() { return Math.abs(this.angle - this.open) < 0.05; },
+    update(dt) {
+      this.idle = this.users > 0 ? 0 : this.idle + dt;
+      const want = this.users > 0 || this.idle < 0.6 ? (this.users > 0 ? this.open : this.angle) : this.closed;
+      const d = want - this.angle;
+      this.angle += Math.sign(d) * Math.min(Math.abs(d), dt * 3.2);
+      leaf.rotation.y = this.angle;
+    },
+  };
 }
 
 const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
@@ -209,6 +227,20 @@ export function floor1(p, anim) {
   panel(p, 0.4, 0.15, love, -0.6, barTop + 0.085, -7.47, { rx: -0.15 });
   for (let i = 0; i < 6; i++) pendant(p, bx0 + 1.2 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
 
+  // ---- big indoor tree by the entrance, just reaching the ceiling
+  {
+    const tx = -1.3, tz = 5.6;
+    cyl(p, 0.72, 0.55, C.woodDark, tx, 0, tz, { seg: 20 });                        // planter
+    cyl(p, 0.66, 0.04, '#5a3b26', tx, 0.55, tz, { seg: 20 });                       // soil
+    for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; sphere(p, 0.08, '#cfc6b8', tx + Math.sin(a) * 0.5, 0.6, tz + Math.cos(a) * 0.5, { s: [1, 0.6, 1] }); } // pebbles
+    cyl(p, 0.17, 2.6, '#7a5233', tx, 0.55, tz, { top: 0.6, bottom: 1, seg: 9 });   // trunk
+    const branch = (ang, tilt, len, y) => cyl(p, 0.06, len, '#7a5233', tx + Math.sin(ang) * len * 0.35, y, tz + Math.cos(ang) * len * 0.35, { top: 0.5, seg: 6, rx: Math.cos(ang) * tilt, rz: -Math.sin(ang) * tilt });
+    branch(0.5, 0.7, 1.1, 2.2); branch(2.6, 0.7, 1.0, 2.4); branch(4.4, 0.65, 1.1, 2.3);
+    const leafCols = ['#4f8a43', '#5f9a4c', '#6aa84f', '#47803d'];
+    const blobs = [[0, 3.75, 0, 0.75], [0.7, 3.4, 0.3, 0.6], [-0.65, 3.45, 0.25, 0.6], [0.2, 3.35, -0.7, 0.6], [-0.3, 3.5, 0.75, 0.55], [0.6, 3.0, -0.35, 0.5], [-0.6, 3.0, -0.4, 0.5], [0.05, 3.05, 0.7, 0.5], [0.95, 2.95, 0.5, 0.42], [-0.95, 2.95, 0.4, 0.42], [0.25, 4.0, 0.15, 0.45]];
+    blobs.forEach(([bx, by, bz, r], i) => sphere(p, r, leafCols[i % 4], tx + bx, by + (CEIL - 4.5), tz + bz, { s: [1.1, 0.85, 1.1] }));
+  }
+
   // ---- plants
   for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [-11.3, 0.2]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
 
@@ -276,7 +308,7 @@ function keyboardOnStand(p, x, z, ry) {
   return g;
 }
 
-export function floor2(p) {
+export function floor2(p, anim = {}) {
   floorSurface(p, RW, 16, RX, 0, plankTex('#d9ae7a', '#b8875a'), 3);
 
   // ================= LIVING ROOM (back-left, x -11.7..-1, z -7.7..1) =================
@@ -314,6 +346,7 @@ export function floor2(p) {
   box(p, mx1 - mx0, 0.03, mz1 - mz0, '#7d5a43', (mx0 + mx1) / 2, 0.02, (mz0 + mz1) / 2, { cast: false });
   glassWall(p, mx0, mz0, mx1, mz0, CEIL);                         // back side
   glassWall(p, mx1, mz0, mx1, mz1, CEIL, { gap: [4.9, 5.8] });   // right side, door at the front
+  addDoor(anim, '2:music', glassDoor(p, mx1, mz0 + 4.9, 0.9, CEIL, -Math.PI / 2), -Math.PI / 2, 0);
   glassWall(p, mx0, mz1, mx1, mz1, CEIL);                         // front (street side)
   const cdCols = ['#d94f3d', '#3e6b9a', '#f1c84b', '#2b2a2c', '#7ab87a', '#e8e1d0', '#9b59b6', '#f08a5d'];
   const cd = { bookColors: cdCols, bookW: 0.035, bookH: 0.16, rows: 7, color: '#3d2b1f' };
@@ -344,7 +377,7 @@ export function floor2(p) {
   for (const sx of [-6.6, -4.2]) { box(p, 0.25, 0.4, 0.25, '#2b2a2c', sx, 0.79, 2.25); cyl(p, 0.07, 0.02, '#777', sx, 1.0, 2.38, { rx: Math.PI / 2, seg: 10 }); }
   officeChair(p, -5.4, 3.25, Math.PI);
   // keyboard on stand along the right glass
-  keyboardOnStand(p, -4.0, 4.6, -Math.PI / 2);
+  keyboardOnStand(p, -4.0, 4.6, Math.PI / 2);   // player sits on the room side, facing the right glass
   // drum kit at the front, drummer facing the street
   rug(p, -6.6, 6.2, 2.6, 2.4, '#5c3d26', '#3d2b1f');
   drumKit(p, -6.6, 6.5, 0);
@@ -477,6 +510,11 @@ export function officeFloor(p, n, employees, anim) {
     const scr = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ map: anim.fxBoard.texture, toneMapped: false }));
     scr.position.set(DESK.x, by + bh / 2, bz);
     p.add(scr);
+    const hit = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.3), new THREE.MeshBasicMaterial({ visible: false }));
+    hit.position.copy(scr.position);
+    hit.userData.dynamic = true;
+    hit.userData.info = { title: 'FX Board 💱', fx: true };
+    p.add(hit);
     for (const cx of [-1.4, 1.4]) cyl(p, 0.012, CEIL - (by + bh), '#2b2a2c', DESK.x + cx, by + bh, bz - 0.05, { seg: 4, cast: false });
   }
 
@@ -484,6 +522,7 @@ export function officeFloor(p, n, employees, anim) {
   const rx0 = 1.6, rx1 = 9.3, rz1 = -2.4;
   box(p, rx1 - rx0, 0.03, 8 + rz1, '#cdbfa8', (rx0 + rx1) / 2, 0.02, (-8 + rz1) / 2, { cast: false });
   glassWall(p, rx0, rz1, rx1, rz1, CEIL, { gap: [0.5, 1.5] });
+  addDoor(anim, `${n}:meet`, glassDoor(p, rx0 + 0.5, rz1, 1.0, CEIL, 0), 0, -1.45);
   glassWall(p, rx0, -7.85, rx0, rz1, CEIL);
   glassWall(p, rx1, -7.85, rx1, rz1, CEIL);
   const mcx = (rx0 + rx1) / 2, mcz = -5.0;
@@ -537,6 +576,7 @@ export function floor5(p, anim) {
   const gx0 = -11.8, gx1 = -2.4, gz0 = -7.8, gz1 = -0.6, gh = 3.0;
   box(p, gx1 - gx0, 0.04, gz1 - gz0, '#7d838b', (gx0 + gx1) / 2, 0.02, (gz0 + gz1) / 2, { cast: false });
   glassWall(p, gx0, gz1, gx1, gz1, gh, { gap: [7.6, 8.8] });
+  addDoor(anim, '5:gym', glassDoor(p, gx0 + 7.6, gz1, 1.2, gh, 0), 0, -1.45);
   glassWall(p, gx1, gz0, gx1, gz1, gh);
   glassWall(p, gx0, gz0, gx1, gz0, gh);
   glassWall(p, gx0, gz0, gx0, gz1, gh);
@@ -571,7 +611,28 @@ export function floor5(p, anim) {
   ['#a98bd6', '#7fc4b4', '#f0a3a3'].forEach((c, i) => box(p, 0.65, 0.025, 1.8, c, -10.6 + i * 1.0, 0.03, -2.2, { cast: false }));
   sphere(p, 0.33, '#8f5fd6', -7.0, 0.36, -1.6);
   box(p, 0.05, 2.2, 4.0, mat('#dfeff5', { roughness: 0.05, metalness: 0.6 }), gx0 + 0.12, 0.2, -4.2, { cast: false });
-  plant(p, -3.0, -1.2);
+  plant(p, -3.0, -7.2);
+  // vending machine just outside the gym: protein & isotonic drinks
+  {
+    const vm = grp(p, -1.95, 0, -2.3, Math.PI / 2);            // front faces +X
+    const teal = '#2f8f83';
+    box(vm, 0.95, 1.95, 0.55, teal, 0, 0, -0.1);                      // cabinet
+    box(vm, 0.95, 0.5, 0.2, teal, 0, 0, 0.275);                       // front frame: bottom
+    box(vm, 0.95, 0.33, 0.2, teal, 0, 1.62, 0.275);                   //              top
+    box(vm, 0.06, 1.12, 0.2, teal, -0.445, 0.5, 0.275);               //              left
+    box(vm, 0.3, 1.12, 0.2, teal, 0.325, 0.5, 0.275);                 //              right (keypad)
+    box(vm, 0.95, 0.06, 0.77, '#1f6b62', 0, 1.95, 0);
+    box(vm, 0.6, 1.12, 0.02, mat('#d9f2ee', { emissive: '#bfe9e2', emissiveIntensity: 0.7 }), -0.12, 0.5, 0.185, { cast: false }); // lit back wall
+    for (const sy of [0.62, 0.91, 1.2, 1.49]) box(vm, 0.6, 0.02, 0.18, '#c9ccd0', -0.12, sy, 0.27, { cast: false });              // shelves
+    box(vm, 0.62, 1.14, 0.02, glassMat(), -0.12, 0.49, 0.37, { cast: false });                                                       // front glass
+    const cols = ['#f2f2f2', '#4fb0e0', '#f1c84b', '#e85d3d', '#7ab87a'];
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) cyl(vm, 0.04, 0.2, cols[(r + c) % 5], -0.36 + c * 0.12, 0.64 + r * 0.29, 0.27, { seg: 8, cast: false });
+    box(vm, 0.18, 0.7, 0.03, '#1b1b1e', 0.33, 0.95, 0.38, { cast: false });                 // keypad panel
+    for (let i = 0; i < 6; i++) box(vm, 0.04, 0.04, 0.02, '#f1c84b', 0.3 + (i % 2) * 0.07, 1.4 - Math.floor(i / 2) * 0.09, 0.4, { cast: false });
+    box(vm, 0.5, 0.18, 0.04, '#1b1b1e', -0.1, 0.18, 0.39, { cast: false });                  // pick-up slot
+    const sign = canvasTex(512, 128, (ctx) => { ctx.fillStyle = '#1f6b62'; ctx.fillRect(0, 0, 512, 128); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px -apple-system, sans-serif'; ctx.fillText('PROTEIN · ISOTONIC', 18, 62); ctx.font = '30px -apple-system, sans-serif'; ctx.fillStyle = '#bfe9e2'; ctx.fillText('stay hydrated 💧', 150, 108); });
+    panel(vm, 0.9, 0.22, sign, 0, 1.8, 0.385, { glow: 0.3 });
+  }
 
   // ---- chill area: lounge set, umbrella table, loungers, planters, string lights
   rug(p, 2.2, 2.2, 5.0, 3.4, '#f0e6d2', '#c8935a');

@@ -82,7 +82,14 @@ html, body {
 #card.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 #card h3 { margin: 0 0 4px; font-size: 19px; }
 #card p { margin: 0 0 6px; white-space: pre-line; font-size: 14px; }
-#card small { opacity: 0.5; font-size: 11px; }
+#card small { opacity: 0.5; font-size: 11px; display: block; }
+#cardBtn {
+  display: block; width: 100%; margin: 4px 0 8px; padding: 12px 14px; border: none; border-radius: 14px;
+  background: var(--green); color: #fff; font: 600 15px -apple-system, "Segoe UI", sans-serif; cursor: pointer;
+  touch-action: manipulation;
+}
+#cardBtn[hidden] { display: none; }
+#cardBtn:disabled { opacity: 0.6; cursor: default; }
 #card { max-width: min(92vw, 380px); }
 #card.emp { min-width: min(88vw, 330px); }
 #card.emp p { text-align: left; font-size: 13px; line-height: 1.45; }

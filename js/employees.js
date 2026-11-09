@@ -1,5 +1,5 @@
 // ✏️ Your AI employees. Add or edit entries here to change who works in the office.
-//   floor: 3 or 4 = office floors (sit at the shared desk), 5 = roof (gym)
+//   floor: 3 or 4 = office floors (sit at the shared desk), 5 = roof (gym), 1 = café
 //   seat:  office seat 0-4 = front side of the desk (back to the camera), 5-9 = back side (facing you)
 //   pos:   [x, z] for people who stand somewhere instead of sitting (e.g. the gym), ry = facing
 //   look:  hair, hairStyle ('short' | 'long' | 'bun'), shirt, pants, tie, outfit ('office' | 'sport'), glasses
@@ -39,10 +39,15 @@ export const EMPLOYEES = [
     ],
   },
   {
-    name: 'Eugene', role: 'Wellness Coach', floor: 5, pos: [-7.4, -3.2], ry: 0.3,
+    name: 'Eugene', role: 'Wellness Coach', floor: 5, pos: [-7.4, -3.2], ry: 0.3, idle: 'Coaching in the gym',
     hair: '#2a1d16', outfit: 'sport', shirt: '#3fa58f', pants: '#2f3a44',
     tasks: [
       { name: 'Weekly weight check-in', when: 'Every Sunday, 8:40 pm', at: { every: 'week', dow: 0, h: 20, m: 40 } },
     ],
+  },
+  {
+    name: 'Jennie', role: "Cashier at Joe's Café", floor: 1, pos: [-7.4, 5.3], ry: 0, idle: 'Ready to take your order',
+    hair: '#2a1a12', hairStyle: 'long', outfit: 'apron', shirt: '#fbf7f0', pants: '#3a3a3e',
+    tasks: [],   // no scheduled tasks yet
   },
 ];

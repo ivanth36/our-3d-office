@@ -7,11 +7,11 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 
 | Floor | What's there |
 |---|---|
-| 1F Joe's Café | Joe the Shih Tzu roams around! U-shaped counter (coffee machine · cashier · pick-up), stools, round tables, sofa corner, long table + bench, Joe statue, mascot signs |
+| 1F Joe's Café | Joe the Shih Tzu roams around! Jennie the cashier, a big indoor tree, U-shaped counter (coffee machine · cashier · pick-up), stools, round tables, sofa corner, long table + bench, Joe statue, mascot signs |
 | 2F Chill Home | Big living room (wall-mounted TV, 2 long sofas, armchair, rug), glass music room at the front-left (CDs, hi-fi, lounge chair, drum kit, keyboard, music desk + computer), large kitchen with island, dining table for 12 |
-| 3F Office A | Big shared desk with AI employees (JungKook, XiaoMing, Aida, Mary), live FX board (1 SGD → KRW / CNY, hourly), glass meeting room |
+| 3F Office A | Big shared desk with AI employees (JungKook, XiaoMing, Aida, Mary), live FX board (1 SGD → KRW / CNY, hourly — tap it to refresh), glass meeting room |
 | 4F Office B | Same layout as 3F |
-| 5F Roof Garden | Eugene the wellness coach in the glass gym (treadmills, weights, bench, yoga mats), lounge, umbrella table, loungers, string lights |
+| 5F Roof Garden | Eugene the wellness coach in the glass gym (treadmill, barbell, yoga), drinks vending machine outside (treadmills, weights, bench, yoga mats), lounge, umbrella table, loungers, string lights |
 
 **Walls:** the left, right and back walls fade to see-through when you rotate the camera to look from that side.
 

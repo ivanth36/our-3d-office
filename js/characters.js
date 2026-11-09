@@ -158,6 +158,11 @@ export function employee(p, x, z, ry, e) {
     box(body, 0.3, 0.03, 0.3, '#ffffff', 0, 0.36, 0, { cast: false });
     box(body, 0.05, 0.12, 0.02, '#ffffff', 0, 0.16, 0.165);
     cyl(body, 0.025, 0.06, '#e2b13c', 0, 0.12, 0.17, { rx: Math.PI / 2, seg: 8 });
+  } else if (e.outfit === 'apron') {
+    box(body, 0.26, 0.4, 0.03, e.apron ?? '#4f7d4a', 0, -0.02, 0.16);               // café apron
+    box(body, 0.03, 0.12, 0.02, e.apron ?? '#4f7d4a', -0.08, 0.36, 0.13);           // straps
+    box(body, 0.03, 0.12, 0.02, e.apron ?? '#4f7d4a', 0.08, 0.36, 0.13);
+    box(body, 0.12, 0.08, 0.02, '#f6edd8', 0.05, 0.18, 0.18, { cast: false });      // name badge
   } else {
     box(body, 0.03, 0.42, 0.02, '#2b2a2c', -0.08, 0, 0.15); // suspenders
     box(body, 0.03, 0.42, 0.02, '#2b2a2c', 0.08, 0, 0.15);
@@ -191,6 +196,12 @@ export function employee(p, x, z, ry, e) {
     cyl(bottle, 0.04, 0.18, '#7fc4e8', 0, -0.06, 0, { seg: 10 });
     g.userData.bottle = bottle;
   }
+
+  // barbell (gym): placed between the hands by the animation
+  const barbell = grp(body);
+  cyl(barbell, 0.018, 1.3, '#9a9ea3', 0, -0.65, 0, { rz: Math.PI / 2, seg: 6, metalness: 0.6 });
+  for (const bx of [-0.52, 0.52]) cyl(barbell, 0.15, 0.06, '#2b2a2c', bx, -0.03, 0, { rz: Math.PI / 2, seg: 14 });
+  barbell.visible = false;
 
   // ---- head (big chibi head)
   const head = grp(g, 0, 1.25, 0);
@@ -227,7 +238,7 @@ export function employee(p, x, z, ry, e) {
   hit.userData.info = g.userData.info;
   g.add(hit);
 
-  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
+  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
   rig.setPose = (pose, opts = {}) => {
     rig.pose = pose;
     const sit = pose === 'sit';
