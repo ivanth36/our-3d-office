@@ -62,6 +62,9 @@ link('1:coreFront', '1:j10');
 node(1, 'cashier', -7.4, 7.15); link('1:cashier', '1:j5');
 node(1, 'cashier2', -6.5, 7.35); link('1:cashier2', '1:j5');   // second customer waits beside
 
+// Jennie's way from the till, out behind the counter, to the red vending machines (left wall)
+chain(node(1, 'jBehind', -7.4, 2.0), node(1, 'jExit', -4.6, 1.95), node(1, 'jSide', -4.6, 0.6), node(1, 'jWest', -9.8, 0.4), node(1, 'vend1', -10.35, -0.85), node(1, 'vend2', -10.35, -1.9));
+
 const CAFE_SEATS = [];
 function cafeSeat(name, stand, access, x, z, ry, y = 0) {
   const id = node(1, name, stand[0], stand[1]);
@@ -422,7 +425,7 @@ class Actor {
       ease(hl.rotation, 'x', c === 2 ? 0.45 : 0); ease(hr.rotation, 'x', c === 1 ? -0.7 : c === 2 ? -0.35 : 0);
       ease(hr.rotation, 'z', c === 1 ? 0.8 : 0);
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
-    } else if (this.act === 'cook' || this.act === 'wash') {   // hands busy at the counter
+    } else if (this.act === 'cook' || this.act === 'wash' || this.act === 'restock') {   // hands busy
       const sp = this.act === 'wash' ? 9 : 5;
       sl.rotation.x = -1.15 + Math.sin(t * sp) * 0.15;
       sr.rotation.x = -1.15 + Math.sin(t * sp + 1.7) * 0.15;
@@ -614,11 +617,19 @@ async function eugene(a) {
 }
 
 async function buyCoffee(a, spot, via = 'lift') {
+  a.w.cafeQueue++;                                  // Jennie heads back to the till
   await a.goStand(spot, via);
   await a.turnTo(Math.PI);
+  if (!a.w.jennieAtTill) {
+    const old = a.e.status;
+    a.status = 'Waiting for Jennie at the counter';
+    await a.waitFor(() => a.w.jennieAtTill, 60);
+    a.status = old;
+  }
   a.status = 'Buying a coffee from Jennie';
   a.w.serve();
   await a.sleep(4);
+  a.w.cafeQueue = Math.max(0, a.w.cafeQueue - 1);
   a.rig.cup.visible = true; a.holdCup = true;
 }
 
@@ -895,7 +906,38 @@ async function phil(a) {
   }
 }
 
-const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, ivan, phil };
+// ---- Jennie: serves at the till; restocks the red vending machines when no one is coming
+async function jennie(a) {
+  const w = a.w, till = a.node;
+  const busy = () => w.cafeQueue > 0;
+  for (;;) {
+    w.jennieAtTill = true;
+    a.status = a.e.idle;
+    await a.sleep(R(15, 25));
+    if (busy()) { await a.waitFor(() => !busy(), 180); continue; }
+    // nobody coming: restock both machines
+    w.jennieAtTill = false;
+    a.status = 'Restocking the vending machines';
+    a.g.position.y = 0;                               // step down from the till step
+    for (const v of ['1:vend1', '1:vend2']) {
+      if (busy()) break;
+      a.rig.crate.visible = true; a.carry = true;
+      await a.go(v);
+      await a.turnTo(-Math.PI / 2);
+      a.rig.crate.visible = false; a.carry = false;
+      a.act = 'restock';
+      await a.sleep(R(6, 9), busy);
+      a.act = null;
+    }
+    a.rig.crate.visible = false; a.carry = false;
+    a.status = busy() ? 'Hurrying back to serve a customer' : 'Back to the till';
+    await a.go(till);
+    await a.turnTo(0);
+    a.g.position.y = a.e.y ?? 0;                      // back up on the step
+  }
+}
+
+const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, ivan, phil, jennie };
 const SPAWN = {                        // where the owners start
   Ivan: { stand: '5:ivanMeet', ry: -2.1 },
   Phil: { seat: SOFA_TV_PHIL },
@@ -903,7 +945,7 @@ const SPAWN = {                        // where the owners start
 
 // ======================================================================== setup
 export function createStaff({ floors, lift, employees, doors = {} }) {
-  const world = { floors, lift, doors, puffs: createPuffs(), serve() {} };
+  const world = { floors, lift, doors, puffs: createPuffs(), serve() {}, cafeQueue: 0, jennieAtTill: true };
   // two plates of food on the Floor 2 dining table (shown when Ivan serves dinner)
   world.plates = new THREE.Group();
   world.plates.userData.dynamic = true;
@@ -944,7 +986,10 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
       a.heading = e.ry ?? 0; a.g.rotation.y = a.heading;
       a.g.position.y = e.y ?? 0;                    // Jennie stands on a step behind the till
       a.status = e.idle ?? 'Here';
-      if (e.name === 'Jennie') world.serve = () => { a.talkFor = 4; a.status = 'Serving a coffee'; setTimeout(() => { a.status = e.idle; }, 4000); };
+      if (e.name === 'Jennie') {
+        link(id, '1:jBehind');
+        world.serve = () => { a.talkFor = 4; a.status = 'Serving a coffee'; setTimeout(() => { if (world.jennieAtTill) a.status = e.idle; }, 4000); };
+      }
     } else {                                        // desk seat
       const s = deskSeatFor(e.floor, e.seat);
       a.at(s.node);

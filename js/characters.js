@@ -214,6 +214,12 @@ export function employee(p, x, z, ry, e) {
   }
   tray.visible = false;
 
+  // cardboard crate of drinks (restocking the vending machines)
+  const crate = grp(body, 0, 0.18, 0.32);
+  box(crate, 0.42, 0.26, 0.3, '#c8a165', 0, -0.05, 0);
+  box(crate, 0.43, 0.04, 0.06, '#e8d6a8', 0, 0.18, 0, { cast: false });   // tape
+  crate.visible = false;
+
   // barbell (gym): placed between the hands by the animation
   const barbell = grp(body);
   cyl(barbell, 0.018, 1.3, '#9a9ea3', 0, -0.65, 0, { rz: Math.PI / 2, seg: 6, metalness: 0.6 });
@@ -255,7 +261,7 @@ export function employee(p, x, z, ry, e) {
   hit.userData.info = g.userData.info;
   g.add(hit);
 
-  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, drink, tray, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
+  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, drink, tray, crate, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
   rig.setPose = (pose, opts = {}) => {
     rig.pose = pose;
     const sit = pose === 'sit';

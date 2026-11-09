@@ -38,6 +38,16 @@ function glassStrip(p, z, x0, x1, y0, y1) {
   box(p, x1 - x0, 0.06, 0.4, '#2b2a2c', (x0 + x1) / 2, (y0 + y1) / 2 + 0.6, z, { cast: false }); // transom
 }
 
+/** Same long black-framed window, for a wall running along Z. */
+function glassStripZ(p, x, z0, z1, y0, y1) {
+  box(p, 0.34, y1 - y0, z1 - z0, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), x, y0, (z0 + z1) / 2, { cast: false });
+  const n = Math.round((z1 - z0) / 1.3);
+  for (let i = 0; i <= n; i++) box(p, 0.4, y1 - y0, 0.06, '#2b2a2c', x, y0, z0 + (z1 - z0) * i / n, { cast: false });
+  box(p, 0.42, 0.07, z1 - z0, '#2b2a2c', x, y0, (z0 + z1) / 2, { cast: false });
+  box(p, 0.42, 0.07, z1 - z0, '#2b2a2c', x, y1 - 0.07, (z0 + z1) / 2, { cast: false });
+  box(p, 0.4, 0.06, z1 - z0, '#2b2a2c', x, (y0 + y1) / 2 + 0.6, (z0 + z1) / 2, { cast: false }); // transom
+}
+
 function glassRail(p, x1, z1, x2, z2, h = 1.05) {
   const len = Math.hypot(x2 - x1, z2 - z1);
   const ry = Math.atan2(x2 - x1, z2 - z1) - Math.PI / 2;
@@ -131,19 +141,21 @@ export function shell(p, n) {
     // back wall (z = -8) with windows
     box(walls.back, W, CEIL, 0.3, WALL, 0, 0, Z0 + 0.15, { cast: false });
     if (n === 1) {
-      windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, -6.4, 2.95);
-      glassStrip(walls.back, Z0 + 0.15, -6.2, CORE_X - 0.2, 0.75, CEIL - 0.45); // big window behind the bar
+      // Floor 1 café: one style everywhere — tall glass with slim black frames
+      glassStrip(walls.back, Z0 + 0.15, X0 + 0.35, CORE_X - 0.2, 0.75, CEIL - 0.45);
     } else {
       windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
     }
     box(walls.back, W - 0.6, 0.12, 0.05, TRIM, 0, 0, Z0 + 0.32, { cast: false });
     // left wall (x = -12)
     box(walls.left, 0.3, CEIL, D, WALL, X0 + 0.15, 0, 0, { cast: false });
-    windowsAlongZ(walls.left, X0 + 0.15, Z0 + 0.5, Z1 - 1.0, 3.0);
+    if (n === 1) glassStripZ(walls.left, X0 + 0.15, Z0 + 0.35, Z1 - 0.6, 0.75, CEIL - 0.45);
+    else windowsAlongZ(walls.left, X0 + 0.15, Z0 + 0.5, Z1 - 1.0, 3.0);
     box(walls.left, 0.05, 0.12, D - 0.6, TRIM, X0 + 0.32, 0, 0, { cast: false });
     // right wall (x = 12): outer wall of the core
     box(walls.right, 0.3, CEIL, D, WALL_OUT, X1 - 0.15, 0, 0, { cast: false });
-    windowsAlongZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.3, 3.2);
+    if (n === 1) glassStripZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.6, 0.75, CEIL - 0.45);
+    else windowsAlongZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.3, 3.2);
     // front corner columns
     box(p, 0.5, CEIL, 0.5, WALL_OUT, X0 + 0.25, 0, Z1 - 0.25, { cast: false });
     box(p, 0.5, CEIL, 0.5, WALL_OUT, X1 - 0.25, 0, Z1 - 0.25, { cast: false });
