@@ -29,34 +29,36 @@ const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
 
 // ---------------------------------------------------------------- signs
 function drawDogFace(ctx, cx, cy, r) {
-  // long floppy ears: beige on top, fading to grey-brown
-  for (const sd of [-1, 1]) {
-    const g = ctx.createLinearGradient(0, cy - r * 0.4, 0, cy + r * 1.1);
-    g.addColorStop(0, '#d8c3a5'); g.addColorStop(0.55, '#b9a68f'); g.addColorStop(1, '#7d7268');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.92, cy + r * 0.3, r * 0.4, r * 0.82, -sd * 0.25, 0, Math.PI * 2); ctx.fill();
-  }
-  // fluffy white head with a little top tuft
+  // big caramel ears
+  ctx.fillStyle = '#c98a4b';
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.9, cy + r * 0.3, r * 0.42, r * 0.85, -sd * 0.15, 0, Math.PI * 2); ctx.fill(); }
+  // white head + top tuft
   ctx.fillStyle = '#fffaf3';
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-  for (const [dx, dy, rr] of [[0, -0.98, 0.22], [-0.2, -0.92, 0.18], [0.2, -0.92, 0.18]]) { ctx.beginPath(); ctx.arc(cx + dx * r, cy + dy * r, rr * r, 0, Math.PI * 2); ctx.fill(); }
-  // soft beige patches around the eyes
-  ctx.fillStyle = '#e2cfb2';
-  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.4, cy - r * 0.12, r * 0.3, r * 0.27, 0, 0, Math.PI * 2); ctx.fill(); }
-  // big shiny eyes
+  ctx.beginPath(); ctx.arc(cx, cy - r * 0.98, r * 0.2, 0, Math.PI * 2); ctx.fill();
+  // caramel eye patches + white blaze
+  ctx.fillStyle = '#c98a4b';
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.44, cy - r * 0.2, r * 0.36, r * 0.36, sd * 0.35, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = '#fffaf3';
+  ctx.beginPath(); ctx.ellipse(cx, cy - r * 0.25, r * 0.16, r * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+  // glossy brown eyes
   for (const sd of [-1, 1]) {
-    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.1, r * 0.18, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#15100c'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.1, r * 0.155, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38 + r * 0.05, cy - r * 0.16, r * 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#4a2a18'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.12, r * 0.18, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#120b07'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.1, r * 0.12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38 + r * 0.06, cy - r * 0.2, r * 0.06, 0, Math.PI * 2); ctx.fill();
   }
-  // nose
-  ctx.fillStyle = '#15100c';
-  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.2, r * 0.15, r * 0.11, 0, 0, Math.PI * 2); ctx.fill();
-  // open smiling mouth + tongue
-  ctx.fillStyle = '#2a1712';
-  ctx.beginPath(); ctx.moveTo(cx - r * 0.3, cy + r * 0.42); ctx.quadraticCurveTo(cx, cy + r * 0.9, cx + r * 0.3, cy + r * 0.42); ctx.quadraticCurveTo(cx, cy + r * 0.5, cx - r * 0.3, cy + r * 0.42); ctx.fill();
-  ctx.fillStyle = '#f08a96';
-  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.66, r * 0.12, r * 0.15, 0, 0, Math.PI * 2); ctx.fill();
+  // nose + little smile
+  ctx.fillStyle = '#141010';
+  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.22, r * 0.14, r * 0.1, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#3a2418'; ctx.lineWidth = r * 0.05; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx - r * 0.1, cy + r * 0.36, r * 0.1, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + r * 0.1, cy + r * 0.36, r * 0.1, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+  // green bow + gold tag
+  ctx.fillStyle = '#3f8a3f';
+  ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.9); ctx.lineTo(cx - r * 0.35, cy + r * 0.72); ctx.lineTo(cx - r * 0.35, cy + r * 1.08); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.9); ctx.lineTo(cx + r * 0.35, cy + r * 0.72); ctx.lineTo(cx + r * 0.35, cy + r * 1.08); ctx.fill();
+  ctx.fillStyle = '#e2b13c';
+  ctx.beginPath(); ctx.arc(cx, cy + r * 0.95, r * 0.1, 0, Math.PI * 2); ctx.fill();
 }
 
 function paw(ctx, x, y, s, color) {
