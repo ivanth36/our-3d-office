@@ -112,6 +112,30 @@ function tvTex() {
   });
 }
 
+// ---------------------------------------------------------------- vending machine
+/** Drinks vending machine; its front faces local +Z (use ry to turn it). */
+function vendingMachine(p, x, z, ry, o = {}) {
+  const vm = grp(p, x, 0, z, ry);
+  const teal = o.body ?? '#2f8f83', trim = o.trim ?? '#1f6b62';
+  box(vm, 0.95, 1.95, 0.55, teal, 0, 0, -0.1);                      // cabinet
+  box(vm, 0.95, 0.5, 0.2, teal, 0, 0, 0.275);                       // front frame: bottom
+  box(vm, 0.95, 0.33, 0.2, teal, 0, 1.62, 0.275);                   //              top
+  box(vm, 0.06, 1.12, 0.2, teal, -0.445, 0.5, 0.275);               //              left
+  box(vm, 0.3, 1.12, 0.2, teal, 0.325, 0.5, 0.275);                 //              right (keypad)
+  box(vm, 0.95, 0.06, 0.77, trim, 0, 1.95, 0);
+  box(vm, 0.6, 1.12, 0.02, mat('#d9f2ee', { emissive: '#bfe9e2', emissiveIntensity: 0.7 }), -0.12, 0.5, 0.185, { cast: false }); // lit back wall
+  for (const sy of [0.62, 0.9, 1.18, 1.46]) box(vm, 0.6, 0.02, 0.18, '#c9ccd0', -0.12, sy, 0.27, { cast: false });              // shelves
+  box(vm, 0.62, 1.14, 0.02, glassMat(), -0.12, 0.49, 0.37, { cast: false });                                                       // front glass
+  const cols = o.cols ?? ['#f2f2f2', '#4fb0e0', '#f1c84b', '#e85d3d', '#7ab87a'];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) cyl(vm, 0.04, 0.19, cols[(r + c) % 5], -0.36 + c * 0.12, 0.64 + r * 0.28, 0.27, { seg: 8, cast: false });
+  box(vm, 0.18, 0.7, 0.03, '#1b1b1e', 0.33, 0.95, 0.38, { cast: false });                 // keypad panel
+  for (let i = 0; i < 6; i++) box(vm, 0.04, 0.04, 0.02, '#f1c84b', 0.3 + (i % 2) * 0.07, 1.4 - Math.floor(i / 2) * 0.09, 0.4, { cast: false });
+  box(vm, 0.5, 0.18, 0.04, '#1b1b1e', -0.1, 0.18, 0.39, { cast: false });                  // pick-up slot
+  const sign = canvasTex(512, 128, (ctx) => { ctx.fillStyle = trim; ctx.fillRect(0, 0, 512, 128); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px -apple-system, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(o.title, 256, 62); ctx.font = '30px -apple-system, sans-serif'; ctx.fillStyle = '#bfe9e2'; ctx.fillText(o.sub, 256, 108); });
+  panel(vm, 0.9, 0.22, sign, 0, 1.8, 0.385, { glow: 0.3 });
+    return vm;
+}
+
 // ---------------------------------------------------------------- Floor 1
 export function floor1(p, anim) {
   floorSurface(p, RW, 16, RX, 0, tileTex('#f1e6d3', '#e6d4b8'), 1.2);
@@ -227,9 +251,17 @@ export function floor1(p, anim) {
   panel(p, 0.4, 0.15, love, -0.6, barTop + 0.085, -7.47, { rx: -0.15 });
   for (let i = 0; i < 6; i++) pendant(p, bx0 + 1.2 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
 
-  // ---- big indoor tree by the entrance, just reaching the ceiling
+  // ---- two red vending machines against the left wall (between the sofa corner and the counter)
+  vendingMachine(p, -11.32, -1.9, Math.PI / 2, { body: '#c8312b', trim: '#9c1f1b', title: 'COLD DRINKS', sub: 'ice cold 🧊', cols: ['#e85d3d', '#f2f2f2', '#2b2a2c', '#f1c84b', '#4fb0e0'] });
+  vendingMachine(p, -11.32, -0.85, Math.PI / 2, { body: '#c8312b', trim: '#9c1f1b', title: 'SNACKS & JUICE', sub: 'treat yourself 🍪', cols: ['#f1c84b', '#e2a356', '#7ab87a', '#f08a3a', '#c96f4a'] });
+
+  // ---- Jennie's step behind the till, so customers can see her over the register
+  box(p, 0.9, 0.3, 0.6, C.woodDark, -7.4, 0, 5.3);
+  box(p, 0.92, 0.03, 0.62, '#3d2b1f', -7.4, 0.3, 5.3);
+
+  // ---- big indoor tree between the tables, just reaching the ceiling
   {
-    const tx = -1.3, tz = 5.6;
+    const tx = 4.7, tz = 0.0;
     cyl(p, 0.72, 0.55, C.woodDark, tx, 0, tz, { seg: 20 });                        // planter
     cyl(p, 0.66, 0.04, '#5a3b26', tx, 0.55, tz, { seg: 20 });                       // soil
     for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; sphere(p, 0.08, '#cfc6b8', tx + Math.sin(a) * 0.5, 0.6, tz + Math.cos(a) * 0.5, { s: [1, 0.6, 1] }); } // pebbles
@@ -242,7 +274,7 @@ export function floor1(p, anim) {
   }
 
   // ---- plants
-  for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [-11.3, 0.2]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
+  for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [-11.3, 0.55]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
 
   // ---- façade: fascia sign, awning, mascot
   box(p, 24, 0.55, 0.25, '#f1e0c3', 0, CEIL - 0.55, 7.95, { cast: false });
@@ -461,7 +493,7 @@ export function floor2(p, anim = {}) {
   chair(p, dx + L / 2 + 0.45, dz, -Math.PI / 2, { seat: C.sage });
   for (let i = 0; i < 4; i++) pendant(p, dx - 2.4 + i * 1.6, dz, { drop: 1.3, shade: '#c8935a' });
   for (let i = 0; i < 3; i++) { cyl(p, 0.07, 0.2, C.white, dx - 1.5 + i * 1.5, 0.82, dz, { seg: 8 }); sphere(p, 0.1, ['#f2a1a8', '#f1d08a', '#f2a1a8'][i], dx - 1.5 + i * 1.5, 1.1, dz); }
-  plant(p, -2.9, 1.3, { tall: true });
+  plant(p, -0.8, 0.9, { tall: true });
   plant(p, 8.8, 7.2, { tall: true });
 }
 
@@ -613,26 +645,7 @@ export function floor5(p, anim) {
   box(p, 0.05, 2.2, 4.0, mat('#dfeff5', { roughness: 0.05, metalness: 0.6 }), gx0 + 0.12, 0.2, -4.2, { cast: false });
   plant(p, -3.0, -7.2);
   // vending machine just outside the gym: protein & isotonic drinks
-  {
-    const vm = grp(p, -1.95, 0, -2.3, Math.PI / 2);            // front faces +X
-    const teal = '#2f8f83';
-    box(vm, 0.95, 1.95, 0.55, teal, 0, 0, -0.1);                      // cabinet
-    box(vm, 0.95, 0.5, 0.2, teal, 0, 0, 0.275);                       // front frame: bottom
-    box(vm, 0.95, 0.33, 0.2, teal, 0, 1.62, 0.275);                   //              top
-    box(vm, 0.06, 1.12, 0.2, teal, -0.445, 0.5, 0.275);               //              left
-    box(vm, 0.3, 1.12, 0.2, teal, 0.325, 0.5, 0.275);                 //              right (keypad)
-    box(vm, 0.95, 0.06, 0.77, '#1f6b62', 0, 1.95, 0);
-    box(vm, 0.6, 1.12, 0.02, mat('#d9f2ee', { emissive: '#bfe9e2', emissiveIntensity: 0.7 }), -0.12, 0.5, 0.185, { cast: false }); // lit back wall
-    for (const sy of [0.62, 0.9, 1.18, 1.46]) box(vm, 0.6, 0.02, 0.18, '#c9ccd0', -0.12, sy, 0.27, { cast: false });              // shelves
-    box(vm, 0.62, 1.14, 0.02, glassMat(), -0.12, 0.49, 0.37, { cast: false });                                                       // front glass
-    const cols = ['#f2f2f2', '#4fb0e0', '#f1c84b', '#e85d3d', '#7ab87a'];
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) cyl(vm, 0.04, 0.19, cols[(r + c) % 5], -0.36 + c * 0.12, 0.64 + r * 0.28, 0.27, { seg: 8, cast: false });
-    box(vm, 0.18, 0.7, 0.03, '#1b1b1e', 0.33, 0.95, 0.38, { cast: false });                 // keypad panel
-    for (let i = 0; i < 6; i++) box(vm, 0.04, 0.04, 0.02, '#f1c84b', 0.3 + (i % 2) * 0.07, 1.4 - Math.floor(i / 2) * 0.09, 0.4, { cast: false });
-    box(vm, 0.5, 0.18, 0.04, '#1b1b1e', -0.1, 0.18, 0.39, { cast: false });                  // pick-up slot
-    const sign = canvasTex(512, 128, (ctx) => { ctx.fillStyle = '#1f6b62'; ctx.fillRect(0, 0, 512, 128); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px -apple-system, sans-serif'; ctx.fillText('PROTEIN · ISOTONIC', 18, 62); ctx.font = '30px -apple-system, sans-serif'; ctx.fillStyle = '#bfe9e2'; ctx.fillText('stay hydrated 💧', 150, 108); });
-    panel(vm, 0.9, 0.22, sign, 0, 1.8, 0.385, { glow: 0.3 });
-  }
+  vendingMachine(p, -1.95, -2.3, Math.PI / 2, { title: 'PROTEIN · ISOTONIC', sub: 'stay hydrated 💧' });
 
   // ---- chill area: lounge set, umbrella table, loungers, planters, string lights
   rug(p, 2.2, 2.2, 5.0, 3.4, '#f0e6d2', '#c8935a');

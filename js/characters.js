@@ -158,6 +158,9 @@ export function employee(p, x, z, ry, e) {
     box(body, 0.3, 0.03, 0.3, '#ffffff', 0, 0.36, 0, { cast: false });
     box(body, 0.05, 0.12, 0.02, '#ffffff', 0, 0.16, 0.165);
     cyl(body, 0.025, 0.06, '#e2b13c', 0, 0.12, 0.17, { rx: Math.PI / 2, seg: 8 });
+  } else if (e.outfit === 'casual') {
+    box(body, 0.28, 0.04, 0.28, e.collar ?? '#ffffff', 0, 0.38, 0, { cast: false });   // collar / neckline
+    box(body, 0.06, 0.12, 0.02, e.collar ?? '#ffffff', 0, 0.26, 0.165, { cast: false }); // placket
   } else if (e.outfit === 'apron') {
     box(body, 0.26, 0.4, 0.03, e.apron ?? '#4f7d4a', 0, -0.02, 0.16);               // café apron
     box(body, 0.03, 0.12, 0.02, e.apron ?? '#4f7d4a', -0.08, 0.36, 0.13);           // straps
@@ -187,6 +190,10 @@ export function employee(p, x, z, ry, e) {
   cyl(cup, 0.045, 0.12, '#ffffff', 0, -0.04, 0, { top: 1.15, bottom: 0.9, seg: 10 });
   cyl(cup, 0.05, 0.03, '#8a5a33', 0, 0.035, 0, { seg: 10 });
   cup.visible = false;
+  const drink = grp(shoulders[0], 0, -0.44, 0.06);              // vending-machine drink bottle
+  cyl(drink, 0.04, 0.17, '#f08a3a', 0, -0.06, 0, { seg: 10 });
+  cyl(drink, 0.025, 0.04, '#ffffff', 0, 0.11, 0, { seg: 8 });
+  drink.visible = false;
   const cig = grp(shoulders[1], 0, -0.4, 0.07);
   box(cig, 0.014, 0.014, 0.1, '#f4f1ea', 0, 0, 0.03, { cast: false });
   box(cig, 0.016, 0.016, 0.02, mat('#ff7a3a', { emissive: '#ff5a1a', emissiveIntensity: 1.5 }), 0, -0.001, 0.085, { cast: false });
@@ -196,6 +203,16 @@ export function employee(p, x, z, ry, e) {
     cyl(bottle, 0.04, 0.18, '#7fc4e8', 0, -0.06, 0, { seg: 10 });
     g.userData.bottle = bottle;
   }
+
+  // tray with two plates of food, carried in front with both hands
+  const tray = grp(body, 0, 0.2, 0.33);
+  box(tray, 0.5, 0.025, 0.3, '#8a5a33', 0, 0, 0);
+  for (const px of [-0.12, 0.12]) {
+    cyl(tray, 0.1, 0.015, '#ffffff', px, 0.025, 0, { seg: 14 });
+    sphere(tray, 0.045, px < 0 ? '#e2a356' : '#7ab87a', px, 0.06, 0.01, { s: [1.2, 0.6, 1] });
+    sphere(tray, 0.03, '#c96f4a', px + 0.03, 0.06, -0.02);
+  }
+  tray.visible = false;
 
   // barbell (gym): placed between the hands by the animation
   const barbell = grp(body);
@@ -238,7 +255,7 @@ export function employee(p, x, z, ry, e) {
   hit.userData.info = g.userData.info;
   g.add(hit);
 
-  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
+  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, drink, tray, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
   rig.setPose = (pose, opts = {}) => {
     rig.pose = pose;
     const sit = pose === 'sit';

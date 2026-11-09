@@ -251,7 +251,7 @@ function employeeText(e) {
   const lines = [`${e.role} · Floor ${e.floor}`];
   if (e.status) lines.push(`Now: ${e.status}`);
   lines.push('');
-  if (!e.tasks?.length) lines.push('No scheduled tasks yet');
+  if (!e.tasks?.length) lines.push(e.owner ? 'No scheduled tasks · just enjoying the house 🏠' : 'No scheduled tasks yet');
   for (const task of e.tasks ?? []) {
     lines.push(`📋 ${task.name}`);
     lines.push(`     ${task.when} (SGT) · next in ${fmtIn(msUntil(task.at))}`);

@@ -46,8 +46,19 @@ export const EMPLOYEES = [
     ],
   },
   {
-    name: 'Jennie', role: "Cashier at Joe's Café", floor: 1, pos: [-7.4, 5.3], ry: 0, idle: 'Ready to take your order',
+    name: 'Jennie', role: "Cashier at Joe's Café", floor: 1, pos: [-7.4, 5.3], y: 0.3, ry: 0, idle: 'Ready to take your order',
     hair: '#2a1a12', hairStyle: 'long', outfit: 'apron', shirt: '#fbf7f0', pants: '#3a3a3e',
     tasks: [],   // no scheduled tasks yet
+  },
+  // ---- the owners: no scheduled tasks, they just enjoy the house (routines in js/staff.js)
+  {
+    name: 'Ivan', role: 'Owner of the home office', floor: 5, owner: true,
+    hair: '#1f1a17', outfit: 'casual', shirt: '#3b5b8a', pants: '#c2a878', collar: '#ffffff',
+    tasks: [],
+  },
+  {
+    name: 'Phil', role: 'Owner of the home office · music lover', floor: 2, owner: true,
+    hair: '#6b4a2b', outfit: 'casual', shirt: '#d9a441', pants: '#2f3a44', collar: '#2b2a2c', glasses: true,
+    tasks: [],
   },
 ];

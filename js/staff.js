@@ -90,6 +90,27 @@ link('2:musicMid', node(2, 'pianoStand', -5.25, 4.6));
 const LOUNGE_SEAT = { node: '2:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
 const DRUM_SEAT = { node: '2:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
 const PIANO_SEAT = { node: '2:pianoStand', x: -4.6, z: 4.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
+const COMPOSE_SEAT = { node: '2:musicMid', x: -5.4, z: 3.25, ry: Math.PI, y: 0, typing: true };   // music PC desk
+
+// ---- Floor 2: open space, living room sofa, kitchen, dining table
+node(2, 'f2mid', 1.5, -0.2);                        // open space between living room & kitchen
+link('2:coreW', '2:f2mid');
+chain('2:f2mid', node(2, 'livFront', -3.2, -2.0), node(2, 'sofaStandA', -5.3, -2.0), node(2, 'sofaStandB', -7.3, -2.0));
+chain('2:livFront', node(2, 'westAisle', -2.7, 0.8), '2:musicOut');           // short way to the music room
+chain('2:coreW', node(2, 'kIn', 8.2, -1.8), node(2, 'kLane', 8.1, -5.2));
+link('2:kLane', node(2, 'stove', 6.7, -6.6));
+link('2:kLane', node(2, 'islandBack', 5.6, -4.7));
+link('2:kLane', node(2, 'sink', 8.25, -6.1));
+link('2:stove', '2:islandBack');
+chain('2:kIn', node(2, 'dineE', 8.0, 1.8), node(2, 'dineStandP', 4.68, 2.2), node(2, 'dineStandI', 3.4, 2.2));
+link('2:f2mid', '2:dineStandI');
+const SOFA_TV_PHIL = { node: '2:sofaStandA', x: -5.3, z: -1.2, ry: Math.PI, y: 0.04 };   // facing the TV
+const SOFA_TV_IVAN = { node: '2:sofaStandB', x: -7.3, z: -1.2, ry: Math.PI, y: 0.04 };
+const DINE_IVAN = { node: '2:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
+const DINE_PHIL = { node: '2:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
+// café sofa corner for the owners
+const CAFE_SOFA_IVAN = { node: '1:sofa', x: -7.7, z: -7.05, ry: 0, y: 0.04 };
+const CAFE_SOFA_PHIL = { node: '1:sofa', x: -8.7, z: -7.05, ry: 0, y: 0.04 };
 
 // ---- Floors 3 & 4: aisle behind the shared desk + meeting room
 for (const f of [3, 4]) {
@@ -115,7 +136,14 @@ chain('5:rPole', '5:gymOut', '5:gymIn');
 chain('5:rPole', node(5, 'meetJ', -2.6, 0.6), '5:gymOut');   // JungKook waits here, just outside the gym
 node(5, 'yoga', -9.6, -2.2);
 node(5, 'barbell', -5.9, -2.5);
+// Ivan's gym spots (next to Eugene's) and the vending machine outside
+node(5, 'ivanMeet', -6.5, -2.6); link('5:ivanMeet', '5:gymIn');
+node(5, 'treadFront2', -10.6, -4.5); link('5:treadFront2', '5:gymIn'); link('5:treadFront2', '5:treadFront');
+node(5, 'ivanBarbell', -4.4, -2.6); link('5:ivanBarbell', '5:gymIn'); link('5:ivanBarbell', '5:ivanMeet');
+node(5, 'ivanYoga', -8.6, -2.2); link('5:ivanYoga', '5:ivanMeet');
+node(5, 'vendFront', -1.1, -2.3); link('5:vendFront', '5:rPole');
 const TREAD = { x: -9.0, z: -6.3, y: 0.23 };
+const TREAD2_X = -10.6;
 
 // glass doors: walking between these node pairs goes through a door
 const DOOR_EDGES = {};
@@ -211,7 +239,8 @@ class Actor {
     this.w = world; this.e = e; this.rig = rig; this.g = rig.group;
     this.task = null; this.anim = 'idle'; this.walkT = 0; this.heading = this.g.rotation.y;
     this.smoking = false; this.holdCup = false; this.talking = false; this.puffT = 0;
-    this.talkFor = 0; this.act = null; // act: 'drum' | 'piano' | 'yoga' | 'barbell'
+    this.talkFor = 0; this.act = null; // act: 'drum' | 'piano' | 'yoga' | 'barbell' | 'cook' | 'wash' | 'eat'
+    this.carry = false; this.sipping = false;
     // soft blob shadow (shadow maps are static, so moving people bring their own)
     this.g.traverse((o) => { if (o.isMesh) o.castShadow = false; });
     this.blob = new THREE.Mesh(new THREE.CircleGeometry(0.3, 18), new THREE.MeshBasicMaterial({ color: '#3b2a1a', transparent: true, opacity: 0.2, depthWrite: false }));
@@ -333,7 +362,10 @@ class Actor {
     await this.moveTo(n.x, n.z, 0.8);
     this.node = n.id;
   }
-  async goSit(seat, via) { await this.stand(); await this.go(seat.node, via); await this.sit(seat); }
+  async goSit(seat, via) {
+    if (this.seat === seat) return;              // already sitting there
+    await this.stand(); await this.go(seat.node, via); await this.sit(seat);
+  }
   async goStand(id, via) { await this.stand(); await this.go(id, via); }
 
   update(dt, t) {
@@ -355,6 +387,10 @@ class Actor {
         r.body.position.y = r.baseY + Math.abs(Math.sin(t * 9 + r.phase)) * 0.012;
         r.body.rotation.z = Math.sin(t * 1.2) * 0.06;
         r.head.rotation.z = Math.sin(t * 1.2) * 0.1;
+      } else if (this.act === 'eat') {                 // eating: fork to mouth now and then
+        sr.rotation.x = -0.9 - Math.max(0, Math.sin(t * 1.6 + r.phase)) * 1.1;
+        sl.rotation.x = -0.9;
+        r.head.rotation.x = (this.talking ? Math.sin(t * 5) * 0.05 : 0) + 0.1;
       } else if (r.typing) {
         r.head.rotation.x = Math.sin(t * 1.3 + r.phase) * 0.06;
         r.head.rotation.y = Math.sin(t * 0.5 + r.phase) * 0.12;
@@ -367,13 +403,16 @@ class Actor {
       return;
     }
     const moving = this.anim === 'walk' || this.anim === 'run';
+    if (this.carry) { sl.rotation.x = -1.1; sr.rotation.x = -1.1; }   // carrying the tray with both hands
     if (moving) {
       const run = this.anim === 'run';
       this.walkT += dt * (run ? 13 : 8.5);
       const s = Math.sin(this.walkT), amp = run ? 0.85 : 0.5;
       hl.rotation.x = s * amp; hr.rotation.x = -s * amp;
-      sl.rotation.x = this.holdCup ? -0.9 : -s * amp * 0.8;
-      if (!this.smoking) sr.rotation.x = s * amp * 0.8;
+      if (!this.carry) {
+        sl.rotation.x = this.holdCup ? -0.9 : -s * amp * 0.8;
+        if (!this.smoking) sr.rotation.x = s * amp * 0.8;
+      }
       r.body.position.y = r.baseY + Math.abs(Math.cos(this.walkT)) * (run ? 0.05 : 0.025);
       r.head.position.y = 1.25 + Math.abs(Math.cos(this.walkT)) * (run ? 0.05 : 0.025);
     } else if (this.act === 'yoga') {                    // cycle: arms up -> tree pose -> warrior
@@ -383,6 +422,12 @@ class Actor {
       ease(hl.rotation, 'x', c === 2 ? 0.45 : 0); ease(hr.rotation, 'x', c === 1 ? -0.7 : c === 2 ? -0.35 : 0);
       ease(hr.rotation, 'z', c === 1 ? 0.8 : 0);
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
+    } else if (this.act === 'cook' || this.act === 'wash') {   // hands busy at the counter
+      const sp = this.act === 'wash' ? 9 : 5;
+      sl.rotation.x = -1.15 + Math.sin(t * sp) * 0.15;
+      sr.rotation.x = -1.15 + Math.sin(t * sp + 1.7) * 0.15;
+      r.head.rotation.x = 0.25;
+      r.body.position.y = r.baseY; r.head.position.y = 1.25;
     } else if (this.act === 'barbell') {                 // overhead press
       const th = -2.1 - 0.8 * Math.sin(t * 1.8);
       sl.rotation.x = th; sr.rotation.x = th;
@@ -391,9 +436,11 @@ class Actor {
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
     } else {
       hl.rotation.x *= 0.8; hr.rotation.x *= 0.8; hr.rotation.z *= 0.8;
-      sl.rotation.x = this.holdCup ? -0.9 : sl.rotation.x * 0.8;
+      if (this.carry) { /* arms stay forward */ }
+      else if (this.holdCup && this.sipping) sl.rotation.x = -0.9 - Math.max(0, Math.sin(t * 0.9 + r.phase)) * 1.45; // drinking
+      else sl.rotation.x = this.holdCup ? -0.9 : sl.rotation.x * 0.8;
       sl.rotation.z *= 0.8;
-      if (!this.smoking) { sr.rotation.x *= 0.8; sr.rotation.z *= 0.8; }
+      if (!this.smoking && !this.carry) { sr.rotation.x *= 0.8; sr.rotation.z *= 0.8; }
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
       r.head.rotation.x = chatting ? Math.sin(t * 5 + r.phase) * 0.07 : 0;
       // standing still with nothing to do: look around a little
@@ -419,7 +466,34 @@ const flags = {
   smokeCall: false, eugeneReady: false, smokeGo: false, smokeDone: false,
   aidaAtDesk: true, maryAtDesk: true, meetingCall: false, aidaInMeeting: false, meetingOver: false,
   cafeInvite: false, cafePair: null, marySeated: false, cafeDone: false,
+  drumUser: null,
+  // Ivan & Phil
+  ivanGym: false, gymPhase: null, eugeneInSession: false,
+  dinnerReady: false, philSeated: false, dinnerDone: false,
+  philCafe: false, f2Chill: false, philF2: false, chillDone: false, ownersAtCafe: false,
 };
+
+// ---- shared gym moves (Eugene and Ivan use their own machine / spot)
+async function treadmillOn(a, tx, front) {
+  await a.go(front);
+  await a.moveTo(tx, -5.5);
+  a.g.position.y = TREAD.y;
+  await a.moveTo(tx, TREAD.z, 0.6);
+  await a.turnTo(0);
+  a.anim = 'run';
+}
+async function treadmillOff(a, tx, front) {
+  a.anim = 'idle';
+  await a.moveTo(tx, -5.5, 0.8);
+  a.g.position.y = 0;
+  const n = nodes.get(front);
+  await a.moveTo(n.x, n.z);
+  a.node = front;
+}
+async function barbellOn(a, spot) { await a.go(spot); await a.turnTo(0.3); a.rig.barbell.visible = true; a.act = 'barbell'; }
+function barbellOff(a) { a.act = null; a.rig.barbell.visible = false; }
+async function yogaOn(a, spot) { await a.go(spot); await a.turnTo(0); a.act = 'yoga'; }
+function yogaOff(a) { a.act = null; }
 
 async function jungkook(a) {
   const home = deskSeatFor(3, a.e.seat);
@@ -431,7 +505,13 @@ async function jungkook(a) {
     await a.face(-3.6, 0.0);
     a.status = 'Waiting for Eugene outside the gym';
     flags.smokeCall = true;
-    await a.waitFor(() => flags.eugeneReady, 90);
+    await a.waitFor(() => flags.eugeneReady, 240);
+    if (!flags.eugeneReady) {                          // Eugene is busy training with Ivan
+      flags.smokeCall = false;
+      a.status = 'Eugene is busy · back to work';
+      await a.goSit(home, 'lift');
+      continue;
+    }
     a.status = 'Chatting with Eugene';
     a.talking = true; await a.sleep(4); a.talking = false;
     flags.smokeGo = true;
@@ -473,8 +553,37 @@ async function eugene(a) {
     holdBottle(true);
     await backHome();
   };
-  const called = () => flags.smokeCall;
+  const called = () => flags.smokeCall || flags.ivanGym;
+  // training session led by Ivan: follow his phases (chat -> treadmill -> barbell -> yoga)
+  const trainWithIvan = async () => {
+    flags.eugeneInSession = true;
+    let cur = null;
+    const stop = async () => {
+      if (cur === 'tread') await treadmillOff(a, TREAD.x, '5:treadFront');
+      else if (cur === 'barbell') barbellOff(a);
+      else if (cur === 'yoga') yogaOff(a);
+      a.talking = false; cur = null;
+    };
+    while (flags.ivanGym) {
+      const ph = flags.gymPhase;
+      if (ph !== cur) {
+        await stop();
+        if (ph === 'chat') { await a.go('5:home'); await a.face(-6.5, -2.6); a.talking = true; a.status = 'Chatting with Ivan'; holdBottle(true); }
+        else if (ph === 'tread') { a.status = 'Running on the treadmill with Ivan'; holdBottle(true); await treadmillOn(a, TREAD.x, '5:treadFront'); }
+        else if (ph === 'barbell') { a.status = 'Lifting the barbell with Ivan'; holdBottle(false); await barbellOn(a, '5:barbell'); }
+        else if (ph === 'yoga') { a.status = 'Yoga with Ivan'; holdBottle(false); await yogaOn(a, '5:yoga'); }
+        cur = ph;
+      }
+      await a.sleep(0.3);
+    }
+    await stop();
+    holdBottle(true);
+    flags.eugeneInSession = false;
+    a.status = 'Back to the gym';
+    await backHome();
+  };
   for (;;) {
+    if (flags.ivanGym) { await trainWithIvan(); continue; }
     if (flags.smokeCall) { await smokeTime(); continue; }
     const act = pick(['coach', 'treadmill', 'barbell', 'yoga']);
     if (act === 'coach') {
@@ -482,41 +591,30 @@ async function eugene(a) {
       await a.sleep(R(8, 14), called);
     } else if (act === 'treadmill') {
       a.status = 'Running on the treadmill';
-      await a.go('5:treadFront');
-      await a.moveTo(TREAD.x, -5.5);
-      a.g.position.y = TREAD.y;
-      await a.moveTo(TREAD.x, TREAD.z, 0.6);
-      await a.turnTo(0);
-      a.anim = 'run';
+      await treadmillOn(a, TREAD.x, '5:treadFront');
       await a.sleep(R(15, 25), called);
-      a.anim = 'idle';
-      await a.moveTo(TREAD.x, -5.5, 0.8);
-      a.g.position.y = 0;
-      await a.moveTo(nodes.get('5:treadFront').x, nodes.get('5:treadFront').z);
-      a.node = '5:treadFront';
+      await treadmillOff(a, TREAD.x, '5:treadFront');
       await backHome();
     } else if (act === 'barbell') {
       a.status = 'Lifting the barbell';
-      await a.go('5:barbell');
-      await a.turnTo(0.3);
-      holdBottle(false); a.rig.barbell.visible = true; a.act = 'barbell';
+      holdBottle(false);
+      await barbellOn(a, '5:barbell');
       await a.sleep(R(12, 18), called);
-      a.act = null; a.rig.barbell.visible = false; holdBottle(true);
+      barbellOff(a); holdBottle(true);
       await backHome();
     } else {
       a.status = 'Doing yoga';
-      await a.go('5:yoga');
-      await a.turnTo(0);
-      holdBottle(false); a.act = 'yoga';
+      holdBottle(false);
+      await yogaOn(a, '5:yoga');
       await a.sleep(R(12, 20), called);
-      a.act = null; holdBottle(true);
+      yogaOff(a); holdBottle(true);
       await backHome();
     }
   }
 }
 
-async function buyCoffee(a, spot) {
-  await a.goStand(spot, 'lift');
+async function buyCoffee(a, spot, via = 'lift') {
+  await a.goStand(spot, via);
   await a.turnTo(Math.PI);
   a.status = 'Buying a coffee from Jennie';
   a.w.serve();
@@ -557,7 +655,7 @@ async function aida(a) {
       a.status = "Taking the lift down to Joe's Café for coffee";
     }
     await buyCoffee(a, '1:cashier');
-    const seat = withMary ? flags.cafePair[0] : pick(CAFE_SEATS);
+    const seat = withMary ? flags.cafePair[0] : pick(CAFE_SEATS.filter((q) => !(flags.ownersAtCafe && q.node === '1:sofa')));
     a.status = withMary ? 'Saving seats for Mary' : "Enjoying a coffee at Joe's Café";
     await a.goSit(seat);
     if (withMary) {
@@ -584,9 +682,14 @@ async function xiaoming(a) {
     await a.goSit(LOUNGE_SEAT, 'stairs');
     a.status = 'Chilling in the music room';
     await a.sleep(R(12, 20));
-    a.status = 'Playing the drums';
-    await a.goSit(DRUM_SEAT);
-    await a.sleep(R(8, 12));
+    if (!flags.drumUser) {
+      flags.drumUser = 'XiaoMing';
+      a.status = 'Playing the drums';
+      await a.goSit(DRUM_SEAT);
+      await a.sleep(R(8, 12));
+      await a.stand();
+      flags.drumUser = null;
+    }
     a.status = 'Playing the keyboard';
     await a.goSit(PIANO_SEAT);
     await a.sleep(R(8, 12));
@@ -638,21 +741,208 @@ async function mary(a) {
   }
 }
 
-const ROUTINES = { jungkook, eugene, aida, xiaoming, mary };
+// ---- Ivan (owner): gym with Eugene -> drink -> cook -> dinner with Phil -> café -> chill -> repeat
+async function ivan(a) {
+  const w = a.w;
+  for (;;) {
+    // 1. gym session with Eugene
+    if (a.node !== '5:ivanMeet') { a.status = 'Taking the lift up to the gym'; await a.goStand('5:ivanMeet', 'lift'); }
+    await a.face(-7.4, -3.2);
+    flags.gymPhase = 'chat'; flags.ivanGym = true;
+    a.status = 'Chatting with Eugene';
+    a.talking = true;
+    await a.waitFor(() => flags.eugeneInSession, 120);
+    await a.sleep(5);
+    a.talking = false;
+    flags.gymPhase = 'tread';
+    a.status = 'Running on the treadmill with Eugene';
+    await treadmillOn(a, TREAD2_X, '5:treadFront2');
+    await a.sleep(R(15, 20));
+    await treadmillOff(a, TREAD2_X, '5:treadFront2');
+    flags.gymPhase = 'barbell';
+    a.status = 'Lifting the barbell with Eugene';
+    await barbellOn(a, '5:ivanBarbell');
+    await a.sleep(R(12, 16));
+    barbellOff(a);
+    flags.gymPhase = 'yoga';
+    a.status = 'Yoga with Eugene';
+    await yogaOn(a, '5:ivanYoga');
+    await a.sleep(R(12, 16));
+    yogaOff(a);
+    flags.gymPhase = 'done'; flags.ivanGym = false;
+    // 2. a drink from the vending machine outside the gym
+    a.status = 'Buying a drink from the vending machine';
+    await a.goStand('5:vendFront');
+    await a.turnTo(-Math.PI / 2);
+    await a.sleep(3);
+    a.rig.drink.visible = true; a.holdCup = true; a.sipping = true;
+    a.status = 'Having a protein shake by the vending machine';
+    await a.sleep(R(8, 11));
+    a.rig.drink.visible = false; a.holdCup = false; a.sipping = false;
+    // 3. cook in the Floor 2 kitchen
+    a.status = 'Taking the lift down to the kitchen';
+    await a.goStand('2:stove', 'lift');
+    await a.turnTo(Math.PI);
+    a.act = 'cook'; a.status = 'Cooking dinner';
+    await a.sleep(R(10, 14));
+    a.act = null;
+    await a.go('2:islandBack');
+    await a.turnTo(0);
+    a.act = 'cook'; a.status = 'Plating up the food';
+    await a.sleep(4);
+    a.act = null;
+    a.rig.tray.visible = true; a.carry = true;
+    a.status = 'Bringing the food to the dining table';
+    await a.go('2:dineStandI');
+    await a.face(3.4, 3.9);
+    a.rig.tray.visible = false; a.carry = false;
+    w.plates.visible = true;
+    flags.dinnerReady = true;
+    // 4. dinner with Phil
+    await a.sit(DINE_IVAN);
+    a.status = 'Waiting for Phil to join';
+    await a.waitFor(() => flags.philSeated, 120);
+    a.act = 'eat'; a.talking = true;
+    a.status = 'Having dinner with Phil';
+    await a.sleep(R(15, 20));
+    a.act = null; a.talking = false;
+    flags.dinnerDone = true;
+    // 5. coffee at the café, then the café sofa (Phil joins after the dishes)
+    a.status = 'Walking down the stairs to the café';
+    flags.ownersAtCafe = true;
+    await buyCoffee(a, '1:cashier', 'stairs');
+    await a.goSit(CAFE_SOFA_IVAN);
+    a.status = 'Coffee on the café sofa';
+    await a.waitFor(() => flags.philCafe, 150);
+    a.talking = true; a.status = 'Chilling with Phil at the café';
+    await a.sleep(R(12, 18));
+    a.talking = false;
+    a.rig.cup.visible = false; a.holdCup = false;
+    // 6. both chill on the Floor 2 sofa
+    flags.f2Chill = true;
+    a.status = 'Heading up to chill on the Floor 2 sofa';
+    await a.goSit(SOFA_TV_IVAN, 'stairs');
+    flags.ownersAtCafe = false;
+    await a.waitFor(() => flags.philF2, 120);
+    a.talking = true; a.status = 'Chilling with Phil';
+    await a.sleep(R(15, 20));
+    a.talking = false;
+    // reset for the next round, then let Phil know we're done
+    flags.dinnerReady = flags.philSeated = flags.dinnerDone = false;
+    flags.philCafe = flags.f2Chill = flags.philF2 = false;
+    flags.chillDone = true;
+  }
+}
+
+// ---- Phil (owner, into music): TV -> drums -> composing … dinner with Ivan -> dishes -> café -> chill -> repeat
+async function phil(a) {
+  const w = a.w;
+  const dinnerTime = () => flags.dinnerReady;
+  for (;;) {
+    // free time until Ivan serves dinner
+    if (!flags.dinnerReady) {
+      a.status = 'Watching TV';
+      await a.goSit(SOFA_TV_PHIL);
+      await a.sleep(R(15, 22), dinnerTime);
+    }
+    if (!flags.dinnerReady && !flags.drumUser) {
+      flags.drumUser = 'Phil';
+      a.status = 'Playing the drums';
+      await a.goSit(DRUM_SEAT);
+      await a.sleep(R(10, 14), dinnerTime);
+      await a.stand();
+      flags.drumUser = null;
+    }
+    if (!flags.dinnerReady) {
+      a.status = 'Composing a new song on the music PC';
+      await a.goSit(COMPOSE_SEAT);
+      await a.sleep(R(18, 26), dinnerTime);
+    }
+    if (!flags.dinnerReady) continue;
+    // dinner with Ivan
+    a.status = 'Joining Ivan for dinner';
+    await a.goSit(DINE_PHIL);
+    flags.philSeated = true;
+    a.act = 'eat'; a.talking = true;
+    a.status = 'Having dinner with Ivan';
+    await a.waitFor(() => flags.dinnerDone, 150);
+    a.act = null; a.talking = false;
+    // clear the table and wash up
+    w.plates.visible = false;
+    a.rig.tray.visible = true; a.carry = true;
+    a.status = 'Bringing the dishes to the kitchen';
+    await a.goStand('2:sink');
+    await a.turnTo(Math.PI / 2);
+    a.rig.tray.visible = false; a.carry = false;
+    a.act = 'wash'; a.status = 'Washing the dishes';
+    await a.sleep(R(8, 11));
+    a.act = null;
+    // join Ivan on the café sofa
+    a.status = 'Walking down to join Ivan at the café';
+    await a.goSit(CAFE_SOFA_PHIL, 'stairs');
+    flags.philCafe = true;
+    a.talking = true; a.status = 'Chilling with Ivan at the café';
+    await a.waitFor(() => flags.f2Chill, 150);
+    a.talking = false;
+    // back up to the Floor 2 sofa together
+    a.status = 'Heading up to the Floor 2 sofa';
+    await a.goSit(SOFA_TV_PHIL, 'stairs');
+    flags.philF2 = true;
+    a.talking = true; a.status = 'Chilling with Ivan';
+    await a.waitFor(() => flags.chillDone, 150);
+    a.talking = false;
+    flags.chillDone = false;
+  }
+}
+
+const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, ivan, phil };
+const SPAWN = {                        // where the owners start
+  Ivan: { stand: '5:ivanMeet', ry: -2.1 },
+  Phil: { seat: SOFA_TV_PHIL },
+};
 
 // ======================================================================== setup
 export function createStaff({ floors, lift, employees, doors = {} }) {
   const world = { floors, lift, doors, puffs: createPuffs(), serve() {} };
+  // two plates of food on the Floor 2 dining table (shown when Ivan serves dinner)
+  world.plates = new THREE.Group();
+  world.plates.userData.dynamic = true;
+  for (const px of [3.4, 4.68]) {
+    const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.02, 16), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6 }));
+    pl.position.set(px, 0.83, 3.4);
+    const food = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), new THREE.MeshStandardMaterial({ color: '#e2a356', roughness: 0.9 }));
+    food.scale.set(1.3, 0.6, 1); food.position.set(px, 0.87, 3.4);
+    const veg = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), new THREE.MeshStandardMaterial({ color: '#6aa84f', roughness: 0.9 }));
+    veg.position.set(px + 0.06, 0.87, 3.36);
+    world.plates.add(pl, food, veg);
+  }
+  world.plates.visible = false;
+  floors[1].add(world.plates);
   const actors = [];
   for (const e of employees) {
     const rig = employee(floors[e.floor - 1], 0, 0, 0, e);
     const a = new Actor(world, e, rig);
-    if (e.pos) {                                    // standing post (Eugene in the gym, Jennie at the till)
+    const sp = SPAWN[e.name];
+    if (sp) {                                       // owners: a starting spot
+      if (sp.stand) {
+        a.at(sp.stand);
+        a.rig.setPose('stand');
+        a.heading = sp.ry ?? 0; a.g.rotation.y = a.heading;
+      } else {
+        a.at(sp.seat.node);
+        a.g.position.set(sp.seat.x, sp.seat.y ?? 0, sp.seat.z);
+        a.heading = sp.seat.ry; a.g.rotation.y = sp.seat.ry;
+        a.rig.setPose('sit');
+        a.seat = sp.seat;
+      }
+      a.status = 'Here';
+    } else if (e.pos) {                             // standing post (Eugene in the gym, Jennie at the till)
       const id = node(e.floor, e.name === 'Eugene' ? 'home' : `home_${e.name}`, e.pos[0], e.pos[1]);
       if (e.name === 'Eugene') for (const n of ['gymIn', 'treadFront', 'yoga', 'barbell']) link(id, `5:${n}`);
       a.at(id);
       a.rig.setPose('stand');
       a.heading = e.ry ?? 0; a.g.rotation.y = a.heading;
+      a.g.position.y = e.y ?? 0;                    // Jennie stands on a step behind the till
       a.status = e.idle ?? 'Here';
       if (e.name === 'Jennie') world.serve = () => { a.talkFor = 4; a.status = 'Serving a coffee'; setTimeout(() => { a.status = e.idle; }, 4000); };
     } else {                                        // desk seat
