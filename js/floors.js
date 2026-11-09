@@ -9,7 +9,6 @@ import {
   C, chair, stool, roundTable, rectTable, sofa, plant, pendant, floorLamp, rug,
   bookshelf, frame, glassWall, monitor, laptop, officeChair,
 } from './furniture.js';
-import { employee } from './characters.js';
 import { roamingJoe } from './joe.js';
 import { CORE_X } from './building.js';
 
@@ -313,8 +312,8 @@ export function floor2(p) {
   // ================= GLASS MUSIC ROOM (front-left, x -11.7..-3.4, z 1.8..7.75) =================
   const mx0 = LEFT_IN, mx1 = -3.4, mz0 = 1.8, mz1 = 7.75;
   box(p, mx1 - mx0, 0.03, mz1 - mz0, '#7d5a43', (mx0 + mx1) / 2, 0.02, (mz0 + mz1) / 2, { cast: false });
-  glassWall(p, mx0, mz0, mx1, mz0, CEIL, { gap: [6.6, 7.6] });   // back side, door near the right
-  glassWall(p, mx1, mz0, mx1, mz1, CEIL);
+  glassWall(p, mx0, mz0, mx1, mz0, CEIL);                         // back side
+  glassWall(p, mx1, mz0, mx1, mz1, CEIL, { gap: [4.9, 5.8] });   // right side, door at the front
   glassWall(p, mx0, mz1, mx1, mz1, CEIL);                         // front (street side)
   const cdCols = ['#d94f3d', '#3e6b9a', '#f1c84b', '#2b2a2c', '#7ab87a', '#e8e1d0', '#9b59b6', '#f08a5d'];
   const cd = { bookColors: cdCols, bookW: 0.035, bookH: 0.16, rows: 7, color: '#3d2b1f' };
@@ -429,9 +428,8 @@ export function floor2(p) {
   chair(p, dx + L / 2 + 0.45, dz, -Math.PI / 2, { seat: C.sage });
   for (let i = 0; i < 4; i++) pendant(p, dx - 2.4 + i * 1.6, dz, { drop: 1.3, shade: '#c8935a' });
   for (let i = 0; i < 3; i++) { cyl(p, 0.07, 0.2, C.white, dx - 1.5 + i * 1.5, 0.82, dz, { seg: 8 }); sphere(p, 0.1, ['#f2a1a8', '#f1d08a', '#f2a1a8'][i], dx - 1.5 + i * 1.5, 1.1, dz); }
-  plant(p, -2.7, 7.2, { tall: true });
+  plant(p, -2.9, 1.3, { tall: true });
   plant(p, 8.8, 7.2, { tall: true });
-  plant(p, 8.8, 0.0);
 }
 
 // ---------------------------------------------------------------- Floors 3 & 4 (office)
@@ -472,11 +470,15 @@ export function officeFloor(p, n, employees, anim) {
   }
   for (let i = 0; i < 5; i++) pendant(p, x - L / 2 + 1 + i * 2, z, { drop: 1.0, shade: '#2f3a2c' });
 
-  // ---- AI employees on this floor
-  employees.filter((e) => e.floor === n && !e.pos).forEach((e) => {
-    const s = seat(e.seat ?? 0);
-    anim.people.push(employee(p, s.x, s.z, s.ry, e));
-  });
+  // ---- live FX board (Floor 3): hangs from the ceiling behind the desk, facing the room
+  if (n === 3 && anim.fxBoard) {
+    const bw = 4.8, bh = bw * 448 / 1024, by = 2.2, bz = -2.3;
+    box(p, bw + 0.16, bh + 0.16, 0.08, '#1b1b1e', DESK.x, by - 0.08, bz - 0.05);
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ map: anim.fxBoard.texture, toneMapped: false }));
+    scr.position.set(DESK.x, by + bh / 2, bz);
+    p.add(scr);
+    for (const cx of [-1.4, 1.4]) cyl(p, 0.012, CEIL - (by + bh), '#2b2a2c', DESK.x + cx, by + bh, bz - 0.05, { seg: 4, cast: false });
+  }
 
   // ---- glass meeting room (back-right)
   const rx0 = 1.6, rx1 = 9.3, rz1 = -2.4;
@@ -525,11 +527,7 @@ export function officeFloor(p, n, employees, anim) {
 }
 
 // ---------------------------------------------------------------- Floor 5 (roof)
-export function floor5(p, anim, employees = []) {
-  // standing employees on the roof (e.g. the wellness coach in the gym)
-  employees.filter((e) => e.floor === 5).forEach((e) => {
-    anim.people.push(employee(p, e.pos[0], e.pos[1], e.ry ?? 0, { pose: 'stand', ...e }));
-  });
+export function floor5(p, anim) {
   floorSurface(p, RW, 16, RX, 0, plankTex('#c39a6b', '#9b7450'), 2);
   // grass patches
   box(p, 7.0, 0.05, 3.0, '#7fae5a', 4.5, 0.02, 6.0, { cast: false });
@@ -600,7 +598,7 @@ export function floor5(p, anim, employees = []) {
     box(p, 1.4, 0.5, 0.7, C.woodDark, px, 0, 7.3);
     sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, px, 0.75, 7.3, { s: [1.4, 0.8, 0.8] });
   }
-  for (const [px, pz] of [[8.8, -1.0], [8.8, 2.5], [-1.4, -7.3], [-11.2, 7.0], [-8.0, 7.0], [8.8, 5.0]]) plant(p, px, pz, { tall: true, s: 1.2 });
+  for (const [px, pz] of [[8.8, -2.6], [8.8, 2.5], [-1.4, -7.3], [-11.2, 7.0], [-8.0, 7.0], [8.8, 5.0]]) plant(p, px, pz, { tall: true, s: 1.2 });
   // a small tree
   cyl(p, 0.5, 0.6, C.woodDark, -9.6, 0, 3.4, { seg: 10 });
   cyl(p, 0.08, 1.6, '#6b4126', -9.6, 0.6, 3.4, { seg: 6 });

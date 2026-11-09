@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { shihTzu } from './characters.js';
 
 // Waypoints in the café's open aisles (floor-local x, z). Edges = walkable straight lines.
-const NODES = [
+export const NODES = [
   [-7.4, -3.3],  // 0 nap spot on the sofa-corner rug
   [-3.3, -3.8],  // 1
   [-3.3, -0.1],  // 2
@@ -21,7 +21,7 @@ const NODES = [
   [0.5, 7.3],    // 14
   [7.5, -5.5],   // 15
 ];
-const EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [1, 7], [7, 8], [8, 9], [9, 10], [2, 11], [11, 9],
+export const EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [1, 7], [7, 8], [8, 9], [9, 10], [2, 11], [11, 9],
   [3, 12], [12, 10], [4, 14], [14, 13], [13, 10], [8, 15], [11, 12]];
 const NEXT = NODES.map((_, i) => EDGES.flatMap(([a, b]) => (a === i ? [b] : b === i ? [a] : [])));
 

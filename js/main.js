@@ -4,6 +4,8 @@ import { H, CEIL, box, cyl, sphere, mat, makeLabel, optimize } from './helpers.j
 import { shell, liftCar, LIFT } from './building.js';
 import { floor1, floor2, officeFloor, floor5 } from './floors.js';
 import { EMPLOYEES } from './employees.js';
+import { createStaff, createLift } from './staff.js';
+import { createFxBoard } from './fx.js';
 
 const FLOORS = [
   { n: 1, name: "Joe's Café", sub: 'Coffee, matcha & the boss dog' },
@@ -134,7 +136,7 @@ function updateWalls() {
 }
 
 // ---------------------------------------------------------------- the building
-const anim = { people: [] };
+const anim = { fxBoard: createFxBoard() };
 const floorGroups = [];
 const floorLabels = [];
 for (const f of FLOORS) {
@@ -145,8 +147,8 @@ for (const f of FLOORS) {
   const walls = shell(g, f.n);
   if (f.n === 1) floor1(g, anim);
   else if (f.n === 2) floor2(g, anim);
-  else if (f.n === 5) floor5(g, anim, EMPLOYEES);
-  else officeFloor(g, f.n, EMPLOYEES, anim);
+  else if (f.n === 5) floor5(g, anim);
+  else officeFloor(g, f.n, [], anim);
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
   const lbl = makeLabel(`${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
@@ -157,6 +159,11 @@ for (const f of FLOORS) {
   floorGroups.push(g);
 }
 const car = liftCar(scene);
+car.traverse((o) => { o.castShadow = false; });   // it moves a lot now; keep the static shadow map valid
+const lift = createLift(car);
+// the AI employees (they work, walk, take the stairs / lift — see js/staff.js)
+const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES });
+anim.fxBoard.start();
 
 // ---------------------------------------------------------------- camera presets
 const BUILD_CENTER = new THREE.Vector3(0, H * 2.25, 0);
@@ -188,7 +195,7 @@ function goTo(n, instant = false) {
   floorLabels.forEach((l, i) => { l.visible = n === 0 || i + 1 === n; });
   renderer.shadowMap.needsUpdate = true;
   // lift travels to the selected floor
-  liftTarget = n === 0 ? 0 : (n - 1) * H;
+  lift.viewY = (n === 0 ? 0 : (n - 1) * H) + 0.02; // idle lift waits on the floor you're viewing
   const p = preset(n);
   if (instant) {
     camera.position.copy(p.pos); controls.target.copy(p.target); controls.update();
@@ -202,7 +209,6 @@ function goTo(n, instant = false) {
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
 }
-let liftTarget = 0;
 
 // ---------------------------------------------------------------- UI
 const nav = document.getElementById('floors');
@@ -242,14 +248,19 @@ function fmtIn(ms) {
   return rh ? `${d} d ${rh} h` : `${d} d`;
 }
 function employeeText(e) {
-  const lines = [`${e.role} · Floor ${e.floor}`, ''];
+  const lines = [`${e.role} · Floor ${e.floor}`];
+  if (e.status) lines.push(`Now: ${e.status}`);
+  lines.push('');
   for (const task of e.tasks ?? []) {
     lines.push(`📋 ${task.name}`);
     lines.push(`     ${task.when} (SGT) · next in ${fmtIn(msUntil(task.at))}`);
   }
   return lines.join('\n');
 }
+let cardInfo = null;
+setInterval(() => { if (cardInfo && card.classList.contains('show')) showCard(cardInfo); }, 1000); // live "Now:" line
 function showCard(info) {
+  cardInfo = info;
   card.querySelector('h3').textContent = info.employee ? `${info.title} 🟢` : info.title;
   card.querySelector('p').textContent = info.employee ? employeeText(info.employee) : info.text;
   card.classList.toggle('emp', !!info.employee);
@@ -306,27 +317,21 @@ function loop() {
     if (tween.t >= 1) tween = null;
   }
   controls.update();
-  // lift glides between floors
-  const ly = liftTarget + 0.02;
-  if (Math.abs(ly - car.position.y) > 0.001) {
-    car.position.y += Math.sign(ly - car.position.y) * Math.min(Math.abs(ly - car.position.y), dt * 6);
-    renderer.shadowMap.needsUpdate = true;
-  }
+  // lift: serves employees first, otherwise waits on the floor you're viewing
+  const simDt = dt * (window.__staffSpeed || 1); // __staffSpeed: testing only
+  lift.update(simDt);
+  car.visible = current === 0 || lift.floor() <= current;
   updateWalls();
   // Joe roams the café
   if (anim.joe) anim.joe.update(dt, t);
-  // employees: gentle typing / nodding
-  for (const p of anim.people) {
-    p.head.rotation.x = Math.sin(t * 1.3 + p.phase) * 0.06;
-    p.head.rotation.y = Math.sin(t * 0.5 + p.phase) * 0.12;
-    p.body.position.y = p.baseY + Math.abs(Math.sin(t * 6 + p.phase)) * 0.008;
-  }
+  // employees: routines, walking, smoking…
+  staff.update(simDt, t);
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
 
 goTo(0, true);
-window.__app = { camera, controls, scene, goTo, anim, THREE };
+window.__app = { camera, controls, scene, goTo, anim, THREE, staff, lift };
 renderer.shadowMap.needsUpdate = true;
 document.getElementById('loading').classList.add('done');
 requestAnimationFrame(loop);
