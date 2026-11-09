@@ -1,6 +1,6 @@
 // Reusable low-poly furniture. Convention: each piece's "front" faces +Z
 // before rotation; pass ry (radians) to turn it. Use faceTo() to aim at a table.
-import { box, cyl, sphere, grp, glowMat, glassMat, mat } from './helpers.js';
+import { CEIL, box, cyl, sphere, grp, glowMat, glassMat, mat } from './helpers.js';
 
 export const C = {
   wood: '#c8935a', woodLight: '#ddb27c', woodDark: '#8a5a33',
@@ -86,7 +86,8 @@ export function plant(p, x, z, o = {}) {
 }
 
 export function pendant(p, x, z, o = {}) {
-  const top = o.ceil ?? 3.7, drop = o.drop ?? 1.1;
+  // drop is given for a 3.7 m ceiling; extra ceiling height lengthens the cord so lamps stay at the same height
+  const top = o.ceil ?? CEIL, drop = (o.drop ?? 1.1) + (o.ceil === undefined ? CEIL - 3.7 : 0);
   const g = grp(p, x, 0, z);
   cyl(g, 0.01, drop, C.black, 0, top - drop, 0, { seg: 4, cast: false });
   cyl(g, 0.22, 0.22, o.shade ?? '#2f3a2c', 0, top - drop - 0.18, 0, { top: 0.25, bottom: 1, seg: 14, cast: false });
@@ -138,7 +139,7 @@ export function frame(p, x, y, z, w, h, ry, color = '#e8c48a') {
 }
 
 /** Glass partition from (x1,z1) to (x2,z2) with dark frame. Optional door gap [from,to] along the length. */
-export function glassWall(p, x1, z1, x2, z2, h = 3.7, o = {}) {
+export function glassWall(p, x1, z1, x2, z2, h = CEIL, o = {}) {
   const len = Math.hypot(x2 - x1, z2 - z1);
   const ry = Math.atan2(x2 - x1, z2 - z1) - Math.PI / 2;
   const g = grp(p, (x1 + x2) / 2, 0, (z1 + z2) / 2, ry);

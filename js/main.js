@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
-import { H, box, cyl, sphere, mat, makeLabel, optimize } from './helpers.js';
+import { H, CEIL, box, cyl, sphere, mat, makeLabel, optimize } from './helpers.js';
 import { shell, liftCar, LIFT } from './building.js';
 import { floor1, floor2, officeFloor, floor5 } from './floors.js';
 import { EMPLOYEES } from './employees.js';
@@ -52,11 +52,11 @@ controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 // ---------------------------------------------------------------- lights
 scene.add(new THREE.HemisphereLight('#fff4e0', '#b9a07f', 1.5));
 const sun = new THREE.DirectionalLight('#ffe2b8', 2.2);
-sun.position.set(18, 34, 26);
-sun.target.position.set(0, 8, 0);
+sun.position.set(18, 40, 26);
+sun.target.position.set(0, 10, 0);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -26, right: 26, top: 26, bottom: -26, near: 1, far: 90 });
+Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 100 });
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 0.03;
 scene.add(sun, sun.target);
@@ -150,7 +150,7 @@ for (const f of FLOORS) {
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
   const lbl = makeLabel(`${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
-  lbl.position.set(-12.6, (f.n - 1) * H + 3.2, 8.6);
+  lbl.position.set(-12.6, (f.n - 1) * H + CEIL - 0.5, 8.6);
   lbl.center.set(0, 0.5);
   scene.add(lbl);
   floorLabels.push(lbl);
@@ -159,7 +159,7 @@ for (const f of FLOORS) {
 const car = liftCar(scene);
 
 // ---------------------------------------------------------------- camera presets
-const BUILD_CENTER = new THREE.Vector3(0, 9, 0);
+const BUILD_CENTER = new THREE.Vector3(0, H * 2.25, 0);
 const VIEW_DIR = new THREE.Vector3(0.55, 0.5, 1).normalize();
 
 function fitDistance(w, h) {
@@ -170,7 +170,7 @@ function fitDistance(w, h) {
 
 function preset(n) {
   if (n === 0) {
-    const d = fitDistance(27, 27) + 8;
+    const d = fitDistance(27, 31) + 8;
     return { target: BUILD_CENTER.clone(), pos: BUILD_CENTER.clone().addScaledVector(VIEW_DIR, d) };
   }
   const target = new THREE.Vector3(-0.5, (n - 1) * H + 0.5, 0.5);

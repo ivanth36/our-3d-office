@@ -13,19 +13,29 @@ export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };
 
 const WALL = '#f3e5cf', WALL_OUT = '#e9d3b4', TRIM = '#8a5a33', SLAB_C = '#e8d6bb';
 
-function windowsAlongX(p, z, x0, x1, every, h0 = 0.9, wh = 2.0) {
+function windowsAlongX(p, z, x0, x1, every, h0 = 0.9, wh = CEIL - 1.6) {
   for (let x = x0 + every / 2; x < x1; x += every) {
     box(p, every * 0.62, wh, 0.34, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), x, h0, z, { cast: false });
     box(p, every * 0.68, 0.08, 0.4, TRIM, x, h0 - 0.08, z, { cast: false });
     box(p, every * 0.68, 0.08, 0.4, TRIM, x, h0 + wh, z, { cast: false });
   }
 }
-function windowsAlongZ(p, x, z0, z1, every, h0 = 0.9, wh = 2.0) {
+function windowsAlongZ(p, x, z0, z1, every, h0 = 0.9, wh = CEIL - 1.6) {
   for (let z = z0 + every / 2; z < z1; z += every) {
     box(p, 0.34, wh, every * 0.62, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), x, h0, z, { cast: false });
     box(p, 0.4, 0.08, every * 0.68, TRIM, x, h0 - 0.08, z, { cast: false });
     box(p, 0.4, 0.08, every * 0.68, TRIM, x, h0 + wh, z, { cast: false });
   }
+}
+
+/** Long window with slim black mullions, set into a wall running along X. */
+function glassStrip(p, z, x0, x1, y0, y1) {
+  box(p, x1 - x0, y1 - y0, 0.34, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), (x0 + x1) / 2, y0, z, { cast: false });
+  const n = Math.round((x1 - x0) / 1.3);
+  for (let i = 0; i <= n; i++) box(p, 0.06, y1 - y0, 0.4, '#2b2a2c', x0 + (x1 - x0) * i / n, y0, z, { cast: false });
+  box(p, x1 - x0, 0.07, 0.42, '#2b2a2c', (x0 + x1) / 2, y0, z, { cast: false });
+  box(p, x1 - x0, 0.07, 0.42, '#2b2a2c', (x0 + x1) / 2, y1 - 0.07, z, { cast: false });
+  box(p, x1 - x0, 0.06, 0.4, '#2b2a2c', (x0 + x1) / 2, (y0 + y1) / 2 + 0.6, z, { cast: false }); // transom
 }
 
 function glassRail(p, x1, z1, x2, z2, h = 1.05) {
@@ -63,7 +73,7 @@ function slab(p, n) {
 
 /** Stairs from this floor (y=0, front) up to the next floor (y=H, back). */
 function stairs(p) {
-  const steps = 16, rise = H / steps, run = (STAIR.z1 - STAIR.z0) / steps;
+  const steps = Math.round(H / 0.22), rise = H / steps, run = (STAIR.z1 - STAIR.z0) / steps;
   const w = STAIR.x1 - STAIR.x0 - 0.3, cx = (STAIR.x0 + STAIR.x1) / 2 + 0.1;
   for (let k = 0; k < steps; k++) {
     const z = STAIR.z1 - run * (k + 0.5);
@@ -74,7 +84,7 @@ function stairs(p) {
   const len = Math.hypot(H, STAIR.z1 - STAIR.z0);
   const rail = grp(p, STAIR.x0 + 0.08, H / 2 + 0.95, (STAIR.z0 + STAIR.z1) / 2);
   box(rail, 0.06, 0.06, len, C.woodDark, 0, 0, 0, { rx: ang });
-  for (let k = 1; k < steps; k += 3) {
+  for (let k = 1; k < steps; k += 4) {
     const z = STAIR.z1 - run * (k + 0.5);
     box(p, 0.03, 0.95, 0.03, C.black, STAIR.x0 + 0.08, rise * (k + 1), z, { cast: false });
   }
@@ -120,7 +130,12 @@ export function shell(p, n) {
     }
     // back wall (z = -8) with windows
     box(walls.back, W, CEIL, 0.3, WALL, 0, 0, Z0 + 0.15, { cast: false });
-    windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
+    if (n === 1) {
+      windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, -6.4, 2.95);
+      glassStrip(walls.back, Z0 + 0.15, -6.2, CORE_X - 0.2, 0.75, CEIL - 0.45); // big window behind the bar
+    } else {
+      windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
+    }
     box(walls.back, W - 0.6, 0.12, 0.05, TRIM, 0, 0, Z0 + 0.32, { cast: false });
     // left wall (x = -12)
     box(walls.left, 0.3, CEIL, D, WALL, X0 + 0.15, 0, 0, { cast: false });

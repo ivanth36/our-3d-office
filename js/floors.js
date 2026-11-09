@@ -169,36 +169,55 @@ export function floor1(p, anim) {
   plant(p, -11.3, -7.3, { tall: true });
   frame(p, -8.5, 2.0, -7.68, 1.0, 0.8, 0, '#97b88f');
 
-  // ---- long communal table with bench along the back wall
-  const lt = rectTable(p, 1.6, -5.9, 7.2, 1.0, { top: C.woodLight });
-  box(p, 7.2, 0.45, 0.45, C.woodDark, 1.6, 0, -7.25);           // bench
-  box(p, 7.2, 0.08, 0.5, '#d9c3a0', 1.6, 0.45, -7.25);
-  box(p, 7.2, 0.5, 0.1, '#d9c3a0', 1.6, 0.5, -7.55);            // bench back cushion
-  for (let i = 0; i < 6; i++) chair(p, -1.4 + i * 1.2, -4.95, Math.PI, { seat: C.sage });
-  for (let i = 0; i < 4; i++) pendant(p, -1.0 + i * 1.75, -5.9, { drop: 1.2 });
-  void lt;
-
-  // plaque used under Joe's framed portrait
-  const plaque = canvasTex(256, 64, (ctx, w, h) => { ctx.fillStyle = '#e8b84a'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#4a3020'; ctx.font = 'bold 34px Georgia, serif'; ctx.fillText('JOE  ♥', 70, 44); });
-
-  // ---- framed portrait of Joe on the café's left wall (by the sofa corner)
-  const pf = grp(p, -11.7, 1.4, -4.5, Math.PI / 2);
-  box(pf, 1.12, 1.12, 0.06, '#5c3d26', 0, 0, 0.03, { cast: false });           // frame
-  box(pf, 0.98, 0.98, 0.02, '#f6eedf', 0, 0.07, 0.06, { cast: false });         // cream mat
-  const pic = new THREE.Mesh(new THREE.PlaneGeometry(0.86 * JOE_ASPECT, 0.86), joePhotoMat());
-  pic.position.set(0, 0.56, 0.075);
-  pf.add(pic);
-  box(pf, 0.5, 0.03, 0.08, '#c9a24a', 0, 1.2, 0.08, { cast: false, metalness: 0.6, roughness: 0.3 }); // picture light
-  box(pf, 0.44, 0.015, 0.05, glowMat('#fff1c8'), 0, 1.185, 0.1, { cast: false });
-  panel(pf, 0.42, 0.1, plaque, 0, -0.12, 0.04);
+  // ---- long high bar table along the back window (sofa corner -> lift), stools facing out
+  const bx0 = -6.0, bx1 = 9.3, backZ = -7.68, walnut = '#6b4423', walnut2 = '#7a4e2a', iron = '#262426';
+  // live-edge walnut top: short segments with a gently wavy front edge
+  for (let x = bx0; x < bx1 - 0.01; x += 0.5) {
+    const w = Math.min(0.5, bx1 - x), d = 0.46 + Math.sin(x * 1.3) * 0.04 + Math.sin(x * 3.1) * 0.02;
+    box(p, w + 0.01, 0.06, d, (Math.floor(x * 2) % 2) ? walnut : walnut2, x + w / 2, 0.99, backZ + d / 2);
+  }
+  box(p, bx1 - bx0, 0.03, 0.3, walnut, (bx0 + bx1) / 2, 0.72, backZ + 0.17);           // lower shelf
+  // black sled-leg frames
+  for (let x = bx0 + 0.1, i = 0; x <= bx1 - 0.05; x = bx0 + 0.1 + (++i) * (bx1 - bx0 - 0.2) / 6) {
+    box(p, 0.05, 0.99, 0.05, iron, x, 0, backZ + 0.06);
+    box(p, 0.05, 0.99, 0.05, iron, x, 0, backZ + 0.4);
+    box(p, 0.05, 0.05, 0.4, iron, x, 0, backZ + 0.23);
+    box(p, 0.05, 0.05, 0.4, iron, x, 0.94, backZ + 0.23);
+  }
+  // high stools with round walnut seats + curved backrests, facing the window
+  const barStool = (sx, sz) => {
+    const g = grp(p, sx, 0, sz, Math.PI);            // front (+Z) turned to face the window (-Z)
+    for (const [lx, lz] of [[-0.14, -0.14], [0.14, -0.14], [-0.14, 0.14], [0.14, 0.14]]) {
+      box(g, 0.03, 0.74, 0.03, iron, lx, 0, lz, { rx: lz * 0.5, rz: -lx * 0.5 });   // slightly splayed legs
+    }
+    for (const [fx, fz, w, d] of [[0, -0.13, 0.27, 0.025], [0, 0.13, 0.27, 0.025], [-0.13, 0, 0.025, 0.27], [0.13, 0, 0.025, 0.27]]) box(g, w, 0.025, d, iron, fx, 0.26, fz); // footrest ring
+    cyl(g, 0.2, 0.05, walnut2, 0, 0.74, 0, { seg: 18 });
+    box(g, 0.025, 0.36, 0.025, iron, -0.1, 0.76, -0.16, { rx: -0.15 });
+    box(g, 0.025, 0.36, 0.025, iron, 0.1, 0.76, -0.16, { rx: -0.15 });
+    box(g, 0.34, 0.13, 0.03, walnut2, 0, 1.0, -0.2, { rx: -0.15 });              // curved-ish backrest
+  };
+  for (let x = bx0 + 0.45; x < bx1 - 0.3; x += 0.8) barStool(x, -6.85);
+  // things on the bar
+  const barTop = 1.05;
+  laptop(p, -3.6, barTop, -7.4, 0);
+  laptop(p, 3.9, barTop, -7.4, 0);
+  for (const cx of [-2.6, 0.8, 5.0, 7.6]) { cyl(p, 0.09, 0.012, C.white, cx, barTop, -7.35, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, cx, barTop + 0.012, -7.35, { seg: 10 }); }
+  cyl(p, 0.18, 0.06, '#e8e1d0', 2.2, barTop, -7.42, { seg: 16 });                      // fruit bowl
+  for (let i = 0; i < 4; i++) sphere(p, 0.055, ['#8a3b4a', '#c98a4b', '#8a3b4a', '#e2a356'][i], 2.12 + (i % 2) * 0.14, barTop + 0.08, -7.46 + Math.floor(i / 2) * 0.1);
+  for (const px of [-5.2, 1.4, 6.2, 8.8]) plant(p, px, -7.48, { s: 0.35, y: barTop });
+  const love = canvasTex(256, 96, (ctx) => { ctx.fillStyle = '#1f1d1e'; ctx.fillRect(0, 0, 256, 96); ctx.fillStyle = '#e9dcc4'; ctx.font = 'italic 52px Georgia, serif'; ctx.fillText('Joe ♥', 52, 64); });
+  box(p, 0.42, 0.17, 0.05, '#1f1d1e', -0.6, barTop, -7.5, { rx: -0.15 });
+  panel(p, 0.4, 0.15, love, -0.6, barTop + 0.085, -7.47, { rx: -0.15 });
+  for (let i = 0; i < 6; i++) pendant(p, bx0 + 1.2 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
 
   // ---- plants
-  for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [8.8, -7.3], [-3.2, -7.3], [-11.3, 0.2]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
+  for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [-11.3, 0.2]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
 
   // ---- façade: fascia sign, awning, mascot
   box(p, 24, 0.55, 0.25, '#f1e0c3', 0, CEIL - 0.55, 7.95, { cast: false });
-  box(p, 4.0, 1.05, 0.2, '#5c3d26', -1.5, 2.67, 7.98, { cast: false });
-  panel(p, 3.9, 0.975, cafeSignTex(), -1.5, 3.195, 8.09, { glow: 0.25 });
+  const sy = CEIL - 3.7; // signs sit relative to the ceiling
+  box(p, 4.0, 1.05, 0.2, '#5c3d26', -1.5, 2.67 + sy, 7.98, { cast: false });
+  panel(p, 3.9, 0.975, cafeSignTex(), -1.5, 3.195 + sy, 8.09, { glow: 0.25 });
   // striped awning over the counter
   const aw = grp(p, -7.8, 2.85, 8.35);
   for (let i = 0; i < 12; i++) box(aw, 0.5, 0.05, 1.0, i % 2 ? C.white : '#4f7d4a', -2.75 + i * 0.5, 0, 0, { rx: 0.35, cast: false });
