@@ -10,6 +10,7 @@ import {
   bookshelf, frame, glassWall, monitor, laptop, officeChair,
 } from './furniture.js';
 import { shihTzu, employee } from './characters.js';
+import { roamingJoe } from './joe.js';
 import { CORE_X } from './building.js';
 
 const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
@@ -208,7 +209,8 @@ export function floor1(p, anim) {
   // outdoor bistro tables on the sidewalk
   roundTable(p, 1.0, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
   roundTable(p, 6.0, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
-  void anim;
+  // ---- the real Joe, roaming around his café
+  anim.joe = roamingJoe(p);
 }
 
 // ---------------------------------------------------------------- Floor 2

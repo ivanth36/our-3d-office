@@ -4,39 +4,50 @@ import { box, cyl, sphere, grp, makeLabel } from './helpers.js';
 
 const FUR = '#fbf6ee', TAN = '#c98a4b', DARK = '#6b4126';
 
-/** Joe the Shih Tzu, ~0.6 tall at scale 1. Front faces +Z. */
-export function shihTzu(p, x, y, z, ry = 0, s = 1) {
+/**
+ * Joe the Shih Tzu, ~0.6 tall at scale 1. Front faces +Z.
+ * g.userData.parts = { body, head, tail, legs[] } so he can be animated.
+ */
+export function shihTzu(p, x, y, z, ry = 0, s = 1, o = {}) {
   const g = grp(p, x, y, z, ry);
   g.scale.setScalar(s);
+  const cast = o.cast ?? true;
+  const body = grp(g, 0, 0, 0);
   // body
-  sphere(g, 0.26, FUR, 0, 0.3, -0.05, { s: [1, 0.85, 1.25] });
-  // legs (fluffy)
-  for (const [lx, lz] of [[-0.13, 0.15], [0.13, 0.15], [-0.13, -0.25], [0.13, -0.25]]) sphere(g, 0.08, FUR, lx, 0.09, lz, { s: [1, 1.3, 1] });
-  // tail plume
-  sphere(g, 0.15, FUR, 0, 0.55, -0.32, { s: [1, 0.8, 1] });
-  sphere(g, 0.1, TAN, 0.03, 0.62, -0.36);
-  // head
-  sphere(g, 0.24, FUR, 0, 0.62, 0.2);
-  sphere(g, 0.11, TAN, 0, 0.82, 0.18, { s: [1.3, 0.6, 1] }); // top knot patch
-  // ears (long brown)
-  sphere(g, 0.12, TAN, -0.22, 0.52, 0.16, { s: [0.7, 1.6, 0.9] });
-  sphere(g, 0.12, TAN, 0.22, 0.52, 0.16, { s: [0.7, 1.6, 0.9] });
-  // eye patches + eyes
-  sphere(g, 0.07, TAN, -0.09, 0.67, 0.38, { s: [1, 0.9, 0.5] });
-  sphere(g, 0.07, TAN, 0.09, 0.67, 0.38, { s: [1, 0.9, 0.5] });
-  sphere(g, 0.045, '#1c1410', -0.09, 0.67, 0.42);
-  sphere(g, 0.045, '#1c1410', 0.09, 0.67, 0.42);
-  sphere(g, 0.012, '#ffffff', -0.075, 0.69, 0.462, { cast: false });
-  sphere(g, 0.012, '#ffffff', 0.105, 0.69, 0.462, { cast: false });
-  // muzzle + nose + tongue
-  sphere(g, 0.1, FUR, 0, 0.56, 0.4, { s: [1.2, 0.8, 0.8] });
-  sphere(g, 0.035, '#1c1410', 0, 0.6, 0.48);
-  sphere(g, 0.025, '#f08a8a', 0, 0.51, 0.47, { s: [1, 0.6, 0.6] });
+  sphere(body, 0.26, FUR, 0, 0.3, -0.05, { s: [1, 0.85, 1.25], cast });
+  // legs (fluffy), each on its own pivot at the hip
+  const legs = [];
+  for (const [lx, lz] of [[-0.13, 0.15], [0.13, 0.15], [-0.13, -0.25], [0.13, -0.25]]) {
+    const hip = grp(g, lx, 0.2, lz);
+    sphere(hip, 0.08, FUR, 0, -0.11, 0, { s: [1, 1.3, 1], cast });
+    legs.push(hip);
+  }
+  // tail plume (pivot at the base so it can wag)
+  const tail = grp(body, 0, 0.45, -0.3);
+  sphere(tail, 0.15, FUR, 0, 0.1, -0.02, { s: [1, 0.8, 1], cast });
+  sphere(tail, 0.1, TAN, 0.03, 0.17, -0.06, { cast });
+  // head (pivot at the neck)
+  const head = grp(body, 0, 0.5, 0.15);
+  const hs = (r, c, hx, hy, hz, opt = {}) => sphere(head, r, c, hx, hy - 0.5, hz - 0.15, { cast, ...opt });
+  hs(0.24, FUR, 0, 0.62, 0.2);
+  hs(0.11, TAN, 0, 0.82, 0.18, { s: [1.3, 0.6, 1] }); // top knot patch
+  hs(0.12, TAN, -0.22, 0.52, 0.16, { s: [0.7, 1.6, 0.9] }); // ears
+  hs(0.12, TAN, 0.22, 0.52, 0.16, { s: [0.7, 1.6, 0.9] });
+  hs(0.07, TAN, -0.09, 0.67, 0.38, { s: [1, 0.9, 0.5] }); // eye patches
+  hs(0.07, TAN, 0.09, 0.67, 0.38, { s: [1, 0.9, 0.5] });
+  hs(0.045, '#1c1410', -0.09, 0.67, 0.42);
+  hs(0.045, '#1c1410', 0.09, 0.67, 0.42);
+  hs(0.012, '#ffffff', -0.075, 0.69, 0.462, { cast: false });
+  hs(0.012, '#ffffff', 0.105, 0.69, 0.462, { cast: false });
+  hs(0.1, FUR, 0, 0.56, 0.4, { s: [1.2, 0.8, 0.8] }); // muzzle
+  hs(0.035, '#1c1410', 0, 0.6, 0.48); // nose
+  hs(0.025, '#f08a8a', 0, 0.51, 0.47, { s: [1, 0.6, 0.6] }); // tongue
   // green bow tie + gold paw tag
-  sphere(g, 0.06, '#3f8a3f', -0.07, 0.42, 0.3, { s: [1, 0.7, 0.6] });
-  sphere(g, 0.06, '#3f8a3f', 0.07, 0.42, 0.3, { s: [1, 0.7, 0.6] });
-  sphere(g, 0.03, '#2f6f2f', 0, 0.42, 0.32);
-  cyl(g, 0.035, 0.015, '#e8b84a', 0, 0.33, 0.33, { rx: Math.PI / 2, seg: 10, metalness: 0.5 });
+  sphere(body, 0.06, '#3f8a3f', -0.07, 0.42, 0.3, { s: [1, 0.7, 0.6], cast });
+  sphere(body, 0.06, '#3f8a3f', 0.07, 0.42, 0.3, { s: [1, 0.7, 0.6], cast });
+  sphere(body, 0.03, '#2f6f2f', 0, 0.42, 0.32, { cast });
+  cyl(body, 0.035, 0.015, '#e8b84a', 0, 0.33, 0.33, { rx: Math.PI / 2, seg: 10, metalness: 0.5, cast });
+  g.userData.parts = { body, head, tail, legs };
   return g;
 }
 

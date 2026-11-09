@@ -227,7 +227,7 @@ export function optimize(root) {
   const buckets = new Map();
   const remove = [];
   const visit = (o) => {
-    if (o.userData.dynamic) return;
+    if (o.userData.dynamic && o !== root) return;
     if (o.isMesh && o !== root) {
       const key = o.material.uuid + (o.castShadow ? 'c' : 'n');
       let b = buckets.get(key);

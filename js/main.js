@@ -89,6 +89,50 @@ function surroundings() {
 }
 surroundings();
 
+// ---------------------------------------------------------------- see-through walls
+// Each side wall gets its own copy of its materials so it can fade on its own.
+const WALL_SIDES = {
+  left: { normal: new THREE.Vector3(-1, 0, 0), mats: new Map(), fade: 1 },
+  right: { normal: new THREE.Vector3(1, 0, 0), mats: new Map(), fade: 1 },
+  back: { normal: new THREE.Vector3(0, 0, -1), mats: new Map(), fade: 1 },
+};
+function addWall(side, group) {
+  optimize(group);
+  const ws = WALL_SIDES[side];
+  group.traverse((o) => {
+    if (!o.isMesh) return;
+    let m = ws.mats.get(o.material);
+    if (!m) {
+      m = o.material.clone();
+      m.userData.baseOpacity = m.opacity;
+      m.userData.baseTransparent = m.transparent;
+      ws.mats.set(o.material, m);
+    }
+    o.material = m;
+  });
+}
+const MIN_WALL_OPACITY = 0.1;
+const _dir = new THREE.Vector3();
+function updateWalls() {
+  // direction from the building's centre to the camera
+  _dir.set(camera.position.x, camera.position.y - controls.target.y, camera.position.z).normalize();
+  for (const side in WALL_SIDES) {
+    const ws = WALL_SIDES[side];
+    // facing = 1 when looking straight at that wall from outside
+    const facing = _dir.dot(ws.normal);
+    const k = THREE.MathUtils.smoothstep(facing, 0.42, 0.68);
+    const want = 1 - k * (1 - MIN_WALL_OPACITY);
+    if (Math.abs(want - ws.fade) < 0.005) continue;
+    ws.fade = want;
+    for (const m of ws.mats.values()) {
+      const solid = want > 0.995 && !m.userData.baseTransparent;
+      m.opacity = m.userData.baseOpacity * want;
+      if (m.transparent === solid) { m.transparent = !solid; m.needsUpdate = true; }
+      m.depthWrite = solid;
+    }
+  }
+}
+
 // ---------------------------------------------------------------- the building
 const anim = { people: [] };
 const floorGroups = [];
@@ -98,12 +142,13 @@ for (const f of FLOORS) {
   g.position.y = (f.n - 1) * H;
   g.name = `floor${f.n}`;
   scene.add(g);
-  shell(g, f.n);
+  const walls = shell(g, f.n);
   if (f.n === 1) floor1(g, anim);
   else if (f.n === 2) floor2(g, anim);
   else if (f.n === 5) floor5(g, anim);
   else officeFloor(g, f.n, EMPLOYEES, anim);
   optimize(g);
+  for (const side in walls) addWall(side, walls[side]);
   const lbl = makeLabel(`${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
   lbl.position.set(-12.6, (f.n - 1) * H + 3.2, 8.6);
   lbl.center.set(0, 0.5);
@@ -152,7 +197,7 @@ function goTo(n, instant = false) {
   }
   // UI
   document.querySelectorAll('#floors button').forEach((b) => b.classList.toggle('active', +b.dataset.floor === n));
-  const info = n === 0 ? { name: "Joe's Café Building", sub: '5 floors · tap a floor below' } : FLOORS[n - 1];
+  const info = n === 0 ? { name: 'IP 3D Home Office', sub: '5 floors · tap a floor below' } : FLOORS[n - 1];
   document.getElementById('floorTitle').textContent = n === 0 ? info.name : `${n}F · ${info.name}`;
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
@@ -224,6 +269,9 @@ function loop() {
     car.position.y += Math.sign(ly - car.position.y) * Math.min(Math.abs(ly - car.position.y), dt * 6);
     renderer.shadowMap.needsUpdate = true;
   }
+  updateWalls();
+  // Joe roams the café
+  if (anim.joe) anim.joe.update(dt, t);
   // employees: gentle typing / nodding
   for (const p of anim.people) {
     p.head.rotation.x = Math.sin(t * 1.3 + p.phase) * 0.06;
@@ -235,7 +283,7 @@ function loop() {
 }
 
 goTo(0, true);
-window.__app = { camera, controls, scene, goTo };
+window.__app = { camera, controls, scene, goTo, anim };
 renderer.shadowMap.needsUpdate = true;
 document.getElementById('loading').classList.add('done');
 requestAnimationFrame(loop);

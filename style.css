@@ -18,14 +18,14 @@ html, body {
 #top {
   position: fixed; left: 0; right: 0; top: 0;
   padding: calc(env(safe-area-inset-top) + 10px) 14px 0;
-  display: flex; gap: 10px; align-items: flex-start; pointer-events: none;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start; pointer-events: none;
 }
 .brand, .floorinfo {
   background: rgba(255, 248, 238, 0.92); border-radius: 18px; box-shadow: var(--shadow);
   padding: 10px 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
-.brand { font-size: 17px; white-space: nowrap; }
-.floorinfo { flex: 1; min-width: 0; }
+.brand { font-size: 15px; white-space: nowrap; padding: 7px 14px; }
+.floorinfo { max-width: 100%; min-width: 200px; }
 #floorTitle { font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #floorSub { font-size: 13px; opacity: 0.75; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -56,7 +56,7 @@ html, body {
 #hint.fade { opacity: 0; }
 
 #card {
-  position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 90px); transform: translate(-50%, -10px);
+  position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 140px); transform: translate(-50%, -10px);
   background: var(--cream); border-radius: 18px; box-shadow: var(--shadow);
   padding: 14px 20px; min-width: 220px; text-align: center;
   opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;

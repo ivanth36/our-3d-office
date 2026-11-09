@@ -105,19 +105,26 @@ export function shell(p, n) {
   liftShaftSegment(p, n, roof);
   if (n < 5) stairs(p);
 
+  const walls = {};
   if (!roof) {
+    // Side / back walls live in their own groups so they can fade out
+    // when the camera looks at the building from that side.
+    for (const side of ['back', 'left', 'right']) {
+      walls[side] = grp(p);
+      walls[side].userData.dynamic = true; // merged separately (see main.js)
+      walls[side].userData.wallSide = side;
+    }
     // back wall (z = -8) with windows
-    box(p, W, CEIL, 0.3, WALL, 0, 0, Z0 + 0.15, { cast: false });
-    windowsAlongX(p, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
+    box(walls.back, W, CEIL, 0.3, WALL, 0, 0, Z0 + 0.15, { cast: false });
+    windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
+    box(walls.back, W - 0.6, 0.12, 0.05, TRIM, 0, 0, Z0 + 0.32, { cast: false });
     // left wall (x = -12)
-    box(p, 0.3, CEIL, D, WALL, X0 + 0.15, 0, 0, { cast: false });
-    windowsAlongZ(p, X0 + 0.15, Z0 + 0.5, Z1 - 1.0, 3.0);
+    box(walls.left, 0.3, CEIL, D, WALL, X0 + 0.15, 0, 0, { cast: false });
+    windowsAlongZ(walls.left, X0 + 0.15, Z0 + 0.5, Z1 - 1.0, 3.0);
+    box(walls.left, 0.05, 0.12, D - 0.6, TRIM, X0 + 0.32, 0, 0, { cast: false });
     // right wall (x = 12): outer wall of the core
-    box(p, 0.3, CEIL, D, WALL_OUT, X1 - 0.15, 0, 0, { cast: false });
-    windowsAlongZ(p, X1 - 0.15, STAIR.z1 + 0.6, Z1 - 0.4, 2.8);
-    // skirting
-    box(p, W - 0.6, 0.12, 0.05, TRIM, 0, 0, Z0 + 0.32, { cast: false });
-    box(p, 0.05, 0.12, D - 0.6, TRIM, X0 + 0.32, 0, 0, { cast: false });
+    box(walls.right, 0.3, CEIL, D, WALL_OUT, X1 - 0.15, 0, 0, { cast: false });
+    windowsAlongZ(walls.right, X1 - 0.15, STAIR.z1 + 0.6, Z1 - 0.4, 2.8);
     // front corner columns
     box(p, 0.5, CEIL, 0.5, WALL_OUT, X0 + 0.25, 0, Z1 - 0.25, { cast: false });
     box(p, 0.5, CEIL, 0.5, WALL_OUT, X1 - 0.25, 0, Z1 - 0.25, { cast: false });
@@ -134,6 +141,7 @@ export function shell(p, n) {
     glassRail(p, STAIR.x0 - 0.05, STAIR.z0 + 0.2, STAIR.x0 - 0.05, STAIR.z1);
     glassRail(p, STAIR.x0, STAIR.z1 + 0.05, X1 - 0.1, STAIR.z1 + 0.05);
   }
+  return walls;
 }
 
 /** Lift car that travels between floors. */
