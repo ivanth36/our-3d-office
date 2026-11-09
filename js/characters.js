@@ -122,38 +122,74 @@ export function shihTzu(p, x, y, z, ry = 0, s = 1) {
 }
 
 /**
- * Seated chibi AI employee. Front faces +Z (place at a chair facing the desk).
- * Returns { group, head, tag } for animation.
+ * Chibi AI employee. Seated at a desk by default (front faces +Z, place at a
+ * chair facing the desk); e.pose === 'stand' makes a standing figure.
+ * Returns { group, head, body, baseY, phase } for animation.
  */
 export function employee(p, x, z, ry, e) {
   const g = grp(p, x, 0, z, ry);
   g.userData.dynamic = true; // don't merge; we animate it
-  g.userData.info = { title: e.name, text: `${e.role}\nAI employee · Floor ${e.floor}` };
+  g.userData.info = { title: e.name, employee: e };
   const skin = e.skin ?? '#f6d6bd', hair = e.hair ?? '#5a3a22', shirt = e.shirt ?? '#ffffff', pants = e.pants ?? '#3a3a3e';
-  // legs (seated: thighs forward, shins down)
-  box(g, 0.13, 0.12, 0.38, pants, -0.09, 0.47, 0.1);
-  box(g, 0.13, 0.12, 0.38, pants, 0.09, 0.47, 0.1);
-  box(g, 0.12, 0.45, 0.12, pants, -0.09, 0.05, 0.26);
-  box(g, 0.12, 0.45, 0.12, pants, 0.09, 0.05, 0.26);
-  box(g, 0.13, 0.07, 0.2, '#2b2a2c', -0.09, 0, 0.3);
-  box(g, 0.13, 0.07, 0.2, '#2b2a2c', 0.09, 0, 0.3);
+  const stand = e.pose === 'stand', sport = e.outfit === 'sport';
+  const lift = stand ? 0.12 : 0;            // standing figures are a little taller
+  if (stand) {
+    // straight legs + shoes
+    box(g, 0.13, 0.6, 0.14, pants, -0.09, 0.05, 0);
+    box(g, 0.13, 0.6, 0.14, pants, 0.09, 0.05, 0);
+    box(g, 0.14, 0.07, 0.22, sport ? '#f4f4f4' : '#2b2a2c', -0.09, 0, 0.03);
+    box(g, 0.14, 0.07, 0.22, sport ? '#f4f4f4' : '#2b2a2c', 0.09, 0, 0.03);
+  } else {
+    // seated: thighs forward, shins down
+    box(g, 0.13, 0.12, 0.38, pants, -0.09, 0.47, 0.1);
+    box(g, 0.13, 0.12, 0.38, pants, 0.09, 0.47, 0.1);
+    box(g, 0.12, 0.45, 0.12, pants, -0.09, 0.05, 0.26);
+    box(g, 0.12, 0.45, 0.12, pants, 0.09, 0.05, 0.26);
+    box(g, 0.13, 0.07, 0.2, '#2b2a2c', -0.09, 0, 0.3);
+    box(g, 0.13, 0.07, 0.2, '#2b2a2c', 0.09, 0, 0.3);
+  }
   // torso
-  const body = grp(g, 0, 0.55, -0.05);
+  const baseY = stand ? 0.62 : 0.55;
+  const body = grp(g, 0, baseY, stand ? 0 : -0.05);
   cyl(body, 0.17, 0.42, shirt, 0, 0, 0, { top: 0.85, bottom: 1, seg: 12 });
-  box(body, 0.03, 0.42, 0.02, '#2b2a2c', -0.08, 0, 0.15); // suspenders
-  box(body, 0.03, 0.42, 0.02, '#2b2a2c', 0.08, 0, 0.15);
-  box(body, 0.04, 0.24, 0.02, e.tie ?? '#2b2a2c', 0, 0.16, 0.165); // tie
-  // arms reaching forward to the desk
-  box(body, 0.09, 0.09, 0.36, shirt, -0.2, 0.22, 0.14);
-  box(body, 0.09, 0.09, 0.36, shirt, 0.2, 0.22, 0.14);
-  sphere(body, 0.055, skin, -0.2, 0.26, 0.34);
-  sphere(body, 0.055, skin, 0.2, 0.26, 0.34);
+  if (sport) {
+    box(body, 0.3, 0.03, 0.3, '#ffffff', 0, 0.36, 0, { cast: false });            // collar stripe
+    box(body, 0.05, 0.12, 0.02, '#ffffff', 0, 0.16, 0.165);                       // whistle cord
+    cyl(body, 0.025, 0.06, '#e2b13c', 0, 0.12, 0.17, { rx: Math.PI / 2, seg: 8 }); // whistle
+  } else {
+    box(body, 0.03, 0.42, 0.02, '#2b2a2c', -0.08, 0, 0.15); // suspenders
+    box(body, 0.03, 0.42, 0.02, '#2b2a2c', 0.08, 0, 0.15);
+    box(body, 0.04, 0.24, 0.02, e.tie ?? '#2b2a2c', 0, 0.16, 0.165); // tie
+  }
+  if (stand) {
+    // arms down by the sides; a water bottle in one hand
+    box(body, 0.09, 0.36, 0.09, shirt, -0.215, 0.04, 0);
+    box(body, 0.09, 0.36, 0.09, shirt, 0.215, 0.04, 0);
+    sphere(body, 0.055, skin, -0.215, 0.02, 0);
+    sphere(body, 0.055, skin, 0.215, 0.02, 0);
+    if (sport) cyl(body, 0.045, 0.2, '#7fc4e8', 0.22, -0.08, 0.06, { seg: 10 });
+  } else {
+    // arms reaching forward to the desk
+    box(body, 0.09, 0.09, 0.36, shirt, -0.2, 0.22, 0.14);
+    box(body, 0.09, 0.09, 0.36, shirt, 0.2, 0.22, 0.14);
+    sphere(body, 0.055, skin, -0.2, 0.26, 0.34);
+    sphere(body, 0.055, skin, 0.2, 0.26, 0.34);
+  }
   // head (big chibi head)
-  const head = grp(g, 0, 1.13, -0.03);
+  const head = grp(g, 0, 1.13 + lift, stand ? 0 : -0.03);
   sphere(head, 0.27, skin, 0, 0.12, 0);
   sphere(head, 0.29, hair, 0, 0.22, -0.04, { s: [1.04, 0.85, 1] });
   sphere(head, 0.12, hair, -0.12, 0.27, 0.17, { s: [1.2, 0.6, 0.8] }); // fringe
   sphere(head, 0.12, hair, 0.1, 0.29, 0.18, { s: [1.2, 0.55, 0.8] });
+  if (e.hairStyle === 'long') {
+    sphere(head, 0.28, hair, 0, 0.02, -0.1, { s: [1.05, 1.25, 0.85] });       // long hair down the back
+    sphere(head, 0.09, hair, -0.24, -0.04, 0.04, { s: [0.6, 1.9, 0.9] });    // side locks
+    sphere(head, 0.09, hair, 0.24, -0.04, 0.04, { s: [0.6, 1.9, 0.9] });
+  } else if (e.hairStyle === 'bun') {
+    sphere(head, 0.11, hair, 0, 0.43, -0.13);                                  // top bun
+    sphere(head, 0.07, hair, -0.25, 0.1, 0.02, { s: [0.6, 1.2, 0.9] });
+    sphere(head, 0.07, hair, 0.25, 0.1, 0.02, { s: [0.6, 1.2, 0.9] });
+  }
   sphere(head, 0.045, '#1c1410', -0.09, 0.1, 0.245);
   sphere(head, 0.045, '#1c1410', 0.09, 0.1, 0.245);
   sphere(head, 0.013, '#ffffff', -0.075, 0.12, 0.285, { cast: false });
@@ -167,12 +203,12 @@ export function employee(p, x, z, ry, e) {
   }
   // floating name tag
   const tag = makeLabel(e.name, { dot: '#3cc35a', height: 0.5 });
-  tag.position.set(0, 1.85, 0);
+  tag.position.set(0, 1.85 + lift, 0);
   g.add(tag);
   // invisible hit box to make tapping easy
-  const hit = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.9, 0.9), new THREE.MeshBasicMaterial({ visible: false }));
-  hit.position.set(0, 0.95, 0);
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.0, 0.9), new THREE.MeshBasicMaterial({ visible: false }));
+  hit.position.set(0, 1.0, 0);
   hit.userData.info = g.userData.info;
   g.add(hit);
-  return { group: g, head, body, phase: Math.random() * 6 };
+  return { group: g, head, body, baseY, phase: Math.random() * 6 };
 }

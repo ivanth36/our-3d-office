@@ -9,9 +9,9 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 |---|---|
 | 1F Joe's Café | Joe the Shih Tzu roams around! U-shaped counter (coffee machine · cashier · pick-up), stools, round tables, sofa corner, long table + bench, Joe statue, mascot signs |
 | 2F Chill Home | Big living room (wall-mounted TV, 2 long sofas, armchair, rug), glass music room at the front-left (CDs, hi-fi, lounge chair, drum kit, keyboard, music desk + computer), large kitchen with island, dining table for 12 |
-| 3F Office A | Big shared desk with AI employees, glass meeting room |
+| 3F Office A | Big shared desk with AI employees (JungKook, XiaoMing, Aida, Mary), glass meeting room |
 | 4F Office B | Same layout as 3F |
-| 5F Roof Garden | Glass gym (treadmills, weights, bench, yoga mats), lounge, umbrella table, loungers, string lights |
+| 5F Roof Garden | Eugene the wellness coach in the glass gym (treadmills, weights, bench, yoga mats), lounge, umbrella table, loungers, string lights |
 
 **Walls:** the left, right and back walls fade to see-through when you rotate the camera to look from that side.
 
@@ -27,4 +27,4 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 - `js/furniture.js`: reusable furniture pieces
 - `js/characters.js`: Joe the Shih Tzu + AI employee figures
 - `js/joe.js`: Joe's roaming walk around the café
-- `js/employees.js`: **edit this to add or rename AI employees**
+- `js/employees.js`: **edit this to add or rename AI employees and the scheduled tasks they run** (tap an employee to see their tasks and next run time)

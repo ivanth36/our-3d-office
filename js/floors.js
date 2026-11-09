@@ -473,7 +473,7 @@ export function officeFloor(p, n, employees, anim) {
   for (let i = 0; i < 5; i++) pendant(p, x - L / 2 + 1 + i * 2, z, { drop: 1.0, shade: '#2f3a2c' });
 
   // ---- AI employees on this floor
-  employees.filter((e) => e.floor === n).forEach((e) => {
+  employees.filter((e) => e.floor === n && !e.pos).forEach((e) => {
     const s = seat(e.seat ?? 0);
     anim.people.push(employee(p, s.x, s.z, s.ry, e));
   });
@@ -525,7 +525,11 @@ export function officeFloor(p, n, employees, anim) {
 }
 
 // ---------------------------------------------------------------- Floor 5 (roof)
-export function floor5(p, anim) {
+export function floor5(p, anim, employees = []) {
+  // standing employees on the roof (e.g. the wellness coach in the gym)
+  employees.filter((e) => e.floor === 5).forEach((e) => {
+    anim.people.push(employee(p, e.pos[0], e.pos[1], e.ry ?? 0, { pose: 'stand', ...e }));
+  });
   floorSurface(p, RW, 16, RX, 0, plankTex('#c39a6b', '#9b7450'), 2);
   // grass patches
   box(p, 7.0, 0.05, 3.0, '#7fae5a', 4.5, 0.02, 6.0, { cast: false });

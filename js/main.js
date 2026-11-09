@@ -145,7 +145,7 @@ for (const f of FLOORS) {
   const walls = shell(g, f.n);
   if (f.n === 1) floor1(g, anim);
   else if (f.n === 2) floor2(g, anim);
-  else if (f.n === 5) floor5(g, anim);
+  else if (f.n === 5) floor5(g, anim, EMPLOYEES);
   else officeFloor(g, f.n, EMPLOYEES, anim);
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
@@ -216,9 +216,43 @@ for (const b of btns) {
 }
 
 const card = document.getElementById('card');
+// ---- employee cards: role + scheduled tasks with the time until each next run
+const SGT = 8 * 3600e3; // schedules are in Singapore time (UTC+8)
+function msUntil(at, now = Date.now()) {
+  const t = new Date(now + SGT);          // read UTC fields as Singapore wall-clock time
+  const c = new Date(t); c.setUTCSeconds(0, 0);
+  if (at.every === 'hour') {
+    c.setUTCMinutes(at.m);
+    if (c <= t) c.setUTCHours(c.getUTCHours() + 1);
+  } else {
+    c.setUTCHours(at.h, at.m);
+    if (at.every === 'week') {
+      c.setUTCDate(c.getUTCDate() + ((at.dow - c.getUTCDay() + 7) % 7));
+      if (c <= t) c.setUTCDate(c.getUTCDate() + 7);
+    } else if (c <= t) c.setUTCDate(c.getUTCDate() + 1);
+  }
+  return c - t;
+}
+function fmtIn(ms) {
+  const min = Math.round(ms / 60000);
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h < 24) return m ? `${h} h ${m} min` : `${h} h`;
+  const d = Math.floor(h / 24), rh = h % 24;
+  return rh ? `${d} d ${rh} h` : `${d} d`;
+}
+function employeeText(e) {
+  const lines = [`${e.role} · Floor ${e.floor}`, ''];
+  for (const task of e.tasks ?? []) {
+    lines.push(`📋 ${task.name}`);
+    lines.push(`     ${task.when} (SGT) · next in ${fmtIn(msUntil(task.at))}`);
+  }
+  return lines.join('\n');
+}
 function showCard(info) {
-  card.querySelector('h3').textContent = info.title;
-  card.querySelector('p').textContent = info.text;
+  card.querySelector('h3').textContent = info.employee ? `${info.title} 🟢` : info.title;
+  card.querySelector('p').textContent = info.employee ? employeeText(info.employee) : info.text;
+  card.classList.toggle('emp', !!info.employee);
   card.classList.add('show');
 }
 function hideCard() { card.classList.remove('show'); }
@@ -285,14 +319,14 @@ function loop() {
   for (const p of anim.people) {
     p.head.rotation.x = Math.sin(t * 1.3 + p.phase) * 0.06;
     p.head.rotation.y = Math.sin(t * 0.5 + p.phase) * 0.12;
-    p.body.position.y = 0.55 + Math.abs(Math.sin(t * 6 + p.phase)) * 0.008;
+    p.body.position.y = p.baseY + Math.abs(Math.sin(t * 6 + p.phase)) * 0.008;
   }
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
 
 goTo(0, true);
-window.__app = { camera, controls, scene, goTo, anim };
+window.__app = { camera, controls, scene, goTo, anim, THREE };
 renderer.shadowMap.needsUpdate = true;
 document.getElementById('loading').classList.add('done');
 requestAnimationFrame(loop);
