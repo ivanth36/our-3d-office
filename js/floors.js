@@ -29,36 +29,23 @@ const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
 
 // ---------------------------------------------------------------- signs
 function drawDogFace(ctx, cx, cy, r) {
-  // big caramel ears
-  ctx.fillStyle = '#c98a4b';
-  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.9, cy + r * 0.3, r * 0.42, r * 0.85, -sd * 0.15, 0, Math.PI * 2); ctx.fill(); }
-  // white head + top tuft
-  ctx.fillStyle = '#fffaf3';
-  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx, cy - r * 0.98, r * 0.2, 0, Math.PI * 2); ctx.fill();
-  // caramel eye patches + white blaze
-  ctx.fillStyle = '#c98a4b';
-  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.44, cy - r * 0.2, r * 0.36, r * 0.36, sd * 0.35, 0, Math.PI * 2); ctx.fill(); }
-  ctx.fillStyle = '#fffaf3';
-  ctx.beginPath(); ctx.ellipse(cx, cy - r * 0.25, r * 0.16, r * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-  // glossy brown eyes
+  const line = '#1c1714';
+  ctx.lineWidth = r * 0.07; ctx.strokeStyle = line; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  // tan floppy ears
+  ctx.fillStyle = '#d2a062';
   for (const sd of [-1, 1]) {
-    ctx.fillStyle = '#4a2a18'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.12, r * 0.18, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#120b07'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.1, r * 0.12, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38 + r * 0.06, cy - r * 0.2, r * 0.06, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.92, cy + r * 0.12, r * 0.3, r * 0.6, sd * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
-  // nose + little smile
-  ctx.fillStyle = '#141010';
-  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.22, r * 0.14, r * 0.1, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#3a2418'; ctx.lineWidth = r * 0.05; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.arc(cx - r * 0.1, cy + r * 0.36, r * 0.1, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx + r * 0.1, cy + r * 0.36, r * 0.1, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-  // green bow + gold tag
-  ctx.fillStyle = '#3f8a3f';
-  ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.9); ctx.lineTo(cx - r * 0.35, cy + r * 0.72); ctx.lineTo(cx - r * 0.35, cy + r * 1.08); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.9); ctx.lineTo(cx + r * 0.35, cy + r * 0.72); ctx.lineTo(cx + r * 0.35, cy + r * 1.08); ctx.fill();
-  ctx.fillStyle = '#e2b13c';
-  ctx.beginPath(); ctx.arc(cx, cy + r * 0.95, r * 0.1, 0, Math.PI * 2); ctx.fill();
+  // round white head
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.ellipse(cx, cy, r, r * 0.88, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // dot eyes, nose, "w" mouth
+  ctx.fillStyle = line;
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(cx + sd * r * 0.36, cy - r * 0.1, r * 0.1, 0, Math.PI * 2); ctx.fill(); }
+  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.18, r * 0.14, r * 0.1, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = r * 0.06;
+  ctx.beginPath(); ctx.arc(cx - r * 0.09, cy + r * 0.3, r * 0.09, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + r * 0.09, cy + r * 0.3, r * 0.09, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
 }
 
 function paw(ctx, x, y, s, color) {

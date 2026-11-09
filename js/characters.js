@@ -2,147 +2,110 @@
 import * as THREE from 'three';
 import { box, cyl, sphere, grp, makeLabel, mat, optimize } from './helpers.js';
 
-const FUR = '#fdfaf5';
 
 // ---------------------------------------------------------------- Joe
-// Plush, cartoon-style Joe (from the Joe character sheet): smooth white coat,
-// big caramel ears, caramel patches round big glossy brown eyes, white blaze,
-// green bow tie with a gold paw tag, fluffy plume tail curled over the back.
-const SPH_HI = new THREE.SphereGeometry(1, 24, 18);   // smoother spheres for close-ups
-const TORUS_ARC = new THREE.TorusGeometry(1, 0.2, 6, 14, Math.PI);
-
-/** Smooth ellipsoid: c = centre [x,y,z], r = radii [rx,ry,rz]. */
-function blob(par, color, c, r, o = {}) {
-  const m = new THREE.Mesh(SPH_HI, typeof color === 'string' ? mat(color, { roughness: o.rough ?? 0.9, metalness: o.metal ?? 0 }) : color);
-  m.position.set(...c);
-  m.scale.set(...r);
-  if (o.rx) m.rotation.x = o.rx;
-  if (o.ry) m.rotation.y = o.ry;
-  if (o.rz) m.rotation.z = o.rz;
-  m.castShadow = o.cast ?? true;
-  m.receiveShadow = true;
-  par.add(m);
+// Simple cartoon Joe (from the "Joe Joe" logo): round white body, big round
+// head, tan floppy ears, black dot eyes, little nose and "w" mouth, stubby
+// legs, small curled tail, thick black outlines and flat toon shading.
+const SPH_HI = new THREE.SphereGeometry(1, 24, 18);
+const TORUS_ARC = new THREE.TorusGeometry(1, 0.22, 6, 14, Math.PI);
+const TOON_STEPS = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([170, 225, 255]), 3, 1, THREE.RedFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+})();
+const toonCache = new Map();
+function toon(color) {
+  let m = toonCache.get(color);
+  if (!m) { m = new THREE.MeshToonMaterial({ color, gradientMap: TOON_STEPS }); toonCache.set(color, m); }
   return m;
 }
-/** Thin curved line (half torus) e.g. closed eyes / smile. up=true -> ∩, false -> ∪. */
-function arc(par, color, c, size, up, rz = 0) {
-  const m = new THREE.Mesh(TORUS_ARC, mat(color, { roughness: 0.6 }));
+const LINE = '#1c1714';
+const OUTLINE_MAT = new THREE.MeshBasicMaterial({ color: LINE, side: THREE.BackSide });
+const OUT = 0.014; // outline thickness
+
+/** Smooth ellipsoid (centre c, radii r) with an optional black cartoon outline. */
+function blob(par, color, c, r, o = {}) {
+  const m = new THREE.Mesh(SPH_HI, toon(color));
   m.position.set(...c);
-  m.scale.set(size, size, size);
+  m.scale.set(...r);
+  m.rotation.set(o.rx ?? 0, o.ry ?? 0, o.rz ?? 0);
+  m.castShadow = o.cast ?? false;
+  par.add(m);
+  if (o.outline !== false) {
+    const ol = new THREE.Mesh(SPH_HI, OUTLINE_MAT);
+    ol.position.copy(m.position);
+    ol.rotation.copy(m.rotation);
+    ol.scale.set(r[0] + OUT, r[1] + OUT, r[2] + OUT);
+    par.add(ol);
+  }
+  return m;
+}
+/** Thin black curve (half torus): up=true -> ∩, up=false -> ∪. */
+function arc(par, c, size, up, rz = 0) {
+  const m = new THREE.Mesh(TORUS_ARC, toon(LINE));
+  m.position.set(...c);
+  m.scale.setScalar(size);
   m.rotation.z = (up ? 0 : Math.PI) + rz;
   par.add(m);
   return m;
 }
 
-const CARAMEL = '#c98a4b', CARAMEL_D = '#b4763c', CARAMEL_L = '#dba468', CREAM = '#f5efe6';
-const BOW = '#3f8a3f', BOW_D = '#2f6f2f', GOLD = '#e2b13c';
+const WHITE = '#ffffff', TAN = '#d2a062', PINK = '#f28c98';
 
 /**
- * Joe the Shih Tzu. ~0.85 tall at scale 1, front faces +Z.
+ * Joe the Shih Tzu, cartoon logo style. ~0.75 tall at scale 1, front faces +Z.
  * g.userData.parts = { body, head, tail, legs[], setExpression(name) }
  * expressions: 'neutral' | 'happy' (open mouth) | 'pleased' (eyes closed) | 'alert'
  */
-export function shihTzu(p, x, y, z, ry = 0, s = 1, o = {}) {
+export function shihTzu(p, x, y, z, ry = 0, s = 1) {
   const g = grp(p, x, y, z, ry);
   g.scale.setScalar(s);
-  const cast = o.cast ?? true;
-  const B = (par, col, c, r, opt = {}) => blob(par, col, c, r, { cast, ...opt });
 
-  // ---- body: rounded torso, fluffy chest, soft fur skirt
+  // ---- round body
   const body = grp(g, 0, 0, 0);
-  B(body, FUR, [0, 0.36, -0.05], [0.205, 0.185, 0.3]);
-  B(body, FUR, [0, 0.39, 0.15], [0.18, 0.19, 0.15]);                 // chest
-  B(body, CREAM, [0, 0.3, 0.17], [0.14, 0.12, 0.11]);                // chest fluff (shade)
-  B(body, FUR, [0, 0.43, -0.28], [0.15, 0.14, 0.1]);                 // rump
+  blob(body, WHITE, [0, 0.3, -0.04], [0.22, 0.2, 0.27]);
 
-  // collar + bow tie + gold paw tag
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.018, 8, 24), mat(BOW, { roughness: 0.7 }));
-  collar.position.set(0, 0.5, 0.15); collar.rotation.x = Math.PI / 2 - 0.45; collar.castShadow = cast;
-  body.add(collar);
-  B(body, BOW, [-0.085, 0.47, 0.3], [0.085, 0.055, 0.035], { rz: 0.3, rough: 0.6 });
-  B(body, BOW, [0.085, 0.47, 0.3], [0.085, 0.055, 0.035], { rz: -0.3, rough: 0.6 });
-  B(body, BOW_D, [0, 0.47, 0.315], [0.032, 0.035, 0.03], { rough: 0.6 });
-  const tag = grp(body, 0, 0.395, 0.315);
-  tag.rotation.x = -0.2;
-  B(tag, GOLD, [0, 0, 0], [0.04, 0.036, 0.012], { rough: 0.3, metal: 0.7 });   // paw pad
-  for (const [tx, ty] of [[-0.03, 0.04], [-0.011, 0.055], [0.011, 0.055], [0.03, 0.04]]) B(tag, GOLD, [tx, ty, 0], [0.013, 0.015, 0.01], { rough: 0.3, metal: 0.7 });
-  B(body, GOLD, [0, 0.445, 0.31], [0.012, 0.02, 0.01], { rough: 0.3, metal: 0.7 }); // ring
-
-  // ---- legs (hip pivots): sturdy fluffy legs, round paws
+  // ---- stubby legs (hip pivots)
   const legs = [];
-  for (const [lx, lz] of [[-0.11, 0.15], [0.11, 0.15], [-0.12, -0.22], [0.12, -0.22]]) {
-    const hip = grp(g, lx, 0.27, lz);
-    B(hip, FUR, [0, -0.1, 0], [0.088, 0.135, 0.092]);
-    B(hip, FUR, [0, 0.0, 0], [0.085, 0.06, 0.085]);                           // fluff where the leg meets the body
-    B(hip, FUR, [0, -0.215, 0.025], [0.08, 0.052, 0.098]);           // paw
-    for (const tx of [-0.035, 0, 0.035]) B(hip, CREAM, [tx, -0.225, 0.11], [0.018, 0.02, 0.012], { cast: false }); // toe lines
+  for (const [lx, lz] of [[-0.12, 0.13], [0.12, 0.13], [-0.12, -0.19], [0.12, -0.19]]) {
+    const hip = grp(g, lx, 0.17, lz);
+    blob(hip, WHITE, [0, -0.07, 0], [0.075, 0.1, 0.08]);
+    blob(hip, WHITE, [0, -0.125, 0.025], [0.08, 0.048, 0.09]);   // round foot
     legs.push(hip);
   }
 
-  // ---- fluffy plume tail curling over the back (pivot at its base)
-  const tail = grp(body, 0, 0.5, -0.3);
-  B(tail, FUR, [0, 0.05, -0.03], [0.075, 0.08, 0.075]);
-  B(tail, FUR, [0, 0.15, -0.05], [0.1, 0.1, 0.1]);
-  B(tail, FUR, [0, 0.25, 0.01], [0.15, 0.12, 0.15]);
-  B(tail, CREAM, [0, 0.21, 0.1], [0.11, 0.09, 0.1]);
-  B(tail, FUR, [0.08, 0.22, 0.03], [0.09, 0.09, 0.1]);
-  B(tail, FUR, [-0.08, 0.22, 0.03], [0.09, 0.09, 0.1]);
-  B(tail, FUR, [0, 0.31, -0.03], [0.09, 0.07, 0.09]);
+  // ---- small curled tail (pivot at its base so it can wag)
+  const tail = grp(body, 0, 0.38, -0.29);
+  blob(tail, WHITE, [0, 0.06, -0.03], [0.05, 0.09, 0.05], { rx: -0.6 });
+  blob(tail, WHITE, [0, 0.13, -0.02], [0.05, 0.05, 0.05]);
+  blob(tail, WHITE, [0, 0.14, 0.04], [0.035, 0.035, 0.035]);
 
-  // ---- head (pivot at the neck): big round chibi head
-  const head = grp(body, 0, 0.52, 0.17);
-  B(head, FUR, [0, 0.17, 0.03], [0.25, 0.23, 0.22]);                 // skull
-  B(head, FUR, [-0.11, 0.07, 0.11], [0.12, 0.1, 0.1]);             // soft cheeks
-  B(head, FUR, [0.11, 0.07, 0.11], [0.12, 0.1, 0.1]);
-  B(head, FUR, [0, 0.03, 0.12], [0.11, 0.08, 0.09]);                // chin
-  // soft top-knot tuft
-  B(head, FUR, [0, 0.38, 0.0], [0.07, 0.06, 0.06], { rz: 0.2 });
-  B(head, FUR, [-0.05, 0.37, 0.05], [0.05, 0.05, 0.05]);
-  B(head, FUR, [0.06, 0.38, 0.02], [0.05, 0.05, 0.05]);
-  B(head, FUR, [0.02, 0.42, -0.02], [0.035, 0.05, 0.035], { rz: -0.4 });
-  // caramel patches round the eyes, white blaze down the middle
-  B(head, CARAMEL, [-0.105, 0.215, 0.165], [0.11, 0.115, 0.09], { rz: -0.3 });
-  B(head, CARAMEL, [0.105, 0.215, 0.165], [0.11, 0.115, 0.09], { rz: 0.3 });
-  B(head, CARAMEL, [-0.15, 0.29, 0.1], [0.08, 0.07, 0.08]);         // patches spread up to the ears
-  B(head, CARAMEL, [0.15, 0.29, 0.1], [0.08, 0.07, 0.08]);
-  B(head, FUR, [0, 0.25, 0.2], [0.045, 0.14, 0.06]);                 // white blaze
-  // muzzle + nose
-  B(head, FUR, [0, 0.1, 0.2], [0.095, 0.07, 0.075]);
-  B(head, '#141010', [0, 0.135, 0.275], [0.037, 0.028, 0.026], { rough: 0.25 });
-  B(head, '#7a7a7a', [0.011, 0.146, 0.297], [0.009, 0.006, 0.004], { cast: false, rough: 0.3 }); // nose shine
+  // ---- big round head (pivot at the neck)
+  const head = grp(body, 0, 0.44, 0.12);
+  blob(head, WHITE, [0, 0.2, 0.05], [0.3, 0.26, 0.25]);
+  // tan floppy ears hanging from the upper sides
+  for (const sd of [-1, 1]) blob(head, TAN, [sd * 0.29, 0.17, 0.0], [0.08, 0.17, 0.13], { rz: sd * 0.42 });
+  // nose
+  blob(head, LINE, [0, 0.145, 0.295], [0.042, 0.03, 0.022], { outline: false });
 
-  // expression pieces (each in its own group so they can be switched)
-  const ex = {
-    eyesOpen: grp(head), eyesClosed: grp(head), eyesUp: grp(head), smile: grp(head), mouthOpen: grp(head),
-  };
-  for (const [sd, gr, dy] of [[-1, ex.eyesOpen, 0], [1, ex.eyesOpen, 0], [-1, ex.eyesUp, 0.012], [1, ex.eyesUp, 0.012]]) {
-    const ex0 = sd * 0.1, ey = 0.205;
-    B(gr, '#5a331c', [ex0, ey, 0.235], [0.066, 0.072, 0.05], { rough: 0.15 });           // brown iris
-    B(gr, '#120b07', [ex0, ey + dy, 0.265], [0.045, 0.05, 0.026], { rough: 0.1 });         // pupil
-    B(gr, '#ffffff', [ex0 + 0.02, ey + 0.028 + dy, 0.284], [0.02, 0.022, 0.01], { cast: false, rough: 0.2 });
-    B(gr, '#ffffff', [ex0 - 0.018, ey - 0.02, 0.28], [0.009, 0.009, 0.006], { cast: false });
-  }
-  for (const sd of [-1, 1]) arc(ex.eyesClosed, '#2a1a12', [sd * 0.1, 0.195, 0.262], 0.04, true);
-  // little "w" smile under the nose
-  arc(ex.smile, '#3a2418', [-0.02, 0.095, 0.268], 0.02, false);
-  arc(ex.smile, '#3a2418', [0.02, 0.095, 0.268], 0.02, false);
-  // open happy mouth with tongue
-  B(ex.mouthOpen, '#3a1c16', [0, 0.07, 0.255], [0.05, 0.04, 0.025], { cast: false });
-  B(ex.mouthOpen, '#f07f8c', [0, 0.055, 0.27], [0.03, 0.025, 0.014], { cast: false });
-  arc(ex.mouthOpen, '#3a2418', [-0.02, 0.1, 0.272], 0.018, false);
-  arc(ex.mouthOpen, '#3a2418', [0.02, 0.1, 0.272], 0.018, false);
-
-  // big caramel ears hanging like long smooth curtains, framing the face
+  // expression pieces (each its own group so they can be switched)
+  const ex = { eyesOpen: grp(head), eyesUp: grp(head), eyesClosed: grp(head), smile: grp(head), mouthOpen: grp(head) };
   for (const sd of [-1, 1]) {
-    const ear = grp(head, sd * 0.2, 0.31, -0.01);
-    ear.rotation.z = sd * 0.12;
-    B(ear, CARAMEL, [0, -0.04, 0.0], [0.08, 0.09, 0.11]);                  // top, blends into the head
-    B(ear, CARAMEL, [sd * 0.025, -0.19, 0.01], [0.1, 0.2, 0.13]);           // long flowing ear
-    B(ear, CARAMEL_D, [sd * 0.03, -0.33, 0.015], [0.095, 0.09, 0.12]);      // rounded, slightly darker ends
-    B(ear, CARAMEL_L, [sd * 0.045, -0.17, 0.05], [0.06, 0.16, 0.08]);       // soft sheen
+    blob(ex.eyesOpen, LINE, [sd * 0.105, 0.225, 0.283], [0.032, 0.035, 0.02], { outline: false });
+    blob(ex.eyesUp, LINE, [sd * 0.105, 0.24, 0.28], [0.036, 0.04, 0.02], { outline: false });
+    blob(ex.eyesUp, WHITE, [sd * 0.105 + 0.012, 0.255, 0.296], [0.01, 0.01, 0.005], { outline: false });
+    arc(ex.eyesClosed, [sd * 0.105, 0.215, 0.291], 0.035, true);
   }
+  // little "w" mouth
+  arc(ex.smile, [-0.024, 0.105, 0.289], 0.024, false);
+  arc(ex.smile, [0.024, 0.105, 0.289], 0.024, false);
+  // happy open mouth + tongue
+  blob(ex.mouthOpen, LINE, [0, 0.085, 0.275], [0.04, 0.032, 0.02], { outline: false });
+  blob(ex.mouthOpen, PINK, [0, 0.072, 0.288], [0.025, 0.018, 0.01], { outline: false });
 
-  // ---- merge static pieces per part (keeps it light on phones)
+  // ---- merge pieces per part (keeps him light on phones)
   for (const k in ex) { ex[k].userData.dynamic = true; optimize(ex[k]); }
   for (const part of [head, tail, ...legs, body]) { part.userData.dynamic = true; optimize(part); }
 
@@ -153,7 +116,7 @@ export function shihTzu(p, x, y, z, ry = 0, s = 1, o = {}) {
     ex.mouthOpen.visible = name === 'happy';
     ex.smile.visible = !ex.mouthOpen.visible;
   };
-  setExpression(o.expression ?? 'neutral');
+  setExpression('neutral');
   g.userData.parts = { body, head, tail, legs, setExpression };
   return g;
 }

@@ -29,7 +29,7 @@ const SPEED = 1.0; // m/s
 const SPOTS = { 0: 'nap', 5: 'beg', 13: 'admire' }; // 'admire' = sits and looks up at the street // special things Joe likes to do at some nodes
 
 export function roamingJoe(floor) {
-  const joe = shihTzu(floor, NODES[2][0], 0.02, NODES[2][1], 0, 0.9, { cast: false });
+  const joe = shihTzu(floor, NODES[2][0], 0.02, NODES[2][1], 0, 1.0);
   joe.userData.dynamic = true;
   // soft blob shadow (shadow maps are static for speed, so Joe brings his own)
   const blob = new THREE.Mesh(
