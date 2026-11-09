@@ -170,7 +170,7 @@ function fitDistance(w, h) {
 
 function preset(n) {
   if (n === 0) {
-    const d = fitDistance(27, 23) + 8;
+    const d = fitDistance(27, 27) + 8;
     return { target: BUILD_CENTER.clone(), pos: BUILD_CENTER.clone().addScaledVector(VIEW_DIR, d) };
   }
   const target = new THREE.Vector3(-0.5, (n - 1) * H + 0.5, 0.5);
@@ -197,7 +197,7 @@ function goTo(n, instant = false) {
   }
   // UI
   document.querySelectorAll('#floors button').forEach((b) => b.classList.toggle('active', +b.dataset.floor === n));
-  const info = n === 0 ? { name: 'IP 3D Home Office', sub: '5 floors · tap a floor below' } : FLOORS[n - 1];
+  const info = n === 0 ? { name: 'IP Man Home Office', sub: '5 floors · pick a floor below' } : FLOORS[n - 1];
   document.getElementById('floorTitle').textContent = n === 0 ? info.name : `${n}F · ${info.name}`;
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
@@ -249,6 +249,15 @@ function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener('resize', onResize);
+
+// keyboard shortcuts on a computer: 0 / A = whole building, 1-5 = floors
+window.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k >= '0' && k <= '5') goTo(+k);
+  else if (k === 'a') goTo(0);
+  else if (k === 'escape') hideCard();
+});
 
 const clock = new THREE.Clock();
 const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);

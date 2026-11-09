@@ -17,33 +17,34 @@ const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
 
 // ---------------------------------------------------------------- signs
 function drawDogFace(ctx, cx, cy, r) {
-  ctx.fillStyle = '#c98a4b';
-  ctx.beginPath(); ctx.ellipse(cx - r * 0.95, cy + r * 0.25, r * 0.42, r * 0.85, 0.2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + r * 0.95, cy + r * 0.25, r * 0.42, r * 0.85, -0.2, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#fff8ee';
+  // long floppy ears: beige on top, fading to grey-brown
+  for (const sd of [-1, 1]) {
+    const g = ctx.createLinearGradient(0, cy - r * 0.4, 0, cy + r * 1.1);
+    g.addColorStop(0, '#d8c3a5'); g.addColorStop(0.55, '#b9a68f'); g.addColorStop(1, '#7d7268');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.92, cy + r * 0.3, r * 0.4, r * 0.82, -sd * 0.25, 0, Math.PI * 2); ctx.fill();
+  }
+  // fluffy white head with a little top tuft
+  ctx.fillStyle = '#fffaf3';
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#c98a4b';
-  ctx.beginPath(); ctx.ellipse(cx, cy - r * 0.78, r * 0.38, r * 0.2, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx - r * 0.38, cy - r * 0.08, r * 0.24, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + r * 0.38, cy - r * 0.08, r * 0.24, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#21160f';
-  ctx.beginPath(); ctx.arc(cx - r * 0.36, cy - r * 0.06, r * 0.14, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + r * 0.36, cy - r * 0.06, r * 0.14, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(cx - r * 0.31, cy - r * 0.11, r * 0.045, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + r * 0.41, cy - r * 0.11, r * 0.045, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#21160f';
-  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.25, r * 0.12, r * 0.09, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#21160f'; ctx.lineWidth = r * 0.05; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.arc(cx - r * 0.1, cy + r * 0.38, r * 0.1, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx + r * 0.1, cy + r * 0.38, r * 0.1, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-  ctx.fillStyle = '#f08a8a';
-  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.56, r * 0.07, r * 0.09, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#3f8a3f'; // bow
-  ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.9); ctx.lineTo(cx - r * 0.35, cy + r * 0.72); ctx.lineTo(cx - r * 0.35, cy + r * 1.08); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.9); ctx.lineTo(cx + r * 0.35, cy + r * 0.72); ctx.lineTo(cx + r * 0.35, cy + r * 1.08); ctx.fill();
-  ctx.fillStyle = '#e8b84a';
-  ctx.beginPath(); ctx.arc(cx, cy + r * 0.92, r * 0.1, 0, Math.PI * 2); ctx.fill();
+  for (const [dx, dy, rr] of [[0, -0.98, 0.22], [-0.2, -0.92, 0.18], [0.2, -0.92, 0.18]]) { ctx.beginPath(); ctx.arc(cx + dx * r, cy + dy * r, rr * r, 0, Math.PI * 2); ctx.fill(); }
+  // soft beige patches around the eyes
+  ctx.fillStyle = '#e2cfb2';
+  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.4, cy - r * 0.12, r * 0.3, r * 0.27, 0, 0, Math.PI * 2); ctx.fill(); }
+  // big shiny eyes
+  for (const sd of [-1, 1]) {
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.1, r * 0.18, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#15100c'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38, cy - r * 0.1, r * 0.155, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cx + sd * r * 0.38 + r * 0.05, cy - r * 0.16, r * 0.05, 0, Math.PI * 2); ctx.fill();
+  }
+  // nose
+  ctx.fillStyle = '#15100c';
+  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.2, r * 0.15, r * 0.11, 0, 0, Math.PI * 2); ctx.fill();
+  // open smiling mouth + tongue
+  ctx.fillStyle = '#2a1712';
+  ctx.beginPath(); ctx.moveTo(cx - r * 0.3, cy + r * 0.42); ctx.quadraticCurveTo(cx, cy + r * 0.9, cx + r * 0.3, cy + r * 0.42); ctx.quadraticCurveTo(cx, cy + r * 0.5, cx - r * 0.3, cy + r * 0.42); ctx.fill();
+  ctx.fillStyle = '#f08a96';
+  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.66, r * 0.12, r * 0.15, 0, 0, Math.PI * 2); ctx.fill();
 }
 
 function paw(ctx, x, y, s, color) {
@@ -149,7 +150,7 @@ export function floor1(p, anim) {
   for (const z of [2.7, 3.6, 4.5]) stool(p, -4.55, z);
   for (const x of [-9.6, -8.7]) stool(p, x, 6.85, { color: C.terracotta });
   // menu board on left wall + hanging pendants over counter
-  panel(p, 2.4, 1.8, menuTex(), -11.83, 2.4, 3.9, { ry: Math.PI / 2 });
+  panel(p, 2.4, 1.8, menuTex(), -11.66, 2.4, 3.9, { ry: Math.PI / 2 });
   for (const x of [-9.6, -7.8, -6.0]) pendant(p, x, 6.0, { drop: 0.9 });
 
   // ---- round tables (chairs face inward)
@@ -165,8 +166,8 @@ export function floor1(p, anim) {
   cyl(p, 0.1, 0.12, C.white, -8.6, 0.47, -4.8, { seg: 10 });
   floorLamp(p, -6.6, -7.2);
   plant(p, -11.3, -7.3, { tall: true });
-  frame(p, -9, 2.1, -7.84, 1.6, 1.0, 0, '#97b88f');
-  frame(p, -11.84, 2.1, -4.4, 1.2, 0.9, Math.PI / 2, '#f1d08a');
+  frame(p, -9, 2.1, -7.68, 1.6, 1.0, 0, '#97b88f');
+  frame(p, -11.68, 2.1, -4.4, 1.2, 0.9, Math.PI / 2, '#f1d08a');
 
   // ---- long communal table with bench along the back wall
   const lt = rectTable(p, 1.6, -5.9, 7.2, 1.0, { top: C.woodLight });
@@ -214,73 +215,190 @@ export function floor1(p, anim) {
 }
 
 // ---------------------------------------------------------------- Floor 2
+// Back-left: living room · Front-left: glass music room · Back-right: kitchen
+// Front-right: dining for 12 · Middle: open space between living room & kitchen.
+const BACK_IN = -7.7, LEFT_IN = -11.7; // inner faces of the back / left walls
+
+function drumKit(p, x, z, ry) {
+  const g = grp(p, x, 0, z, ry);       // drummer sits at local (0,0,-0.7), kit faces +Z
+  const shell = '#b3261e', chrome = '#c9ccd0', gold = '#d9b24a', head = '#f4efe6';
+  // bass drum lying on its side, front head facing +Z
+  cyl(g, 0.3, 0.45, shell, 0, 0.3, 0.15, { rx: Math.PI / 2, seg: 20 });
+  cyl(g, 0.27, 0.02, head, 0, 0.3, 0.38, { rx: Math.PI / 2, seg: 20 });
+  // snare + toms + floor tom
+  cyl(g, 0.17, 0.12, shell, -0.38, 0.62, -0.2, { seg: 16 }); cyl(g, 0.16, 0.01, head, -0.38, 0.74, -0.2, { seg: 16 });
+  cyl(g, 0.02, 0.62, chrome, -0.38, 0, -0.2, { seg: 6 });
+  cyl(g, 0.14, 0.14, shell, -0.16, 0.82, 0.08, { seg: 14, rx: -0.3 });
+  cyl(g, 0.15, 0.15, shell, 0.18, 0.82, 0.08, { seg: 14, rx: -0.3 });
+  cyl(g, 0.21, 0.42, shell, 0.5, 0.0, -0.25, { seg: 16 }); cyl(g, 0.2, 0.01, head, 0.5, 0.42, -0.25, { seg: 16 });
+  // cymbals on stands + hi-hat
+  for (const [cx, cz, h] of [[-0.62, 0.15, 1.25], [0.55, 0.3, 1.35]]) {
+    cyl(g, 0.015, h, chrome, cx, 0, cz, { seg: 6 });
+    cyl(g, 0.24, 0.015, gold, cx, h, cz, { seg: 18, top: 0.3, bottom: 1, metalness: 0.6, roughness: 0.3 });
+  }
+  cyl(g, 0.015, 0.85, chrome, -0.72, 0, -0.3, { seg: 6 });
+  cyl(g, 0.17, 0.012, gold, -0.72, 0.85, -0.3, { seg: 16, metalness: 0.6, roughness: 0.3 });
+  cyl(g, 0.17, 0.012, gold, -0.72, 0.88, -0.3, { seg: 16, metalness: 0.6, roughness: 0.3 });
+  // drum throne
+  cyl(g, 0.03, 0.5, chrome, 0, 0, -0.7, { seg: 6 });
+  cyl(g, 0.2, 0.08, C.black, 0, 0.5, -0.7, { seg: 14 });
+  return g;
+}
+
+function keyboardOnStand(p, x, z, ry) {
+  const g = grp(p, x, 0, z, ry);       // player at local -Z side
+  box(g, 0.05, 0.75, 0.05, C.black, -0.55, 0, 0, { rz: 0.35 });
+  box(g, 0.05, 0.75, 0.05, C.black, 0.55, 0, 0, { rz: -0.35 });
+  box(g, 1.4, 0.1, 0.35, '#1f1f22', 0, 0.75, 0);
+  box(g, 1.3, 0.025, 0.16, '#f8f6f0', 0, 0.85, -0.08);                 // white keys
+  for (let i = 0; i < 26; i++) if (i % 7 !== 2 && i % 7 !== 6) box(g, 0.022, 0.03, 0.09, '#111', -0.62 + i * 0.05, 0.86, -0.04);
+  box(g, 0.7, 0.05, 0.3, C.black, 0, 0.45, -0.6);                     // bench
+  box(g, 0.6, 0.45, 0.25, C.black, 0, 0, -0.6);
+  return g;
+}
+
 export function floor2(p) {
   floorSurface(p, RW, 16, RX, 0, plankTex('#d9ae7a', '#b8875a'), 3);
 
-  // ---- living room (left)
-  box(p, 3.4, 2.0, 0.08, C.black, -7.6, 1.3, -7.8);
-  panel(p, 3.2, 1.8, tvTex(), -7.6, 2.3, -7.75, { glow: 0.5 });
-  box(p, 4.0, 0.5, 0.5, C.woodDark, -7.6, 0, -7.55);
-  for (let i = 0; i < 3; i++) box(p, 1.1, 0.04, 0.02, C.wood, -8.9 + i * 1.3, 0.25, -7.29);
-  rug(p, -7.6, -4.3, 5.6, 4.4, '#f0e4cc', '#a77b4f');
-  sofa(p, -7.6, -1.6, 4.2, Math.PI, { color: '#d9c3a0' });              // facing TV
-  sofa(p, -11.2, -4.3, 4.0, Math.PI / 2, { color: '#d9c3a0', pillow: '#c96f4a' }); // along left wall
-  rectTable(p, -7.6, -4.3, 1.8, 1.0, { h: 0.4, top: C.woodLight });
-  sphere(p, 0.15, '#c96f4a', -7.3, 0.55, -4.2, { s: [1, 0.6, 1] });
-  floorLamp(p, -11.2, -7.2);
-  plant(p, -4.6, -7.3, { tall: true });
-  plant(p, -11.3, -1.4);
-  for (let i = 0; i < 3; i++) pendant(p, -9.2 + i * 1.6, -4.3, { drop: 0.7, shade: '#e8c48a' });
+  // ================= LIVING ROOM (back-left, x -11.7..-1, z -7.7..1) =================
+  const tvx = -6.3;
+  // wall-mounted TV
+  box(p, 4.3, 2.45, 0.08, '#1b1b1e', tvx, 1.15, BACK_IN + 0.04);
+  panel(p, 4.1, 2.3, tvTex(), tvx, 1.15 + 1.225, BACK_IN + 0.09, { glow: 0.55 });
+  box(p, 0.3, 0.3, 0.06, '#2b2a2c', tvx, 1.0, BACK_IN + 0.03);                  // wall bracket hint
+  // floating TV console + soundbar
+  box(p, 5.4, 0.45, 0.5, C.woodDark, tvx, 0.3, BACK_IN + 0.25);
+  for (let i = 0; i < 4; i++) box(p, 1.25, 0.35, 0.02, C.wood, tvx - 2.0 + i * 1.33, 0.35, BACK_IN + 0.51);
+  box(p, 1.6, 0.1, 0.12, '#2b2a2c', tvx, 0.75, BACK_IN + 0.3);
+  plant(p, tvx - 2.2, BACK_IN + 0.25, { s: 0.55, y: 0.75 });
+  // bookshelves flanking the TV
+  bookshelf(p, -10.4, BACK_IN + 0.2, 2.0, 2.4, 0);
+  bookshelf(p, -2.2, BACK_IN + 0.2, 2.0, 2.4, 0);
+  // rug, two long sofas, armchair, coffee table
+  rug(p, tvx, -3.7, 8.2, 5.6, '#efe2c8', '#a77b4f');
+  sofa(p, tvx, -1.1, 5.2, Math.PI, { color: '#d9c3a0' });                                 // facing the TV
+  sofa(p, -11.05, -3.9, 4.4, Math.PI / 2, { color: '#d9c3a0', pillow: '#c96f4a' });       // along the left wall
+  sofa(p, -2.2, -4.0, 1.3, -Math.PI / 2, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' }); // armchair
+  rectTable(p, tvx, -3.8, 2.4, 1.2, { h: 0.4, top: C.woodLight });
+  sphere(p, 0.16, '#c96f4a', tvx + 0.5, 0.56, -3.7, { s: [1, 0.6, 1] });
+  box(p, 0.5, 0.06, 0.35, '#e9e1cf', tvx - 0.6, 0.47, -3.9);                                // magazines
+  rectTable(p, -10.9, -0.9, 0.6, 0.6, { h: 0.55, top: C.woodLight });                        // side tables
+  rectTable(p, -2.2, -2.7, 0.6, 0.6, { h: 0.55, top: C.woodLight });
+  floorLamp(p, -10.9, -6.8);
+  floorLamp(p, -2.2, -5.4);
+  plant(p, -11.2, -0.1, { tall: true });
+  for (let i = 0; i < 3; i++) pendant(p, tvx - 1.6 + i * 1.6, -3.8, { drop: 0.6, shade: '#e8c48a' });
+  frame(p, LEFT_IN + 0.02, 2.0, -3.9, 2.0, 1.1, Math.PI / 2, '#c96f4a');
 
-  // ---- glass music room (CDs, sound system, lounge chair)
-  const mx0 = -3.8, mx1 = 2.2, mz1 = -2.8;
-  box(p, mx1 - mx0, 0.03, 8 + mz1, '#7d5a43', (mx0 + mx1) / 2, 0.02, (-8 + mz1) / 2, { cast: false });
-  glassWall(p, mx0, mz1, mx1, mz1, CEIL, { gap: [3.6, 4.6] });
-  glassWall(p, mx0, -7.85, mx0, mz1, CEIL);
-  glassWall(p, mx1, -7.85, mx1, mz1, CEIL);
+  // ================= GLASS MUSIC ROOM (front-left, x -11.7..-3.4, z 1.8..7.75) =================
+  const mx0 = LEFT_IN, mx1 = -3.4, mz0 = 1.8, mz1 = 7.75;
+  box(p, mx1 - mx0, 0.03, mz1 - mz0, '#7d5a43', (mx0 + mx1) / 2, 0.02, (mz0 + mz1) / 2, { cast: false });
+  glassWall(p, mx0, mz0, mx1, mz0, CEIL, { gap: [6.6, 7.6] });   // back side, door near the right
+  glassWall(p, mx1, mz0, mx1, mz1, CEIL);
+  glassWall(p, mx0, mz1, mx1, mz1, CEIL);                         // front (street side)
   const cdCols = ['#d94f3d', '#3e6b9a', '#f1c84b', '#2b2a2c', '#7ab87a', '#e8e1d0', '#9b59b6', '#f08a5d'];
-  bookshelf(p, (mx0 + mx1) / 2, -7.6, 5.6, 2.9, 0, { bookColors: cdCols, bookW: 0.035, bookH: 0.16, rows: 7, color: '#3d2b1f' });
-  bookshelf(p, mx0 + 0.25, -5.4, 2.6, 2.4, Math.PI / 2, { bookColors: cdCols, bookW: 0.035, bookH: 0.16, rows: 6, color: '#3d2b1f' });
-  // speakers + amp console + turntable
-  for (const sx of [-2.2, 1.6]) {
-    box(p, 0.5, 1.2, 0.45, '#2b2a2c', sx, 0, -6.6);
-    cyl(p, 0.16, 0.03, '#555', sx, 0.75, -6.37, { rx: Math.PI / 2, seg: 14 });
-    cyl(p, 0.09, 0.03, '#555', sx, 1.0, -6.37, { rx: Math.PI / 2, seg: 12 });
+  const cd = { bookColors: cdCols, bookW: 0.035, bookH: 0.16, rows: 7, color: '#3d2b1f' };
+  bookshelf(p, LEFT_IN + 0.22, 5.2, 4.6, 2.9, Math.PI / 2, cd);   // CD wall
+  // hi-fi: console + turntable + amp + tall speakers along the back glass (left half)
+  box(p, 2.4, 0.6, 0.5, C.woodDark, -9.3, 0, 2.3);
+  box(p, 0.8, 0.12, 0.4, '#c9ccd0', -9.8, 0.6, 2.3, { metalness: 0.5, roughness: 0.4 });
+  box(p, 0.6, 0.08, 0.45, C.black, -8.8, 0.6, 2.3);
+  cyl(p, 0.2, 0.02, '#1a1a1a', -8.8, 0.68, 2.3, { seg: 20 });
+  for (const sx of [-10.9, -7.7]) {
+    box(p, 0.5, 1.2, 0.45, '#2b2a2c', sx, 0, 2.3);
+    cyl(p, 0.16, 0.03, '#555', sx, 0.75, 2.53, { rx: Math.PI / 2, seg: 14 });
+    cyl(p, 0.09, 0.03, '#555', sx, 1.0, 2.53, { rx: Math.PI / 2, seg: 12 });
   }
-  box(p, 2.4, 0.6, 0.5, C.woodDark, -0.3, 0, -6.6);
-  box(p, 0.8, 0.12, 0.4, '#c9ccd0', -0.8, 0.6, -6.6, { metalness: 0.5, roughness: 0.4 });
-  box(p, 0.6, 0.08, 0.45, C.black, 0.2, 0.6, -6.6);
-  cyl(p, 0.2, 0.02, '#1a1a1a', 0.2, 0.68, -6.6, { seg: 20 });
-  // lounge chair (facing the speakers) + ottoman
-  const lc = grp(p, -0.3, 0, -4.3, Math.PI);
+  // lounge chair + ottoman facing the speakers
+  const lc = grp(p, -9.3, 0, 4.6, Math.PI);
   box(lc, 0.9, 0.35, 0.85, C.woodDark, 0, 0.0, 0);
   box(lc, 0.82, 0.18, 0.78, '#3b2a20', 0, 0.35, 0.02);
   box(lc, 0.82, 0.9, 0.2, '#3b2a20', 0, 0.45, -0.4, { rx: -0.25 });
-  cyl(p, 0.3, 0.35, '#3b2a20', -0.3, 0, -5.4, { seg: 14 });
-  floorLamp(p, 1.6, -3.4);
-  pendant(p, -0.8, -5.3, { drop: 0.7, shade: '#2f3a2c' });
+  cyl(p, 0.3, 0.35, '#3b2a20', -9.3, 0, 3.55, { seg: 14 });
+  floorLamp(p, -10.9, 7.2);
+  // music production desk with computer (right half, against the back glass)
+  rectTable(p, -5.4, 2.35, 2.8, 0.8, { top: '#2b2a2c', leg: C.black });
+  monitor(p, -5.85, 0.79, 2.25, 0);
+  monitor(p, -4.95, 0.79, 2.25, 0);
+  box(p, 0.9, 0.04, 0.25, '#1f1f22', -5.4, 0.79, 2.6);                                   // MIDI controller
+  for (let i = 0; i < 8; i++) box(p, 0.06, 0.02, 0.06, '#f1c84b', -5.75 + i * 0.1, 0.83, 2.53);
+  for (const sx of [-6.6, -4.2]) { box(p, 0.25, 0.4, 0.25, '#2b2a2c', sx, 0.79, 2.25); cyl(p, 0.07, 0.02, '#777', sx, 1.0, 2.38, { rx: Math.PI / 2, seg: 10 }); }
+  officeChair(p, -5.4, 3.25, Math.PI);
+  // keyboard on stand along the right glass
+  keyboardOnStand(p, -4.0, 4.6, -Math.PI / 2);
+  // drum kit at the front, drummer facing the street
+  rug(p, -6.6, 6.2, 2.6, 2.4, '#5c3d26', '#3d2b1f');
+  drumKit(p, -6.6, 6.5, 0);
+  pendant(p, -9.3, 4.0, { drop: 0.7, shade: '#2f3a2c' });
+  pendant(p, -5.4, 3.0, { drop: 0.7, shade: '#2f3a2c' });
+  const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 56px -apple-system, sans-serif'; ctx.fillText('♪ Music Room', 40, 68); });
+  panel(p, 1.9, 0.36, sign, -9.0, 3.1, mz0 + 0.04, { transparent: true });
+  panel(p, 1.9, 0.36, sign, -9.0, 3.1, mz0 - 0.04, { transparent: true, ry: Math.PI });
 
-  // ---- kitchen (right, back)
-  const kx0 = 2.9, kx1 = 9.3;
-  box(p, kx1 - kx0, 0.9, 0.65, '#7f9f6e', (kx0 + kx1) / 2, 0, -7.5);                 // base cabinets
-  box(p, kx1 - kx0, 0.05, 0.7, '#f4ede2', (kx0 + kx1) / 2, 0.9, -7.5);
-  box(p, kx1 - kx0 - 1.2, 0.8, 0.4, '#8fae84', (kx0 + kx1) / 2 + 0.6, 1.9, -7.65);    // upper cabinets
-  box(p, 0.9, 2.1, 0.75, '#c9ccd0', kx0 + 0.45, 0, -7.45, { metalness: 0.5, roughness: 0.35 }); // fridge
-  box(p, 0.02, 1.0, 0.02, C.black, kx0 + 0.8, 0.9, -7.06);
-  box(p, 0.8, 0.04, 0.5, C.black, 6.5, 0.95, -7.5);                                     // hob
-  box(p, 0.7, 0.05, 0.45, '#d0d4d8', 8.2, 0.94, -7.5, { metalness: 0.6 });               // sink
-  box(p, 0.8, 0.5, 0.45, '#c9ccd0', 6.5, 1.85, -7.6, { metalness: 0.5 });               // hood
-  // big island with stools
-  box(p, 3.6, 0.9, 1.3, '#7f9f6e', 6.1, 0, -4.6);
-  box(p, 3.8, 0.06, 1.45, '#f4ede2', 6.1, 0.9, -4.6);
-  for (let i = 0; i < 4; i++) stool(p, 4.8 + i * 0.85, -3.55, { color: C.wood });
-  for (let i = 0; i < 3; i++) pendant(p, 5.0 + i * 1.1, -4.6, { drop: 1.2, shade: '#f4ede2' });
-  cyl(p, 0.25, 0.08, C.white, 5.6, 0.96, -4.7, { seg: 16 });
-  for (let i = 0; i < 3; i++) sphere(p, 0.08, ['#e85d3d', '#f1c84b', '#7ab87a'][i], 5.5 + i * 0.1, 1.08, -4.7);
+  // ================= KITCHEN (back-right, x 2.5..9.3, z -7.7..-0.8) =================
+  const kx0 = 2.5, kx1 = 9.3, cab = '#7f9f6e', cabLight = '#8fae84', quartz = '#f4ede2', steel = '#c9ccd0';
+  // tall units: double fridge + oven tower + pantry
+  box(p, 1.3, 2.3, 0.75, steel, kx0 + 0.65, 0, BACK_IN + 0.38, { metalness: 0.5, roughness: 0.35 });
+  box(p, 0.02, 2.2, 0.02, '#888', kx0 + 0.65, 0.05, BACK_IN + 0.76);
+  for (const hx of [-0.08, 0.08]) box(p, 0.03, 0.9, 0.04, '#555', kx0 + 0.65 + hx, 0.9, BACK_IN + 0.78);
+  box(p, 0.75, 2.3, 0.7, cab, kx0 + 1.68, 0, BACK_IN + 0.35);
+  for (const oy of [0.75, 1.4]) {
+    box(p, 0.62, 0.55, 0.02, '#2b2a2c', kx0 + 1.68, oy, BACK_IN + 0.71);
+    box(p, 0.5, 0.25, 0.01, mat('#ffb36b', { emissive: '#ff9a4a', emissiveIntensity: 0.4 }), kx0 + 1.68, oy + 0.12, BACK_IN + 0.72, { cast: false });
+  }
+  // base run along the back wall
+  const bx0 = kx0 + 2.05;
+  box(p, kx1 - bx0, 0.88, 0.65, cab, (bx0 + kx1) / 2, 0, BACK_IN + 0.33);
+  box(p, kx1 - bx0 + 0.05, 0.05, 0.7, quartz, (bx0 + kx1) / 2, 0.88, BACK_IN + 0.35);
+  for (let x = bx0 + 0.3; x < kx1 - 0.1; x += 0.6) box(p, 0.25, 0.02, 0.02, '#c9a77a', x, 0.75, BACK_IN + 0.67); // handles
+  box(p, kx1 - bx0, 0.7, 0.02, '#e9f1ee', (bx0 + kx1) / 2, 0.93, BACK_IN + 0.01, { cast: false }); // backsplash
+  // upper cabinets with an open shelf in the middle
+  box(p, 1.6, 0.8, 0.38, cabLight, bx0 + 0.8, 1.8, BACK_IN + 0.19);
+  box(p, 1.2, 0.8, 0.38, cabLight, kx1 - 0.6, 1.8, BACK_IN + 0.19);
+  // range + chimney hood (centre)
+  const hx = (bx0 + kx1) / 2 - 0.2;
+  box(p, 0.9, 0.04, 0.55, C.black, hx, 0.93, BACK_IN + 0.35);
+  for (const [ox, oz] of [[-0.2, -0.12], [0.2, -0.12], [-0.2, 0.12], [0.2, 0.12]]) cyl(p, 0.09, 0.01, '#444', hx + ox, 0.97, BACK_IN + 0.35 + oz, { seg: 12 });
+  box(p, 1.0, 0.25, 0.5, steel, hx, 1.75, BACK_IN + 0.25, { metalness: 0.5 });
+  box(p, 0.35, 1.2, 0.3, steel, hx, 2.0, BACK_IN + 0.15, { metalness: 0.5 });
+  cyl(p, 0.16, 0.2, '#b84a3a', hx - 0.2, 0.97, BACK_IN + 0.23, { seg: 12 });                // pot
+  // open shelves between uppers: plates & jars
+  for (const sy of [1.9, 2.3]) box(p, 0.8, 0.04, 0.3, C.wood, hx + 0.93, sy, BACK_IN + 0.15);
+  for (let i = 0; i < 4; i++) cyl(p, 0.07, 0.18, ['#e8e1d0', '#c96f4a', '#97b88f', '#f1d08a'][i], hx + 0.63 + i * 0.2, 1.94, BACK_IN + 0.15, { seg: 10 });
+  for (let i = 0; i < 5; i++) cyl(p, 0.11, 0.02, '#f8f6f0', hx + 0.93, 2.34 + i * 0.02, BACK_IN + 0.15, { seg: 14 });
+  // countertop items: coffee machine, kettle, toaster, utensils, cutting board, fruit
+  box(p, 0.35, 0.4, 0.35, '#2b2a2c', bx0 + 0.4, 0.93, BACK_IN + 0.3);
+  cyl(p, 0.1, 0.22, steel, bx0 + 0.9, 0.93, BACK_IN + 0.32, { seg: 12, metalness: 0.5 });
+  box(p, 0.35, 0.2, 0.2, '#e8c48a', kx1 - 0.6, 0.93, BACK_IN + 0.3);
+  cyl(p, 0.07, 0.2, '#e8e1d0', kx1 - 1.2, 0.93, BACK_IN + 0.3, { seg: 10 });
+  box(p, 0.5, 0.03, 0.3, C.woodLight, hx + 1.1, 0.93, BACK_IN + 0.38);
+  // L-return along the right (toward the lift side)
+  box(p, 0.65, 0.88, 2.6, cab, kx1 - 0.33, 0, BACK_IN + 0.65 + 1.3);
+  box(p, 0.7, 0.05, 2.65, quartz, kx1 - 0.33, 0.88, BACK_IN + 0.65 + 1.3);
+  box(p, 0.5, 0.03, 0.6, '#d0d4d8', kx1 - 0.33, 0.92, BACK_IN + 1.6, { metalness: 0.6 });    // second sink
+  box(p, 0.05, 0.35, 0.05, steel, kx1 - 0.08, 0.93, BACK_IN + 1.6, { metalness: 0.6 });
+  // big island with waterfall ends, sink, stools
+  const ix = 5.6, iz = -3.4;
+  box(p, 4.0, 0.9, 1.5, cab, ix, 0, iz);
+  box(p, 4.2, 0.07, 1.65, quartz, ix, 0.9, iz);
+  box(p, 0.08, 0.9, 1.65, quartz, ix - 2.07, 0, iz);
+  box(p, 0.08, 0.9, 1.65, quartz, ix + 2.07, 0, iz);
+  box(p, 0.7, 0.03, 0.45, '#d0d4d8', ix - 0.9, 0.95, iz - 0.2, { metalness: 0.6 });
+  cyl(p, 0.025, 0.4, steel, ix - 0.9, 0.95, iz - 0.5, { seg: 8, metalness: 0.6 });
+  cyl(p, 0.28, 0.08, C.white, ix + 0.8, 0.97, iz, { seg: 16 });                        // fruit bowl
+  for (let i = 0; i < 4; i++) sphere(p, 0.08, ['#e85d3d', '#f1c84b', '#7ab87a', '#e85d3d'][i], ix + 0.65 + i * 0.1, 1.09, iz + (i % 2) * 0.08);
+  plant(p, ix + 1.7, iz, { s: 0.45, y: 0.97 });
+  for (let i = 0; i < 4; i++) stool(p, ix - 1.5 + i * 1.0, iz + 1.15, { color: C.wood });
+  for (let i = 0; i < 3; i++) pendant(p, ix - 1.4 + i * 1.4, iz, { drop: 1.2, shade: '#f4ede2' });
+  rug(p, ix, iz + 1.0, 5.4, 1.2, '#e8dcc6', '#c9a77a');
 
-  // ---- dining table for 12
-  const dx = 3.4, dz = 2.6, L = 6.4;
-  rug(p, dx, dz, L + 2.2, 3.6, '#efe7d6', '#c9a77a');
+  // ================= OPEN SPACE between living room & kitchen =================
+  plant(p, 0.7, BACK_IN + 0.4, { tall: true, s: 1.2 });
+  frame(p, 0.7, 1.6, BACK_IN + 0.02, 1.4, 1.0, 0, '#97b88f');
+
+  // ================= DINING FOR 12 (front-right) =================
+  const dx = 3.4, dz = 3.9, L = 6.4;
+  rug(p, dx, dz, L + 2.4, 3.6, '#efe7d6', '#c9a77a');
   rectTable(p, dx, dz, L, 1.4, { top: C.wood });
   for (let i = 0; i < 5; i++) {
     const x = dx - L / 2 + (i + 0.5) * L / 5;
@@ -291,14 +409,9 @@ export function floor2(p) {
   chair(p, dx + L / 2 + 0.45, dz, -Math.PI / 2, { seat: C.sage });
   for (let i = 0; i < 4; i++) pendant(p, dx - 2.4 + i * 1.6, dz, { drop: 1.3, shade: '#c8935a' });
   for (let i = 0; i < 3; i++) { cyl(p, 0.07, 0.2, C.white, dx - 1.5 + i * 1.5, 0.82, dz, { seg: 8 }); sphere(p, 0.1, ['#f2a1a8', '#f1d08a', '#f2a1a8'][i], dx - 1.5 + i * 1.5, 1.1, dz); }
-
-  // ---- extras
-  plant(p, -3.6, 7.2, { tall: true });
+  plant(p, -2.7, 7.2, { tall: true });
   plant(p, 8.8, 7.2, { tall: true });
-  bookshelf(p, -11.65, 4.5, 3.0, 2.2, Math.PI / 2);
-  floorLamp(p, -11.2, 2.4);
-  sofa(p, -9.5, 5.8, 2.2, Math.PI / 2 + 0.6, { color: '#c96f4a', pillow: '#f1d08a' });
-  frame(p, -11.84, 2.2, 0.0, 1.6, 1.0, Math.PI / 2, '#c96f4a');
+  plant(p, 8.8, 0.0);
 }
 
 // ---------------------------------------------------------------- Floors 3 & 4 (office)
@@ -364,8 +477,8 @@ export function officeFloor(p, n, employees, anim) {
   }
   officeChair(p, mcx - 2.9, mcz, Math.PI / 2, { color: accent });
   officeChair(p, mcx + 2.9, mcz, -Math.PI / 2, { color: accent });
-  box(p, 2.6, 1.5, 0.08, C.black, mcx, 1.1, -7.75);                                   // meeting TV
-  box(p, 2.45, 1.35, 0.02, mat('#4b7aa8', { emissive: '#35618c', emissiveIntensity: 0.5 }), mcx, 1.17, -7.7, { cast: false });
+  box(p, 2.6, 1.5, 0.08, C.black, mcx, 1.1, -7.64);                                   // meeting TV
+  box(p, 2.45, 1.35, 0.02, mat('#4b7aa8', { emissive: '#35618c', emissiveIntensity: 0.5 }), mcx, 1.17, -7.59, { cast: false });
   box(p, 2.4, 1.2, 0.05, '#ffffff', rx1 - 0.08, 1.0, mcz, { ry: Math.PI / 2 });         // whiteboard
   pendant(p, mcx - 1, mcz, { drop: 1.1, shade: '#f4ede2' });
   pendant(p, mcx + 1, mcz, { drop: 1.1, shade: '#f4ede2' });
@@ -388,7 +501,7 @@ export function officeFloor(p, n, employees, anim) {
   box(p, 1.8, 0.9, 0.6, C.woodDark, -10.9, 0, 5.8, { ry: Math.PI / 2 });
   box(p, 0.4, 0.45, 0.35, '#c9ccd0', -10.9, 0.9, 5.6, { metalness: 0.5 });
   for (const [px, pz] of [[-11.3, -1.5], [-11.3, 7.2], [0.8, 7.2], [8.9, 7.2], [1.1, -7.3]]) plant(p, px, pz, { tall: true });
-  frame(p, -11.84, 2.1, -4.5, 1.6, 1.0, Math.PI / 2, accent);
+  frame(p, -11.68, 2.1, -4.5, 1.6, 1.0, Math.PI / 2, accent);
 }
 
 // ---------------------------------------------------------------- Floor 5 (roof)

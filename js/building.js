@@ -1,13 +1,14 @@
 // The 5-storey shell: slabs, walls, windows, stairs, lift shaft, railings.
 // Building footprint: x -12..12, z -8..8. Street (front) is +Z.
-// Service core on the right: lift x 9.6..12 / z -8..-5.6, stairs x 9.6..12 / z -1.6..4.
+// Service core on the right: lift x 9.6..12 / z -8..-5.6 (door faces the front),
+// a roomy lift lobby z -5.6..0.4, stairs x 9.6..12 / z 0.4..6 (moved towards the front).
 import * as THREE from 'three';
 import { H, SLAB, CEIL, box, cyl, grp, glassMat, mat, makeLabel, optimize } from './helpers.js';
 import { C } from './furniture.js';
 
 export const W = 24, D = 16, X0 = -12, X1 = 12, Z0 = -8, Z1 = 8;
 export const CORE_X = 9.6;              // rooms are x < CORE_X
-export const STAIR = { x0: 9.6, x1: 12, z0: -1.6, z1: 4 };
+export const STAIR = { x0: 9.6, x1: 12, z0: 0.4, z1: 6.0 };
 export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };
 
 const WALL = '#f3e5cf', WALL_OUT = '#e9d3b4', TRIM = '#8a5a33', SLAB_C = '#e8d6bb';
@@ -88,10 +89,13 @@ function liftShaftSegment(p, n, top = false) {
   box(p, x1 - x0, hh, 0.04, glassMat(), (x0 + x1) / 2, y0, z1, { cast: false });
   box(p, 0.04, hh, z1 - z0, glassMat(), x0, y0, (z0 + z1) / 2, { cast: false });
   for (const [px, pz] of [[x0, z1], [x1 - 0.05, z1], [x0, z0 + 0.05]]) box(p, 0.1, hh, 0.1, '#5b4a3c', px, y0, pz, { cast: false });
-  // door frame on the room side (left, facing -X)
-  box(p, 0.12, 0.12, 1.4, '#5b4a3c', x0, 2.3, (z0 + z1) / 2, { cast: false });
+  // door frame on the lobby side (front, facing +Z)
+  const cx = (x0 + x1) / 2;
+  box(p, 1.4, 0.12, 0.12, '#5b4a3c', cx, 2.3, z1, { cast: false });
+  box(p, 0.08, 2.3, 0.12, '#5b4a3c', cx - 0.7, 0, z1, { cast: false });
+  box(p, 0.08, 2.3, 0.12, '#5b4a3c', cx + 0.7, 0, z1, { cast: false });
   const lbl = makeLabel(`LIFT · ${n}F`, { height: 0.3, px: 40, depthTest: true });
-  lbl.position.set(x0 - 0.1, 2.7, (z0 + z1) / 2);
+  lbl.position.set(cx, 2.7, z1 + 0.15);
   p.add(lbl);
   if (top) {
     box(p, x1 - x0 + 0.2, 0.25, z1 - z0 + 0.2, '#5b4a3c', (x0 + x1) / 2, 3.4, (z0 + z1) / 2, { cast: false });
@@ -124,7 +128,7 @@ export function shell(p, n) {
     box(walls.left, 0.05, 0.12, D - 0.6, TRIM, X0 + 0.32, 0, 0, { cast: false });
     // right wall (x = 12): outer wall of the core
     box(walls.right, 0.3, CEIL, D, WALL_OUT, X1 - 0.15, 0, 0, { cast: false });
-    windowsAlongZ(walls.right, X1 - 0.15, STAIR.z1 + 0.6, Z1 - 0.4, 2.8);
+    windowsAlongZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.3, 3.2);
     // front corner columns
     box(p, 0.5, CEIL, 0.5, WALL_OUT, X0 + 0.25, 0, Z1 - 0.25, { cast: false });
     box(p, 0.5, CEIL, 0.5, WALL_OUT, X1 - 0.25, 0, Z1 - 0.25, { cast: false });

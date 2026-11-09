@@ -48,6 +48,24 @@ html, body {
 #floors button .small { font-size: 11px; font-weight: 600; opacity: 0.8; white-space: nowrap; }
 #floors button.active { background: var(--green); color: #fff; }
 
+/* ---------- computer / tablet in landscape: roomier UI ---------- */
+@media (hover: hover) and (pointer: fine) {
+  #floors button:hover:not(.active) { background: #fff; transform: translateY(-2px); }
+}
+@media (min-width: 900px) {
+  #top { flex-direction: row; align-items: center; padding-top: 16px; padding-left: 20px; }
+  .brand { font-size: 18px; padding: 12px 18px; }
+  .floorinfo { min-width: 280px; max-width: 420px; }
+  #floorTitle { font-size: 19px; }
+  #floorSub { font-size: 14px; }
+  #floors { padding-bottom: 20px; gap: 12px; }
+  #floors button { max-width: 120px; min-height: 72px; }
+  #floors button .big { font-size: 28px; }
+  #floors button .small { font-size: 12px; }
+  #hint { bottom: 110px; font-size: 14px; }
+  #card { top: 100px; min-width: 280px; }
+}
+
 #hint {
   position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); transform: translateX(-50%);
   background: rgba(60, 40, 25, 0.75); color: #fff; font-size: 13px; padding: 8px 14px; border-radius: 999px;
