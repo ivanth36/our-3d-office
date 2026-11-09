@@ -9,9 +9,21 @@ import {
   C, chair, stool, roundTable, rectTable, sofa, plant, pendant, floorLamp, rug,
   bookshelf, frame, glassWall, monitor, laptop, officeChair,
 } from './furniture.js';
-import { shihTzu, employee } from './characters.js';
+import { employee } from './characters.js';
 import { roamingJoe } from './joe.js';
 import { CORE_X } from './building.js';
+
+// Joe's photo cut-out (transparent PNG in /assets)
+const JOE_ASPECT = 459 / 452;
+let joeTex = null;
+function joePhotoMat() {
+  if (!joeTex) {
+    joeTex = new THREE.TextureLoader().load('assets/joe.png');
+    joeTex.colorSpace = THREE.SRGBColorSpace;
+    joeTex.anisotropy = 4;
+  }
+  return new THREE.MeshBasicMaterial({ map: joeTex, alphaTest: 0.45, toneMapped: false, side: THREE.DoubleSide });
+}
 
 const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
 
@@ -166,8 +178,7 @@ export function floor1(p, anim) {
   cyl(p, 0.1, 0.12, C.white, -8.6, 0.47, -4.8, { seg: 10 });
   floorLamp(p, -6.6, -7.2);
   plant(p, -11.3, -7.3, { tall: true });
-  frame(p, -9, 2.1, -7.68, 1.6, 1.0, 0, '#97b88f');
-  frame(p, -11.68, 2.1, -4.4, 1.2, 0.9, Math.PI / 2, '#f1d08a');
+  frame(p, -8.5, 2.0, -7.68, 1.0, 0.8, 0, '#97b88f');
 
   // ---- long communal table with bench along the back wall
   const lt = rectTable(p, 1.6, -5.9, 7.2, 1.0, { top: C.woodLight });
@@ -178,18 +189,36 @@ export function floor1(p, anim) {
   for (let i = 0; i < 4; i++) pendant(p, -1.0 + i * 1.75, -5.9, { drop: 1.2 });
   void lt;
 
-  // ---- Joe statue on a pedestal near the entrance
+  // ---- Joe cut-out standee on the pedestal near the entrance (always turns to face you)
   cyl(p, 0.55, 0.6, '#e8d6bb', 7.4, 0, 6.0, { seg: 18 });
   cyl(p, 0.6, 0.08, C.woodDark, 7.4, 0.6, 6.0, { seg: 18 });
-  const joeStatue = shihTzu(p, 7.4, 0.68, 6.0, -0.4, 1.25);
   const plaque = canvasTex(256, 64, (ctx, w, h) => { ctx.fillStyle = '#e8b84a'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#4a3020'; ctx.font = 'bold 34px Georgia, serif'; ctx.fillText('JOE  ♥', 70, 44); });
   panel(p, 0.6, 0.15, plaque, 7.4, 0.35, 6.56);
-  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.6, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
-  hit.position.set(7.4, 0.8, 6.0);
+  const standee = grp(p, 7.4, 0.68, 6.0);
+  standee.userData.dynamic = true;               // not merged: it rotates every frame
+  const sh = 1.35, sw = sh * JOE_ASPECT;
+  const photo = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), joePhotoMat());
+  photo.position.y = sh / 2 + 0.04;
+  standee.add(photo);
+  box(standee, 0.7, 0.05, 0.22, C.woodDark, 0, 0, 0, { cast: false }); // little stand base
+  box(standee, 0.6, 0.04, 0.03, '#3d2b1f', 0, 0.05, 0.0, { cast: false });
+  anim.billboards = [standee];
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.0, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
+  hit.position.set(7.4, 1.0, 6.0);
   hit.userData.info = { title: "Joe 🐾", text: "The boss of Joe's Café.\nShih Tzu · Chief Happiness Officer" };
   hit.userData.dynamic = true;
   p.add(hit);
-  void joeStatue;
+
+  // ---- framed portrait of Joe on the café's left wall (by the sofa corner)
+  const pf = grp(p, -11.7, 1.4, -4.5, Math.PI / 2);
+  box(pf, 1.12, 1.12, 0.06, '#5c3d26', 0, 0, 0.03, { cast: false });           // frame
+  box(pf, 0.98, 0.98, 0.02, '#f6eedf', 0, 0.07, 0.06, { cast: false });         // cream mat
+  const pic = new THREE.Mesh(new THREE.PlaneGeometry(0.86 * JOE_ASPECT, 0.86), joePhotoMat());
+  pic.position.set(0, 0.56, 0.075);
+  pf.add(pic);
+  box(pf, 0.5, 0.03, 0.08, '#c9a24a', 0, 1.2, 0.08, { cast: false, metalness: 0.6, roughness: 0.3 }); // picture light
+  box(pf, 0.44, 0.015, 0.05, glowMat('#fff1c8'), 0, 1.185, 0.1, { cast: false });
+  panel(pf, 0.42, 0.1, plaque, 0, -0.12, 0.04);
 
   // ---- plants
   for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [8.8, -7.3], [-3.2, -7.3], [-11.3, 0.2]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
