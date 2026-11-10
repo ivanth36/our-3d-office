@@ -46,9 +46,14 @@ export const EMPLOYEES = [
     ],
   },
   {
-    name: 'Jennie', role: "Cashier at Joe's Café", floor: 1, pos: [-7.4, 5.3], y: 0.3, ry: 0, idle: 'Ready to take your order',
+    name: 'Jennie', role: "Cashier at Joe's Café", floor: 1, pos: [-17.0, 5.3], y: 0.3, ry: 0, idle: 'Ready to take your order',
     hair: '#2a1a12', hairStyle: 'long', outfit: 'apron', shirt: '#fbf7f0', pants: '#3a3a3e',
     tasks: [],   // no scheduled tasks yet
+  },
+  {
+    name: 'Violet', role: 'Receptionist · welcome lounge', floor: 1, pos: [2.0, 4.75], ry: 0, idle: 'Welcoming guests at reception',
+    hair: '#2a1a12', hairStyle: 'long', outfit: 'blazer', skirt: '#2b3550', shirt: '#2b3550', blouse: '#ffffff', pants: '#f6d6bd',
+    tasks: [],
   },
   // ---- cleaners: push their carts around floors 1-5 (never on the same floor); routines in js/staff.js
   {

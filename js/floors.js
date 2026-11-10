@@ -89,6 +89,19 @@ function cafeSignTex() {
   });
 }
 
+function receptionSignTex() {
+  return canvasTex(1024, 256, (ctx, w, h) => {
+    ctx.fillStyle = '#2f3a2c'; roundRect(ctx, 0, 0, w, h, 40); ctx.fill();
+    ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 10; roundRect(ctx, 14, 14, w - 28, h - 28, 30); ctx.stroke();
+    ctx.fillStyle = '#f6edd8'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = 'bold 92px Georgia, "Times New Roman", serif';
+    ctx.fillText('IP Man Home Office', w / 2, 108);
+    ctx.font = '600 42px -apple-system, "Segoe UI", sans-serif';
+    ctx.fillStyle = '#c9e3b0';
+    ctx.fillText('WELCOME  ·  RECEPTION', w / 2, 196);
+  });
+}
+
 function menuTex() {
   return canvasTex(512, 384, (ctx, w, h) => {
     ctx.fillStyle = '#2f3a2c'; ctx.fillRect(0, 0, w, h);
@@ -209,43 +222,41 @@ export function floor1(p, anim) {
   panel(p, 2.4, 1.8, menuTex(), -11.66, 2.4, 3.9, { ry: Math.PI / 2 });
   for (const x of [-9.6, -7.8, -6.0]) pendant(p, x, 6.0, { drop: 0.9 });
 
-  // ---- round tables (chairs face inward)
-  const tables = [[-1.2, -2.0], [2.8, -2.0], [6.6, -2.0], [0.6, 1.8], [4.6, 1.8], [2.6, 5.4]];
-  tables.forEach(([x, z], i) => roundTable(p, x, z, { chairs: i % 2 ? 3 : 4, start: i % 2 ? 0.3 : Math.PI / 4, chair: { seat: i % 2 ? C.sage : C.fabric } }));
-  for (const [x, z] of tables) pendant(p, x, z, { shade: '#c8935a' });
-
-  // ---- cozy sofa corner (back-left)
-  rug(p, -9.0, -5.0, 5.0, 4.2, '#efe2c8', '#b88a58');
-  sofa(p, -9.0, -7.25, 4.0, 0, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
-  sofa(p, -11.25, -4.4, 3.0, Math.PI / 2, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
-  rectTable(p, -8.8, -4.8, 1.6, 0.9, { h: 0.4, top: C.woodLight });
-  cyl(p, 0.1, 0.12, C.white, -8.6, 0.47, -4.8, { seg: 10 });
-  floorLamp(p, -6.6, -7.2);
-  plant(p, -11.3, -7.3, { tall: true });
   frame(p, -8.5, 2.0, -7.68, 1.0, 0.8, 0, '#97b88f');
 
-  // ---- long high bar table along the back window (sofa corner -> lift), stools facing out
+  // ---- L-shaped high bar: along the left window up to the vending machines, then along the
+  //      back window to the middle of the floor (café half). Stools face the windows.
   const barG = grp(p);
-  barG.userData.noShift = true;               // built for the full (longer) floor
+  barG.userData.noShift = true;               // built in final (real) positions
   {
   const p = barG;
-  const bx0 = -6.0 - EXT, bx1 = 9.3, backZ = -7.68, walnut = '#6b4423', walnut2 = '#7a4e2a', iron = '#262426';
-  // live-edge walnut top: short segments with a gently wavy front edge
-  for (let x = bx0; x < bx1 - 0.01; x += 0.5) {
+  const backZ = -7.68, leftX = X0 + 0.3, bx1 = -6.0, lz1 = -2.5;
+  const walnut = '#6b4423', walnut2 = '#7a4e2a', iron = '#262426';
+  // live-edge walnut tops: short segments with a gently wavy front edge
+  for (let x = leftX; x < bx1 - 0.01; x += 0.5) {
     const w = Math.min(0.5, bx1 - x), d = 0.46 + Math.sin(x * 1.3) * 0.04 + Math.sin(x * 3.1) * 0.02;
     box(p, w + 0.01, 0.06, d, (Math.floor(x * 2) % 2) ? walnut : walnut2, x + w / 2, 0.99, backZ + d / 2);
   }
-  box(p, bx1 - bx0, 0.03, 0.3, walnut, (bx0 + bx1) / 2, 0.72, backZ + 0.17);           // lower shelf
-  // black sled-leg frames
-  for (let x = bx0 + 0.1, i = 0; x <= bx1 - 0.05; x = bx0 + 0.1 + (++i) * (bx1 - bx0 - 0.2) / 6) {
-    box(p, 0.05, 0.99, 0.05, iron, x, 0, backZ + 0.06);
-    box(p, 0.05, 0.99, 0.05, iron, x, 0, backZ + 0.4);
-    box(p, 0.05, 0.05, 0.4, iron, x, 0, backZ + 0.23);
-    box(p, 0.05, 0.05, 0.4, iron, x, 0.94, backZ + 0.23);
+  for (let z = backZ + 0.46; z < lz1 - 0.01; z += 0.5) {
+    const w = Math.min(0.5, lz1 - z), d = 0.46 + Math.sin(z * 1.3) * 0.04 + Math.sin(z * 3.1) * 0.02;
+    box(p, d, 0.06, w + 0.01, (Math.floor(z * 2) % 2) ? walnut : walnut2, leftX + d / 2, 0.99, z + w / 2);
   }
+  box(p, bx1 - leftX, 0.03, 0.3, walnut, (leftX + bx1) / 2, 0.72, backZ + 0.17);            // lower shelves
+  box(p, 0.3, 0.03, lz1 - backZ - 0.46, walnut, leftX + 0.17, 0.72, (backZ + 0.46 + lz1) / 2);
+  // black sled-leg frames
+  const frameX = (x) => {
+    box(p, 0.05, 0.99, 0.05, iron, x, 0, backZ + 0.06); box(p, 0.05, 0.99, 0.05, iron, x, 0, backZ + 0.4);
+    box(p, 0.05, 0.05, 0.4, iron, x, 0, backZ + 0.23); box(p, 0.05, 0.05, 0.4, iron, x, 0.94, backZ + 0.23);
+  };
+  const frameZ = (z) => {
+    box(p, 0.05, 0.99, 0.05, iron, leftX + 0.06, 0, z); box(p, 0.05, 0.99, 0.05, iron, leftX + 0.4, 0, z);
+    box(p, 0.4, 0.05, 0.05, iron, leftX + 0.23, 0, z); box(p, 0.4, 0.05, 0.05, iron, leftX + 0.23, 0.94, z);
+  };
+  for (let i = 0; i <= 5; i++) frameX(leftX + 0.6 + i * (bx1 - 0.1 - leftX - 0.6) / 5);
+  for (let i = 0; i <= 2; i++) frameZ(backZ + 0.8 + i * (lz1 - 0.1 - backZ - 0.8) / 2);
   // high stools with round walnut seats + curved backrests, facing the window
-  const barStool = (sx, sz) => {
-    const g = grp(p, sx, 0, sz, Math.PI);            // front (+Z) turned to face the window (-Z)
+  const barStool = (sx, sz, ry) => {
+    const g = grp(p, sx, 0, sz, ry);                 // front (+Z) turned to face the window
     for (const [lx, lz] of [[-0.14, -0.14], [0.14, -0.14], [-0.14, 0.14], [0.14, 0.14]]) {
       box(g, 0.03, 0.74, 0.03, iron, lx, 0, lz, { rx: lz * 0.5, rz: -lx * 0.5 });   // slightly splayed legs
     }
@@ -255,19 +266,23 @@ export function floor1(p, anim) {
     box(g, 0.025, 0.36, 0.025, iron, 0.1, 0.76, -0.16, { rx: -0.15 });
     box(g, 0.34, 0.13, 0.03, walnut2, 0, 1.0, -0.2, { rx: -0.15 });              // curved-ish backrest
   };
-  for (let x = bx0 + 0.45; x < bx1 - 0.3; x += 0.8) barStool(x, -6.85);
+  for (let x = -19.85; x < bx1 - 0.2; x += 0.8) barStool(x, -6.85, Math.PI);   // back window
+  for (let z = -6.4; z <= -3.0; z += 0.8) barStool(leftX + 0.85, z, -Math.PI / 2); // left window
   // things on the bar
   const barTop = 1.05;
-  laptop(p, -3.6, barTop, -7.4, 0);
-  laptop(p, 3.9, barTop, -7.4, 0);
-  for (const cx of [-2.6, 0.8, 5.0, 7.6]) { cyl(p, 0.09, 0.012, C.white, cx, barTop, -7.35, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, cx, barTop + 0.012, -7.35, { seg: 10 }); }
-  cyl(p, 0.18, 0.06, '#e8e1d0', 2.2, barTop, -7.42, { seg: 16 });                      // fruit bowl
-  for (let i = 0; i < 4; i++) sphere(p, 0.055, ['#8a3b4a', '#c98a4b', '#8a3b4a', '#e2a356'][i], 2.12 + (i % 2) * 0.14, barTop + 0.08, -7.46 + Math.floor(i / 2) * 0.1);
-  for (const px of [-5.2, 1.4, 6.2, 8.8]) plant(p, px, -7.48, { s: 0.35, y: barTop });
+  laptop(p, -18.0, barTop, -7.4, 0);
+  laptop(p, -9.5, barTop, -7.4, 0);
+  for (const cx of [-16.0, -12.5, -8.2]) { cyl(p, 0.09, 0.012, C.white, cx, barTop, -7.35, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, cx, barTop + 0.012, -7.35, { seg: 10 }); }
+  for (const cz of [-5.2, -3.6]) { cyl(p, 0.09, 0.012, C.white, leftX + 0.25, barTop, cz, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, leftX + 0.25, barTop + 0.012, cz, { seg: 10 }); }
+  cyl(p, 0.18, 0.06, '#e8e1d0', -14.2, barTop, -7.42, { seg: 16 });                      // fruit bowl
+  for (let i = 0; i < 4; i++) sphere(p, 0.055, ['#8a3b4a', '#c98a4b', '#8a3b4a', '#e2a356'][i], -14.28 + (i % 2) * 0.14, barTop + 0.08, -7.46 + Math.floor(i / 2) * 0.1);
+  for (const px of [-11.2, -6.6]) plant(p, px, -7.48, { s: 0.35, y: barTop });
+  plant(p, leftX + 0.22, -7.45, { s: 0.35, y: barTop });                                  // corner
   const love = canvasTex(256, 96, (ctx) => { ctx.fillStyle = '#1f1d1e'; ctx.fillRect(0, 0, 256, 96); ctx.fillStyle = '#e9dcc4'; ctx.font = 'italic 52px Georgia, serif'; ctx.fillText('Joe ♥', 52, 64); });
-  box(p, 0.42, 0.17, 0.05, '#1f1d1e', -0.6, barTop, -7.5, { rx: -0.15 });
-  panel(p, 0.4, 0.15, love, -0.6, barTop + 0.085, -7.47, { rx: -0.15 });
-  for (let i = 0; i < 10; i++) pendant(p, bx0 + 1.2 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
+  box(p, 0.42, 0.17, 0.05, '#1f1d1e', -13.0, barTop, -7.5, { rx: -0.15 });
+  panel(p, 0.4, 0.15, love, -13.0, barTop + 0.085, -7.47, { rx: -0.15 });
+  for (let i = 0; i < 6; i++) pendant(p, -19.6 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
+  for (const pz of [-6.0, -3.6]) pendant(p, leftX + 0.45, pz, { drop: 1.05, shade: '#2f3a2c' });
   }
 
   // ---- two red vending machines against the left wall (between the sofa corner and the counter)
@@ -293,41 +308,111 @@ export function floor1(p, anim) {
   }
 
   // ---- plants
-  for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [-11.3, 0.55]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
+  for (const [x, z] of [[8.8, 7.3], [-11.3, 0.55]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
 
   // ---- façade: fascia sign, awning, mascot
   box(p, X1 - X0, 0.55, 0.25, '#f1e0c3', XC, CEIL - 0.55, 7.95, { cast: false }).userData.noShift = true;
   const sy = CEIL - 3.7; // signs sit relative to the ceiling
-  box(p, 4.0, 1.05, 0.2, '#5c3d26', -1.5, 2.67 + sy, 7.98, { cast: false });
-  panel(p, 3.9, 0.975, cafeSignTex(), -1.5, 3.195 + sy, 8.09, { glow: 0.25 });
+  const signs = grp(p);
+  signs.userData.noShift = true;              // real positions
+  box(signs, 4.0, 1.05, 0.2, '#5c3d26', -11.0, 2.67 + sy, 7.98, { cast: false });
+  panel(signs, 3.9, 0.975, cafeSignTex(), -11.0, 3.195 + sy, 8.09, { glow: 0.25 });
+  box(signs, 4.0, 1.05, 0.2, '#2f3a2c', 2.0, 2.67 + sy, 7.98, { cast: false });
+  panel(signs, 3.9, 0.975, receptionSignTex(), 2.0, 3.195 + sy, 8.09, { glow: 0.25 });
   // striped awning over the counter
   const aw = grp(p, -7.8, 2.85, 8.35);
   for (let i = 0; i < 12; i++) box(aw, 0.5, 0.05, 1.0, i % 2 ? C.white : '#4f7d4a', -2.75 + i * 0.5, 0, 0, { rx: 0.35, cast: false });
-  // hanging round mascot sign by the door
+  // hanging round mascot sign by the café entrance + outdoor bistro tables
   const ms = canvasTex(256, 256, (ctx, w, h) => { ctx.fillStyle = '#f6edd8'; ctx.beginPath(); ctx.arc(128, 128, 124, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#5c3d26'; ctx.lineWidth = 10; ctx.stroke(); drawDogFace(ctx, 128, 118, 70); });
-  box(p, 0.06, 0.06, 0.9, C.black, 4.5, 2.95, 8.4, { cast: false });
-  cyl(p, 0.6, 0.06, '#5c3d26', 4.5, 2.25, 8.75, { rx: Math.PI / 2, seg: 24 });
-  panel(p, 1.1, 1.1, ms, 4.5, 2.25, 8.79);
-  panel(p, 1.1, 1.1, ms, 4.5, 2.25, 8.71, { ry: Math.PI });
-  // outdoor bistro tables on the sidewalk
-  roundTable(p, 1.0, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
-  roundTable(p, 6.0, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
+  box(signs, 0.06, 0.06, 0.9, C.black, -7.6, 2.95, 8.4, { cast: false });
+  cyl(signs, 0.6, 0.06, '#5c3d26', -7.6, 2.25, 8.75, { rx: Math.PI / 2, seg: 24 });
+  panel(signs, 1.1, 1.1, ms, -7.6, 2.25, 8.79);
+  panel(signs, 1.1, 1.1, ms, -7.6, 2.25, 8.71, { ry: Math.PI });
+  roundTable(signs, -11.5, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
+  roundTable(signs, -8.5, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
   // ---- the real Joe, roaming around his café
   anim.joe = roamingJoe(p);
   anim.joe.group.userData.noShift = true;   // Joe positions himself on the (already shifted) map
 
-  // ---- the new café space (building is 40% longer): more round tables, plants
-  {
-    const nb = grp(p);
-    nb.userData.noShift = true;
-    [[-11.5, 1.5], [-7.6, 1.9], [-9.6, 4.8]].forEach(([x, z], i) => {
-      roundTable(nb, x, z, { chairs: 4, start: i % 2 ? 0.3 : Math.PI / 4, chair: { seat: i % 2 ? C.sage : C.fabric } });
-      pendant(nb, x, z, { shade: '#c8935a' });
-    });
-    plant(nb, -13.2, -2.3, { tall: true });
-    plant(nb, -5.2, 5.6, { tall: true });
-    plant(nb, -6.0, -1.8);
+  // ================= LEFT HALF: café tables + divider (real positions) =================
+  const cafeG = grp(p);
+  cafeG.userData.noShift = true;
+  [[-11.9, -3.4], [-8.8, -3.4], [-11.2, 0.8], [-8.0, 1.0], [-11.6, 4.7], [-8.4, 4.8]].forEach(([x, z], i) => {
+    roundTable(cafeG, x, z, { chairs: 4, start: Math.PI / 4, chair: { seat: i % 2 ? C.sage : C.fabric } });
+    pendant(cafeG, x, z, { shade: '#c8935a' });
+  });
+  // low planter divider between the café and the lounge (gaps to walk through)
+  [[-3.4, 2.4], [1.1, 3.0], [5.6, 2.0]].forEach(([cz, len], i) => {
+    box(cafeG, 0.5, 0.7, len, C.woodDark, -5.4, 0, cz);
+    for (let k = 0; k < len / 0.45; k++) {
+      const bz = cz - len / 2 + 0.25 + k * 0.45;
+      sphere(cafeG, 0.24, k % 2 ? C.leaf : C.leaf2, -5.4, 0.85, bz, { s: [1, 0.8, 1] });
+      sphere(cafeG, 0.06, FLOWER_COLS[(i * 5 + k) % FLOWER_COLS.length], -5.32, 1.02, bz + 0.08, { cast: false });
+    }
+  });
+
+  // ================= RIGHT HALF: welcome lounge with reception (real positions) =================
+  const lg = grp(p);
+  lg.userData.noShift = true;
+  // reception desk at the entrance; Violet stands behind it, facing the street
+  const rd = grp(lg, 2.0, 0, 5.6);
+  box(rd, 4.0, 1.05, 0.7, '#f4ede2', 0, 0, 0);
+  box(rd, 4.0, 0.14, 0.72, C.green, 0, 0, 0);
+  box(rd, 4.12, 0.06, 0.86, '#5c3d26', 0, 1.05, 0);                       // walnut top
+  box(rd, 3.7, 0.05, 0.42, '#5c3d26', 0, 0.8, -0.5);                     // work shelf (staff side)
+  panel(rd, 2.8, 0.56, receptionSignTex(), 0, 0.6, 0.36, { glow: 0.15 });
+  monitor(rd, -0.9, 1.11, -0.1, Math.PI);                                 // faces Violet
+  box(rd, 0.42, 0.02, 0.14, '#e8e4dc', -0.9, 1.11, -0.32);
+  cyl(rd, 0.06, 0.05, '#c9a24a', 0.9, 1.11, 0.15, { seg: 12, metalness: 0.6, roughness: 0.3 });   // service bell
+  cyl(rd, 0.07, 0.25, C.white, 1.5, 1.11, -0.1, { seg: 10 });            // flowers
+  for (let i = 0; i < 5; i++) sphere(rd, 0.07, FLOWER_COLS[i], 1.45 + (i % 3) * 0.05, 1.42 + (i % 2) * 0.05, -0.12 + (i % 2) * 0.05);
+  box(rd, 0.3, 0.3, 0.05, C.woodDark, 0.25, 1.11, 0.2, { rx: -0.3 });     // brochure stand
+  for (let i = 0; i < 3; i++) box(rd, 0.08, 0.2, 0.01, ['#7fa8e0', '#f1c84b', '#97b88f'][i], 0.15 + i * 0.1, 1.2, 0.23, { rx: -0.3, cast: false });
+  pendant(lg, 1.0, 5.6, { drop: 1.0, shade: '#c9a24a' });
+  pendant(lg, 3.0, 5.6, { drop: 1.0, shade: '#c9a24a' });
+  plant(lg, -0.6, 5.6, { tall: true });
+  plant(lg, 4.6, 5.6, { tall: true });
+  // round sofa circling the big tree
+  rug(lg, 4.7, 0.0, 4.6, 4.6, '#efe2c8', '#a77b4f');
+  for (let k = 0; k < 12; k++) {
+    const a = k / 12 * Math.PI * 2;
+    const seg = grp(lg, 4.7 + Math.sin(a) * 1.25, 0, Math.cos(a) * 1.25, a);   // faces outward
+    const col = k % 2 ? '#c96f4a' : '#d9a441';
+    box(seg, 0.68, 0.4, 0.62, col, 0, 0, 0);
+    box(seg, 0.66, 0.1, 0.55, '#f3e7d2', 0, 0.4, 0.03);
+    box(seg, 0.68, 0.45, 0.14, col, 0, 0.4, -0.25);
   }
+  // two sofas facing each other around a coffee table
+  rug(lg, -2.5, 0.5, 4.0, 4.4, '#ece2cf', '#7a5a43');
+  sofa(lg, -2.5, -1.2, 2.4, 0, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
+  sofa(lg, -2.5, 2.2, 2.4, Math.PI, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
+  rectTable(lg, -2.5, 0.5, 1.4, 0.7, { h: 0.4, top: C.woodLight });
+  cyl(lg, 0.08, 0.2, C.white, -2.3, 0.47, 0.5, { seg: 10 });
+  sphere(lg, 0.1, '#f28cb0', -2.3, 0.75, 0.5);
+  box(lg, 0.5, 0.04, 0.35, '#e9e1cf', -2.9, 0.47, 0.45);                  // magazines
+  floorLamp(lg, -0.8, -1.5);
+  floorLamp(lg, -0.8, 2.6);
+  pendant(lg, -2.5, 0.5, { drop: 0.9, shade: '#e8c48a' });
+  // armchair corner by the lift
+  sofa(lg, 7.9, -2.6, 2.2, -Math.PI / 2, { color: '#7a8fb0', cushion: '#9fb3cf', pillow: '#f1d08a' });
+  sofa(lg, 6.3, -3.4, 0.95, Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
+  sofa(lg, 6.3, -1.8, 0.95, Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
+  rectTable(lg, 7.1, -2.6, 0.6, 1.0, { h: 0.4, top: C.woodLight });
+  // long built-in sofa along the back wall with little side tables
+  for (const bx of [-2.7, 1.1, 4.9]) {
+    sofa(lg, bx, -7.25, 3.6, 0, { color: '#d9c3a0', pillow: '#8fae84' });
+    roundTable(lg, bx, -6.1, { r: 0.35, h: 0.45, vase: true });
+  }
+  plant(lg, -4.9, -7.2, { tall: true });
+  plant(lg, 7.6, -7.2, { tall: true });
+  // magazine rack + water dispenser
+  const mr = grp(lg, -3.6, 0, 5.4);
+  box(mr, 0.7, 0.9, 0.3, C.woodDark, 0, 0, 0);
+  for (let i = 0; i < 4; i++) box(mr, 0.15, 0.22, 0.02, ['#e85d3d', '#7fa8e0', '#f1c84b', '#97b88f'][i], -0.24 + i * 0.16, 0.7, 0.16, { rx: -0.2, cast: false });
+  const wd = grp(lg, 6.6, 0, 5.2);
+  box(wd, 0.4, 1.0, 0.4, '#e9e6e0', 0, 0, 0);
+  cyl(wd, 0.15, 0.45, mat('#bfe0ee', { transparent: true, opacity: 0.6 }), 0, 1.0, 0, { seg: 14, cast: false });
+
 }
 
 // ---------------------------------------------------------------- Floor 2

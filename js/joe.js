@@ -3,31 +3,38 @@ import * as THREE from 'three';
 import { shihTzu } from './characters.js';
 import { sx } from './building.js';
 
-// Waypoints in the café's open aisles (floor-local x, z). Edges = walkable straight lines.
+// Waypoints on Floor 1 (real positions): café half on the left, welcome lounge on the right.
+// Edges are walkable straight lines between the furniture.
 export const NODES = [
-  [-7.4, -3.3],  // 0 nap spot on the sofa-corner rug
-  [-3.3, -3.8],  // 1
-  [-3.3, -0.1],  // 2
-  [-3.3, 3.6],   // 3
-  [-2.6, 7.75],  // 4
-  [-6.5, 7.75],  // 5 in front of the cashier
-  [-10.0, 7.75], // 6
-  [2.6, -3.8],   // 7
-  [8.4, -3.8],   // 8
-  [8.4, -0.1],   // 9
-  [8.4, 3.6],    // 10
-  [2.6, -0.1],   // 11
-  [2.6, 3.6],    // 12
-  [5.2, 7.3],    // 13 by the entrance
-  [0.5, 7.3],    // 14
-  [7.5, -5.5],   // 15
+  [-19.6, -5.5],  // 0  café back aisle (behind the window-bar stools' tables)
+  [-13.45, -5.5], // 1
+  [-6.2, -5.5],   // 2
+  [-4.6, -5.0],   // 3  lounge back aisle
+  [1.0, -5.0],    // 4
+  [9.0, -5.0],    // 5  by the lift
+  [-19.2, -1.3],  // 6  café middle aisle (by the vending machines)
+  [-13.45, -1.3], // 7
+  [-6.2, -1.3],   // 8
+  [-4.6, -1.3],   // 9  through the divider
+  [-4.6, 3.8],    // 10 lounge front-left
+  [1.0, 3.8],     // 11 lounge middle (Joe's nap spot by the tree sofa)
+  [9.0, 3.8],     // 12
+  [-6.2, 3.8],    // 13 café side of the divider gap
+  [-13.45, 7.5],  // 14 café front aisle
+  [-6.2, 7.4],    // 15
+  [-19.6, 7.6],   // 16
+  [-4.6, 7.2],    // 17 entrance, lounge side
+  [2.0, 7.0],     // 18 in front of reception
+  [8.0, 7.2],     // 19
+  [-16.6, 7.6],   // 20 in front of the café till (Joe begs here)
 ];
-export const EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [1, 7], [7, 8], [8, 9], [9, 10], [2, 11],
-  [3, 12], [12, 10], [4, 14], [14, 13], [13, 10], [8, 15], [11, 12]];
+export const EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [6, 7], [7, 8], [8, 9], [9, 3], [9, 10], [10, 11], [11, 12],
+  [4, 11], [1, 7], [7, 14], [2, 8], [8, 13], [13, 15], [13, 10], [15, 17], [17, 18], [18, 19], [14, 15], [14, 20], [20, 16],
+  [10, 17], [12, 19], [5, 12], [6, 0]];
 const NEXT = NODES.map((_, i) => EDGES.flatMap(([a, b]) => (a === i ? [b] : b === i ? [a] : [])));
 
 const SPEED = 1.0; // m/s
-const SPOTS = { 0: 'nap', 5: 'beg', 13: 'admire' }; // 'admire' = sits and looks up at the street // special things Joe likes to do at some nodes
+const SPOTS = { 11: 'nap', 20: 'beg', 18: 'admire' }; // special things Joe likes to do at some nodes
 
 export function roamingJoe(floor) {
   const WP = NODES.map(([x, z]) => [sx(1, x), z]); // waypoints on the (40% longer) café floor

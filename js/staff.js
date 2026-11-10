@@ -58,34 +58,37 @@ for (let a = 1; a <= 5; a++) for (let b = a + 1; b <= 5; b++) link(`${a}:liftIn`
 // ---- Floor 1: Joe's café aisles (shared with Joe's roaming map)
 JOE_NODES.forEach(([x, z], i) => node(1, `j${i}`, x, z));
 JOE_EDGES.forEach(([a, b]) => link(`1:j${a}`, `1:j${b}`));
-link('1:coreW', '1:j9');
-link('1:coreFront', '1:j10');
-node(1, 'cashier', -7.4, 7.15); link('1:cashier', '1:j5');
-node(1, 'cashier2', -6.5, 7.35); link('1:cashier2', '1:j5');   // second customer waits beside
+link('1:coreW', '1:j5'); link('1:coreW', '1:j12');
+link('1:coreFront', '1:j19'); link('1:coreFront', '1:j12');
+node(1, 'cashier', -17.0, 7.15); link('1:cashier', '1:j20');
+node(1, 'cashier2', -16.1, 7.35); link('1:cashier2', '1:j20');   // second customer waits beside
 
 // Jennie's way from the till, out behind the counter, to the red vending machines (left wall)
-chain(node(1, 'jBehind', -7.4, 2.0), node(1, 'jExit', -4.6, 1.95), node(1, 'jSide', -4.6, 0.6), node(1, 'jWest', -9.8, 0.4), node(1, 'vend1', -10.35, -0.85), node(1, 'vend2', -10.35, -1.9));
+chain(node(1, 'jBehind', -17.0, 2.0), node(1, 'jExit', -14.2, 1.95), node(1, 'jSide', -14.2, 0.6), node(1, 'jWest', -19.4, 0.4), node(1, 'vend1', -19.95, -0.85), node(1, 'vend2', -19.95, -1.9));
 
+// café seats (left half): window-bar stools and round-table chairs
 const CAFE_SEATS = [];
 function cafeSeat(name, stand, access, x, z, ry, y = 0) {
   const id = node(1, name, stand[0], stand[1]);
   link(id, `1:${access}`);
-  CAFE_SEATS.push({ node: id, x, z, ry, y });
+  const seat = { node: id, x, z, ry, y };
+  CAFE_SEATS.push(seat);
+  return seat;
 }
-for (const [i, acc] of [[3, 'j1'], [6, 'j1'], [10, 'j7'], [14, 'j15']]) {   // high bar stools facing the window
-  const x = -5.55 + 0.8 * i;
-  cafeSeat(`bar${i}`, [x, -6.1], acc, x, -6.85, Math.PI, 0.26);
-}
-cafeSeat('sofa', [-7.6, -6.2], 'j0', -7.7, -7.05, 0, 0.04);                    // sofa corner
-cafeSeat('table5', [3.6, 4.33], 'j12', 3.26, 4.69, 2.39 + Math.PI);             // round tables
-cafeSeat('table0', [-0.16, -0.96], 'j11', -0.51, -1.31, Math.PI / 4 + Math.PI);
+const barX = (k) => -19.85 + 0.8 * k;                               // back-window stools
+for (const [k, acc] of [[3, 'j0'], [7, 'j1'], [12, 'j1'], [16, 'j2']]) cafeSeat(`bar${k}`, [barX(k), -6.1], acc, barX(k), -6.85, Math.PI, 0.26);
+cafeSeat('barL', [-19.8, -4.8], 'j0', -20.45, -4.8, -Math.PI / 2, 0.26);   // left-window stool
+cafeSeat('t1', [-10.86, -2.36], 'j7', -11.21, -2.71, Math.PI / 4 + Math.PI);
+cafeSeat('t6', [-7.36, 3.76], 'j13', -7.71, 4.11, 3 * Math.PI / 4 + Math.PI);
 // seats used when Aida and Mary go for coffee together (next to each other)
 const pairSeat = (name, stand, access, x, z, ry, y = 0) => { const id = node(1, name, stand[0], stand[1]); link(id, `1:${access}`); return { node: id, x, z, ry, y }; };
-const byNode = (id) => CAFE_SEATS.find((q) => q.node === id);
 const CAFE_PAIRS = [
-  [byNode('1:bar3'), pairSeat('bar4', [-2.35, -6.1], 'j1', -2.35, -6.85, Math.PI, 0.26)],
-  [byNode('1:table0'), pairSeat('table0b', [-2.24, -0.96], 'j2', -1.89, -1.31, 7 * Math.PI / 4 + Math.PI)],
+  [pairSeat('bar10', [barX(10), -6.1], 'j1', barX(10), -6.85, Math.PI, 0.26), pairSeat('bar11', [barX(11), -6.1], 'j1', barX(11), -6.85, Math.PI, 0.26)],
+  [pairSeat('t3a', [-12.24, -0.24], 'j7', -11.89, 0.11, 5 * Math.PI / 4 + Math.PI), pairSeat('t3b', [-12.24, 1.84], 'j7', -11.89, 1.49, 7 * Math.PI / 4 + Math.PI)],
 ];
+// welcome lounge (right half): the facing sofas, used by Ivan & Phil after coffee
+chain('1:j9', node(1, 'loungeA', -4.3, -0.2), '1:j10');
+chain('1:loungeA', node(1, 'loungeStandI', -3.1, -0.3), node(1, 'loungeStandP', -1.9, -0.3));
 
 // ---- Floor 2: music room (glass lounge, front-left)
 chain('2:coreFront', node(2, 'musicOut', -2.8, 7.15), node(2, 'musicIn', -4.0, 7.15), node(2, 'musicMid', -5.3, 4.0), node(2, 'lounge', -8.6, 3.95));
@@ -113,8 +116,8 @@ const SOFA_TV_IVAN = { node: '2:sofaStandB', x: -7.3, z: -1.2, ry: Math.PI, y: 0
 const DINE_IVAN = { node: '2:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
 const DINE_PHIL = { node: '2:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
 // café sofa corner for the owners
-const CAFE_SOFA_IVAN = { node: '1:sofa', x: -7.7, z: -7.05, ry: 0, y: 0.04 };
-const CAFE_SOFA_PHIL = { node: '1:sofa', x: -8.7, z: -7.05, ry: 0, y: 0.04 };
+const CAFE_SOFA_IVAN = { node: '1:loungeStandI', x: -3.1, z: -1.15, ry: 0, y: 0.04 };   // welcome-lounge sofa
+const CAFE_SOFA_PHIL = { node: '1:loungeStandP', x: -1.9, z: -1.15, ry: 0, y: 0.04 };
 
 // ---- Floors 3 & 4: aisle behind the shared desk + meeting room
 for (const f of [3, 4]) {
@@ -153,7 +156,8 @@ node(5, 'vendFront', -1.1, -2.3); link('5:vendFront', '5:rPole');
 const TREAD = { stepX: -10.3, y: 0.23, eugeneZ: -4.8, ivanZ: -3.3 };
 
 // ---- cleaners' work spots on every floor (mop the floor, water a plant, garden on the roof)
-node(1, 'treeW', 3.4, 0.0); link('1:treeW', '1:j11');                 // by the indoor tree
+node(1, 'divW', -4.7, -3.0); link('1:divW', '1:j3'); link('1:divW', '1:j9');   // café / lounge divider planters
+node(1, 'recPlant', -1.4, 6.4); link('1:recPlant', '1:j17'); link('1:recPlant', '1:j18'); // plants by reception
 node(2, 'plantW', -0.1, 0.3); link('2:plantW', '2:f2mid');
 for (const f of [3, 4]) { node(f, 'plantNW', -10.6, -1.2); link(`${f}:plantNW`, `${f}:desk5`); }
 node(5, 'gardenF1', 5.8, 6.4); link('5:gardenF1', '5:rMid');           // front flower planters
@@ -161,7 +165,7 @@ node(5, 'gardenF0', -1.0, 6.4); link('5:gardenF0', '5:smokeE');
 node(5, 'gardenB', 1.9, -6.6); link('5:gardenB', '5:rMid');            // back flower planters
 node(5, 'plantE', 8.0, 2.5); link('5:plantE', '5:rMid');
 const CLEAN_JOBS = {
-  1: [{ n: '1:j8', k: 'mop' }, { n: '1:j3', k: 'mop' }, { n: '1:treeW', k: 'water', face: [4.7, 0.0] }, { n: '1:j4', k: 'water', face: [-3.6, 7.2] }],
+  1: [{ n: '1:j1', k: 'mop' }, { n: '1:j4', k: 'mop' }, { n: '1:divW', k: 'water', face: [-5.4, -3.0] }, { n: '1:recPlant', k: 'water', face: [-0.6, 5.6] }],
   2: [{ n: '2:f2mid', k: 'mop' }, { n: '2:dineE', k: 'mop' }, { n: '2:plantW', k: 'water', face: [-0.8, 0.9] }, { n: '2:coreFront', k: 'water', face: [8.8, 7.2] }],
   3: [{ n: '3:aisleE', k: 'mop' }, { n: '3:desk7', k: 'mop' }, { n: '3:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '3:plantNW', k: 'water', face: [-11.3, -1.5] }],
   4: [{ n: '4:aisleE', k: 'mop' }, { n: '4:desk7', k: 'mop' }, { n: '4:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '4:plantNW', k: 'water', face: [-11.3, -1.5] }],
@@ -702,7 +706,7 @@ async function aida(a) {
       a.status = "Taking the lift down to Joe's Café for coffee";
     }
     await buyCoffee(a, '1:cashier');
-    const seat = withMary ? flags.cafePair[0] : pick(CAFE_SEATS.filter((q) => !(flags.ownersAtCafe && q.node === '1:sofa')));
+    const seat = withMary ? flags.cafePair[0] : pick(CAFE_SEATS);
     a.status = withMary ? 'Saving seats for Mary' : "Enjoying a coffee at Joe's Café";
     await a.goSit(seat);
     if (withMary) {
@@ -859,9 +863,9 @@ async function ivan(a) {
     flags.ownersAtCafe = true;
     await buyCoffee(a, '1:cashier', 'stairs');
     await a.goSit(CAFE_SOFA_IVAN);
-    a.status = 'Coffee on the café sofa';
+    a.status = 'Coffee in the welcome lounge';
     await a.waitFor(() => flags.philCafe, 150);
-    a.talking = true; a.status = 'Chilling with Phil at the café';
+    a.talking = true; a.status = 'Chilling with Phil in the lounge';
     await a.sleep(R(12, 18));
     a.talking = false;
     a.rig.cup.visible = false; a.holdCup = false;
@@ -925,10 +929,10 @@ async function phil(a) {
     await a.sleep(R(8, 11));
     a.act = null;
     // join Ivan on the café sofa
-    a.status = 'Walking down to join Ivan at the café';
+    a.status = 'Walking down to join Ivan in the lounge';
     await a.goSit(CAFE_SOFA_PHIL, 'stairs');
     flags.philCafe = true;
-    a.talking = true; a.status = 'Chilling with Ivan at the café';
+    a.talking = true; a.status = 'Chilling with Ivan in the lounge';
     await a.waitFor(() => flags.f2Chill, 150);
     a.talking = false;
     // back up to the Floor 2 sofa together
@@ -1124,6 +1128,20 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
     update(dt, t) {
       for (const a of actors) a.update(dt, t);
       for (const id in world.doors) world.doors[id].update(dt);
+      // Violet greets anyone walking past reception
+      const violet = actors.find((q) => q.e.name === 'Violet');
+      if (violet) {
+        violet.greetCool = (violet.greetCool ?? 0) - dt;
+        if (violet.greetCool <= 0) {
+          const v = violet.g.position;
+          const near = actors.find((q) => q !== violet && q.floor === 1 && q.g.parent === violet.g.parent && Math.hypot(q.g.position.x - v.x, q.g.position.z - v.z) < 3.0);
+          if (near) {
+            violet.talkFor = 2.5; violet.greetCool = 12;
+            violet.e.status = `Greeting ${near.e.name}`;
+            setTimeout(() => { violet.e.status = violet.e.idle; }, 2500);
+          }
+        }
+      }
       world.puffs.update(dt);
     },
   };

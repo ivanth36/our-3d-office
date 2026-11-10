@@ -146,10 +146,17 @@ export function employee(p, x, z, ry, e) {
   const legsStand = grp(g);
   const hips = [-0.09, 0.09].map((hx) => {
     const hip = grp(legsStand, hx, 0.64, 0);
-    box(hip, 0.13, 0.58, 0.14, pants, 0, -0.6, 0);
-    box(hip, 0.14, 0.07, 0.22, shoe, 0, -0.64, 0.03);
+    if (e.skirt) {                                    // slimmer legs + heels under a skirt
+      box(hip, 0.1, 0.58, 0.11, pants, 0, -0.6, 0);
+      box(hip, 0.11, 0.06, 0.2, '#1f1d1e', 0, -0.64, 0.03);
+      box(hip, 0.03, 0.08, 0.03, '#1f1d1e', 0, -0.64, -0.06);
+    } else {
+      box(hip, 0.13, 0.58, 0.14, pants, 0, -0.6, 0);
+      box(hip, 0.14, 0.07, 0.22, shoe, 0, -0.64, 0.03);
+    }
     return hip;
   });
+  if (e.skirt) cyl(legsStand, 0.2, 0.3, e.skirt, 0, 0.38, 0, { top: 0.85, bottom: 1, seg: 14 });   // short skirt
 
   // ---- torso
   const body = grp(g, 0, 0.62, 0);
@@ -158,6 +165,12 @@ export function employee(p, x, z, ry, e) {
     box(body, 0.3, 0.03, 0.3, '#ffffff', 0, 0.36, 0, { cast: false });
     box(body, 0.05, 0.12, 0.02, '#ffffff', 0, 0.16, 0.165);
     cyl(body, 0.025, 0.06, '#e2b13c', 0, 0.12, 0.17, { rx: Math.PI / 2, seg: 8 });
+  } else if (e.outfit === 'blazer') {                  // smart blazer over a white blouse
+    box(body, 0.13, 0.2, 0.02, e.blouse ?? '#ffffff', 0, 0.2, 0.16, { cast: false });        // blouse V
+    box(body, 0.05, 0.24, 0.02, '#1c2236', -0.07, 0.14, 0.17, { rz: 0.35, cast: false });   // lapels
+    box(body, 0.05, 0.24, 0.02, '#1c2236', 0.07, 0.14, 0.17, { rz: -0.35, cast: false });
+    for (const by of [0.0, 0.08]) sphere(body, 0.012, '#c9a24a', 0, by, 0.172, { cast: false });  // buttons
+    box(body, 0.1, 0.05, 0.02, '#c9a24a', 0.09, 0.27, 0.165, { cast: false });                 // name badge
   } else if (e.outfit === 'casual') {
     box(body, 0.28, 0.04, 0.28, e.collar ?? '#ffffff', 0, 0.38, 0, { cast: false });   // collar / neckline
     box(body, 0.06, 0.12, 0.02, e.collar ?? '#ffffff', 0, 0.26, 0.165, { cast: false }); // placket
