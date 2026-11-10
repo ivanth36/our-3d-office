@@ -493,24 +493,31 @@ export function floor2(p, anim = {}) {
   }
 
   // ================= GLASS MUSIC ROOM (front-left, x -11.7..-3.4, z 1.8..7.75) =================
-  const mx0 = LEFT_IN, mx1 = -3.4, mz0 = 1.8, mz1 = 7.75;
-  box(p, mx1 - mx0, 0.03, mz1 - mz0, '#7d5a43', (mx0 + mx1) / 2, 0.02, (mz0 + mz1) / 2, { cast: false });
-  glassWall(p, mx0, mz0, mx1, mz0, CEIL);                         // back side
-  glassWall(p, mx1, mz0, mx1, mz1, CEIL, { gap: [4.9, 5.8] });   // right side, door at the front
-  addDoor(anim, '2:music', glassDoor(p, mx1, mz0 + 4.9, 0.9, CEIL, -Math.PI / 2), -Math.PI / 2, 0);
-  glassWall(p, mx0, mz1, mx1, mz1, CEIL);                         // front (street side)
+  // The music room and the game room behind it form one glass block (same width, real x -21.45..-12):
+  // one shared glass wall at z = 0 with a door in its middle; the only outside door is in the
+  // middle of the music room's right wall. Glass + floor are built in real positions.
+  const mz0 = 0.0, mz1 = 7.75;
+  {
+    const mg = grp(p);
+    mg.userData.noShift = true;
+    const rx0 = X0 + 0.15, rx1 = -12.0;
+    box(mg, rx1 - rx0 - 0.15, 0.03, mz1 - mz0, '#7d5a43', (rx0 + rx1) / 2 + 0.075, 0.02, (mz0 + mz1) / 2, { cast: false });
+    glassWall(mg, rx1, mz0, rx1, mz1, CEIL, { gap: [3.35, 4.35] });          // right side, door in the middle
+    addDoor(anim, '2:music', glassDoor(mg, rx1, mz0 + 3.35, 1.0, CEIL, -Math.PI / 2), -Math.PI / 2, 0);
+    glassWall(mg, rx0, mz1, rx1, mz1, CEIL);                                 // front (street side)
+  }
   const cdCols = ['#d94f3d', '#3e6b9a', '#f1c84b', '#2b2a2c', '#7ab87a', '#e8e1d0', '#9b59b6', '#f08a5d'];
   const cd = { bookColors: cdCols, bookW: 0.035, bookH: 0.16, rows: 7, color: '#3d2b1f' };
   bookshelf(p, LEFT_IN + 0.22, 5.2, 4.6, 2.9, Math.PI / 2, cd);   // CD wall
   // hi-fi: console + turntable + amp + tall speakers along the back glass (left half)
-  box(p, 2.4, 0.6, 0.5, C.woodDark, -9.3, 0, 2.3);
-  box(p, 0.8, 0.12, 0.4, '#c9ccd0', -9.8, 0.6, 2.3, { metalness: 0.5, roughness: 0.4 });
-  box(p, 0.6, 0.08, 0.45, C.black, -8.8, 0.6, 2.3);
-  cyl(p, 0.2, 0.02, '#1a1a1a', -8.8, 0.68, 2.3, { seg: 20 });
-  for (const sx of [-10.9, -7.7]) {
-    box(p, 0.5, 1.2, 0.45, '#2b2a2c', sx, 0, 2.3);
-    cyl(p, 0.16, 0.03, '#555', sx, 0.75, 2.53, { rx: Math.PI / 2, seg: 14 });
-    cyl(p, 0.09, 0.03, '#555', sx, 1.0, 2.53, { rx: Math.PI / 2, seg: 12 });
+  box(p, 2.4, 0.6, 0.5, C.woodDark, -9.9, 0, 0.6);
+  box(p, 0.8, 0.12, 0.4, '#c9ccd0', -10.4, 0.6, 0.6, { metalness: 0.5, roughness: 0.4 });
+  box(p, 0.6, 0.08, 0.45, C.black, -9.4, 0.6, 0.6);
+  cyl(p, 0.2, 0.02, '#1a1a1a', -9.4, 0.68, 0.6, { seg: 20 });
+  for (const sx of [-11.3, -8.3]) {
+    box(p, 0.5, 1.2, 0.45, '#2b2a2c', sx, 0, 0.6);
+    cyl(p, 0.16, 0.03, '#555', sx, 0.75, 0.83, { rx: Math.PI / 2, seg: 14 });
+    cyl(p, 0.09, 0.03, '#555', sx, 1.0, 0.83, { rx: Math.PI / 2, seg: 12 });
   }
   // lounge chair + ottoman facing the speakers
   const lc = grp(p, -9.3, 0, 4.6, Math.PI);
@@ -520,23 +527,22 @@ export function floor2(p, anim = {}) {
   cyl(p, 0.3, 0.35, '#3b2a20', -9.3, 0, 3.55, { seg: 14 });
   floorLamp(p, -10.9, 7.2);
   // music production desk with computer (right half, against the back glass)
-  rectTable(p, -5.4, 2.35, 2.8, 0.8, { top: '#2b2a2c', leg: C.black });
-  monitor(p, -5.85, 0.79, 2.25, 0);
-  monitor(p, -4.95, 0.79, 2.25, 0);
-  box(p, 0.9, 0.04, 0.25, '#1f1f22', -5.4, 0.79, 2.6);                                   // MIDI controller
-  for (let i = 0; i < 8; i++) box(p, 0.06, 0.02, 0.06, '#f1c84b', -5.75 + i * 0.1, 0.83, 2.53);
-  for (const sx of [-6.6, -4.2]) { box(p, 0.25, 0.4, 0.25, '#2b2a2c', sx, 0.79, 2.25); cyl(p, 0.07, 0.02, '#777', sx, 1.0, 2.38, { rx: Math.PI / 2, seg: 10 }); }
-  officeChair(p, -5.4, 3.25, Math.PI);
+  rectTable(p, -4.6, 2.35, 2.8, 0.8, { top: '#2b2a2c', leg: C.black });
+  monitor(p, -5.05, 0.79, 2.25, 0);
+  monitor(p, -4.15, 0.79, 2.25, 0);
+  box(p, 0.9, 0.04, 0.25, '#1f1f22', -4.6, 0.79, 2.6);                                   // MIDI controller
+  for (let i = 0; i < 8; i++) box(p, 0.06, 0.02, 0.06, '#f1c84b', -4.95 + i * 0.1, 0.83, 2.53);
+  for (const sx of [-5.8, -3.4]) { box(p, 0.25, 0.4, 0.25, '#2b2a2c', sx, 0.79, 2.25); cyl(p, 0.07, 0.02, '#777', sx, 1.0, 2.38, { rx: Math.PI / 2, seg: 10 }); }
+  officeChair(p, -4.6, 3.25, Math.PI);
   // keyboard on stand along the right glass
-  keyboardOnStand(p, -4.0, 4.6, Math.PI / 2);   // player sits on the room side, facing the right glass
+  keyboardOnStand(p, -4.0, 5.6, Math.PI / 2);   // player sits on the room side, facing the right glass
   // drum kit at the front, drummer facing the street
   rug(p, -6.6, 6.2, 2.6, 2.4, '#5c3d26', '#3d2b1f');
   drumKit(p, -6.6, 6.5, 0);
   pendant(p, -9.3, 4.0, { drop: 0.7, shade: '#2f3a2c' });
-  pendant(p, -5.4, 3.0, { drop: 0.7, shade: '#2f3a2c' });
+  pendant(p, -4.6, 3.0, { drop: 0.7, shade: '#2f3a2c' });
   const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 56px -apple-system, sans-serif'; ctx.fillText('♪ Music Room', 40, 68); });
-  panel(p, 1.9, 0.36, sign, -9.0, 3.1, mz0 + 0.04, { transparent: true });
-  panel(p, 1.9, 0.36, sign, -9.0, 3.1, mz0 - 0.04, { transparent: true, ry: Math.PI });
+  panel(p, 1.9, 0.36, sign, -9.0, 3.1, mz0 + 0.04, { transparent: true });           // on the shared glass wall
 
   // ================= KITCHEN (back-right, x 2.5..9.3, z -7.7..-0.8) =================
   const kx0 = 2.5, kx1 = 9.3, cab = '#7f9f6e', cabLight = '#8fae84', quartz = '#f4ede2', steel = '#c9ccd0';
@@ -619,15 +625,15 @@ export function floor2(p, anim = {}) {
   gr.userData.noShift = true;
   {
     const p = gr;
-    const x0 = X0 + 0.3, x1 = -12.0, z0 = -7.7, z1 = 0.6;
+    const x0 = X0 + 0.3, x1 = -12.0, z0 = -7.7, z1 = 0.0;
     box(p, x1 - x0, 0.03, z1 - z0, '#2a2d3a', (x0 + x1) / 2, 0.02, (z0 + z1) / 2, { cast: false });   // dark carpet
     rug(p, -16.4, -3.6, 4.6, 3.4, '#3a3f5c', '#7a5cff');
-    glassWall(p, x0 - 0.15, z1, x1, z1, CEIL, { gap: [7.3, 8.3] });   // front, door near the right
-    glassWall(p, x1, -7.85, x1, z1, CEIL);                              // right side
-    addDoor(anim, '2:game', glassDoor(p, -14.15, z1, 1.0, CEIL, 0), 0, -1.45);
+    glassWall(p, x0 - 0.15, z1, x1, z1, CEIL, { gap: [4.2, 5.2] });   // shared wall with the music room, door in the middle
+    glassWall(p, x1, -7.85, x1, z1, CEIL);                              // right side (no outside door)
+    addDoor(anim, '2:game', glassDoor(p, -17.25, z1, 1.0, CEIL, 0), 0, -1.45);
     const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#7a5cff'; ctx.font = 'bold 58px -apple-system, sans-serif'; ctx.fillText('🎮 Game Room', 40, 70); });
-    panel(p, 1.9, 0.36, sign, -16.6, 3.1, z1 + 0.04, { transparent: true });
-    panel(p, 1.9, 0.36, sign, -16.6, 3.1, z1 - 0.04, { transparent: true, ry: Math.PI });
+    panel(p, 1.9, 0.36, sign, -14.4, 3.1, z1 + 0.04, { transparent: true });         // seen from the music room
+    panel(p, 1.9, 0.36, sign, -16.75, 3.1, z1 - 0.04, { transparent: true, ry: Math.PI });
     const neon = (c) => mat(c, { emissive: c, emissiveIntensity: 1.4 });
     box(p, 0.04, 0.04, z1 - z0 - 0.4, neon('#7a5cff'), x0 + 0.05, CEIL - 0.25, (z0 + z1) / 2, { cast: false });   // LED strips
     box(p, x1 - x0 - 0.4, 0.04, 0.04, neon('#22d3ee'), (x0 + x1) / 2, CEIL - 0.25, z0 + 0.05, { cast: false });
