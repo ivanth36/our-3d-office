@@ -132,6 +132,9 @@ node(5, 'smokeE', 2.6, 6.1);
 node(5, 'rPole', -1.4, -1.2);
 // the big gym now fills the left end of the roof; its door is on the garden side (x = -12 real)
 // (coordinates here are in the original-layout system: real x = design x - 9.6 left of x = -1)
+chain('5:coreW', '5:rMid', '5:smokeJ', '5:smokeE');
+link('5:rMid', '5:rPole');
+link('5:coreW', '5:rPole');
 node(5, 'gymOut', -1.8, -1.0);                      // outside the gym door
 node(5, 'gymIn', -3.0, -1.0);                       // just inside
 chain('5:rPole', '5:gymOut', '5:gymIn');
