@@ -779,7 +779,7 @@ export function officeFloor(p, n, employees, anim) {
   pendant(p, mcx - 1, mcz, { drop: 1.1, shade: '#f4ede2' });
   pendant(p, mcx + 1, mcz, { drop: 1.1, shade: '#f4ede2' });
   plant(p, rx0 + 0.5, -7.3);
-  const label = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 54px -apple-system, sans-serif'; ctx.fillText(n === 3 ? 'Meeting Room A' : 'Meeting Room B', 20, 68); });
+  const label = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 54px -apple-system, sans-serif'; ctx.fillText('Meeting Room', 20, 68); });
   panel(p, 1.8, 0.34, label, rx0 + 3.0, 3.1, rz1 + 0.04, { transparent: true });
 
   // ---- bookshelves along the back wall + lounge corner

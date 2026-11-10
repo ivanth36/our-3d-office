@@ -145,7 +145,7 @@ const deskSeatFor = (f, i) => ({ node: `${f}:desk${i}`, ...deskSeat(i), y: 0, ty
 chain(node(3, 'mgrOut', raw(-4.5), -2.6), node(3, 'mgrIn', raw(-4.5), -3.85), node(3, 'mgrW', raw(-6.3), -3.85), node(3, 'mgrBack', raw(-6.3), -6.75), node(3, 'mgrChair', raw(-5.2), -6.75));
 link('3:mgrOut', '3:desk9'); link('3:mgrOut', '3:aisleE');
 const KENNY_SEAT = { node: '3:mgrChair', x: raw(-4.4), z: -6.6, ry: 0, y: 0, typing: true };
-// team meeting in Meeting Room A (Kenny at the head of the table)
+// team meeting in the meeting room (Kenny at the head of the table)
 node(3, 'meetC', 6.75, -3.0); link('3:meetB', '3:meetC');
 node(3, 'meetE', 8.0, -3.0); link('3:meetC', '3:meetE');
 node(3, 'meetRStand', 8.4, -4.0); link('3:meetE', '3:meetRStand');
@@ -1183,7 +1183,7 @@ async function kenny(a) {
     if (Math.random() < 0.45 && atDesks.length >= 2 && !flags.meetingCall && !flags.aidaInMeeting) {
       flags.teamExpected = atDesks.length;
       flags.teamMeeting = true;
-      a.status = 'Calling the team into Meeting Room A';
+      a.status = 'Calling the team into the meeting room';
       await a.goSit(TEAM_SEATS.Kenny);
       a.status = 'Waiting for the team to come in';
       await a.waitFor(() => flags.inTeamMeeting.size >= flags.teamExpected, 120);
