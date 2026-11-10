@@ -2,7 +2,7 @@
 
 Context about the owner's setup to remember in every session:
 
-- **Floor 3 (Office A)** is Ivan's **internal office**: every employee there works for Ivan and
+- **Floor 3 (In-house Office)** is Ivan's **in-house office**: every employee there works for Ivan and
   does things for him (they run his scheduled tasks).
 - **Floor 4** is the **Outsource AI Team** office, kept for future use. Ivan may do business for
   other companies, with employees working for those clients. He may call himself the
