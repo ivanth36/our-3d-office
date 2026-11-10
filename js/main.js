@@ -6,12 +6,13 @@ import { floor1, floor2, officeFloor, floor5 } from './floors.js';
 import { EMPLOYEES } from './employees.js';
 import { createStaff, createLift } from './staff.js';
 import { createFxBoard } from './fx.js';
+import { createPanel } from './panel.js';
 
 const FLOORS = [
   { n: 1, name: "Joe's Café", sub: 'Café · welcome lounge & reception' },
   { n: 2, name: 'Chill Home', sub: 'Living room · music room · kitchen' },
-  { n: 3, name: 'Office A', sub: 'Shared desk · Meeting Room A' },
-  { n: 4, name: 'Office B', sub: 'Shared desk · Meeting Room B' },
+  { n: 3, name: 'Office A', sub: 'Internal office · my AI team' },
+  { n: 4, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 5, name: 'Roof Garden', sub: 'Glass gym · chill garden' },
 ];
 
@@ -175,6 +176,7 @@ const lift = createLift(car);
 // the AI employees (they work, walk, take the stairs / lift — see js/staff.js)
 const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doors: anim.doors || {} });
 anim.fxBoard.start();
+const panel = createPanel({ employees: EMPLOYEES, floors: FLOORS });
 
 // ---------------------------------------------------------------- camera presets
 const BUILD_CENTER = new THREE.Vector3(XC, H * 2.25, 0);
@@ -219,6 +221,7 @@ function goTo(n, instant = false) {
   document.getElementById('floorTitle').textContent = n === 0 ? info.name : `${n}F · ${info.name}`;
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
+  if (typeof panel !== 'undefined') panel.show(n);   // floor team panel (hidden for the whole building)
 }
 
 // ---------------------------------------------------------------- UI

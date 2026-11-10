@@ -1050,7 +1050,24 @@ async function cleaner(a) {
   }
 }
 
-const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, ivan, phil, jennie, lily: cleaner, robert: cleaner };
+// ---- Sally (nutritionist): reads research at her desk, sometimes checks the Floor 2 kitchen
+async function sally(a) {
+  const home = deskSeatFor(3, a.e.seat);
+  for (;;) {
+    a.status = 'Reading the latest nutrition research';
+    await a.sleep(R(35, 55));
+    a.status = 'Checking what is in the kitchen';
+    await a.goStand('2:islandBack', 'stairs');
+    await a.turnTo(0);
+    a.act = 'cook'; a.status = 'Planning healthy meals in the kitchen';
+    await a.sleep(R(8, 12));
+    a.act = null;
+    a.status = 'Walking back up to Floor 3';
+    await a.goSit(home, 'stairs');
+  }
+}
+
+const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, sally, ivan, phil, jennie, lily: cleaner, robert: cleaner };
 const SPAWN = {                        // where the owners and cleaners start
   Lily: { stand: '1:j9', ry: Math.PI },
   Robert: { stand: '4:aisleE', ry: 0 },
