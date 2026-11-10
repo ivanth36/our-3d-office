@@ -54,7 +54,8 @@ export const EMPLOYEES = [
     name: 'Eugene', home: 5, role: 'Wellness Coach · daily check-ins & weekly plans', floor: 5, pos: [-6.2, -1.2], ry: 0.6, idle: 'Coaching in the gym',
     hair: '#2a1d16', outfit: 'sport', shirt: '#3fa58f', pants: '#2f3a44',
     tasks: [
-      { name: 'Eugene daily check-in (weekly plan on Sundays)', when: 'Every day, 7:45 am (weekly review & plan on Sundays)', at: { every: 'day', h: 7, m: 45 } },
+      // private: personal health info, never published on the (public) site
+      { name: 'Eugene daily check-in (weekly plan on Sundays)', when: 'Every day, 7:45 am (weekly review & plan on Sundays)', at: { every: 'day', h: 7, m: 45 }, private: true },
     ],
   },
   {

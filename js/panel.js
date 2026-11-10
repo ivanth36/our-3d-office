@@ -116,6 +116,10 @@ export function createPanel({ employees, floors }) {
       col.insertAdjacentHTML('beforeend', `<div class="emp-none">${e.owner ? 'No scheduled tasks · enjoying the house 🏠' : e.cleaner ? 'No scheduled tasks · keeping the house clean 🧹' : 'No scheduled tasks yet'}</div>`);
     }
     for (const task of e.tasks ?? []) {
+      if (task.private) {                             // personal health info: never shown on the public site
+        col.insertAdjacentHTML('beforeend', `<div class="emp-task empty"><div class="t-name">📋 ${esc(task.name)}</div><div class="t-when">${esc(task.when)}</div><div class="t-prev">🔒 Sent to you privately · not shown on this site</div></div>`);
+        continue;
+      }
       const rep = reports[task.name];
       const readable = rep && typeof rep.text === 'string' && rep.text.length > 0;
       const card = document.createElement(readable ? 'button' : 'div');
