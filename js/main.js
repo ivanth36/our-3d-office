@@ -193,7 +193,7 @@ function preset(n) {
   }
   const target = new THREE.Vector3(XC - 0.5, (n - 1) * H + 0.5, 0.5);
   const dir = new THREE.Vector3(0.3, 1.15, 1).normalize();
-  const d = fitDistance(32, 15) * 0.78 + 4;
+  const d = fitDistance(35, 15) * 0.82 + 4;
   return { target, pos: target.clone().addScaledVector(dir, d) };
 }
 
