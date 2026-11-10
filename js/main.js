@@ -174,7 +174,7 @@ const car = liftCar(scene);
 car.traverse((o) => { o.castShadow = false; });   // it moves a lot now; keep the static shadow map valid
 const lift = createLift(car);
 // the AI employees (they work, walk, take the stairs / lift — see js/staff.js)
-const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doors: anim.doors || {} });
+const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doors: anim.doors || {}, joe: anim.joe });
 anim.fxBoard.start();
 const panel = createPanel({ employees: EMPLOYEES, floors: FLOORS });
 

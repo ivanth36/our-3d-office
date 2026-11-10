@@ -68,7 +68,74 @@ export function roamingJoe(floor) {
     st.mode = 'walk';
   }
 
+  // ---- "come and play": someone calls Joe to a spot; he trots there and plays until released
+  const nearestNode = (x, z) => { let b = 0, bd = Infinity; WP.forEach(([nx, nz], i) => { const d = Math.hypot(nx - x, nz - z); if (d < bd) { bd = d; b = i; } }); return b; };
+  function nodeRoute(from, to) {                       // breadth-first search over the walking map
+    const prev = new Map([[from, -1]]), q = [from];
+    while (q.length) { const u = q.shift(); if (u === to) break; for (const v of NEXT[u]) if (!prev.has(v)) { prev.set(v, u); q.push(v); } }
+    const path = []; for (let u = to; u !== -1 && u !== undefined; u = prev.get(u)) path.unshift(u);
+    return path;
+  }
+  function visit(x, z) {
+    const start = nearestNode(joe.position.x, joe.position.z);
+    const route = nodeRoute(start, nearestNode(x, z)).map((i) => WP[i]);
+    route.push([x, z]);
+    st.route = route; st.mode = 'visit';
+    body.scale.y = 1; body.rotation.x = 0;
+  }
+  function release() {
+    if (st.mode !== 'visit' && st.mode !== 'play') return;
+    st.route = null;
+    st.at = st.prev = -1;
+    st.to = nearestNode(joe.position.x, joe.position.z);
+    body.position.y = 0; body.rotation.set(0, 0, 0);
+    st.mode = 'walk';
+  }
+  function trot(tx, tz, dt) {                          // one step towards (tx, tz); returns the distance left
+    const dx = tx - joe.position.x, dz = tz - joe.position.z;
+    const dist = Math.hypot(dx, dz);
+    const want = Math.atan2(dx, dz);
+    let diff = Math.atan2(Math.sin(want - st.heading), Math.cos(want - st.heading));
+    st.heading += diff * Math.min(1, dt * 8);
+    joe.rotation.y = st.heading;
+    const step = Math.abs(diff) > 0.6 ? 0 : Math.min(dist, SPEED * 1.4 * dt);
+    joe.position.x += (dx / (dist || 1)) * step;
+    joe.position.z += (dz / (dist || 1)) * step;
+    st.walkT += dt * 14;
+    legs.forEach((l, i) => { l.rotation.x = Math.sin(st.walkT + (i === 0 || i === 3 ? 0 : Math.PI)) * 0.6; });
+    body.position.y = Math.abs(Math.sin(st.walkT)) * 0.04;
+    return dist;
+  }
+
   function update(dt, t) {
+    if (st.mode === 'visit') {                           // running over, tail going like mad
+      face('happy');
+      tail.rotation.z = Math.sin(t * 20) * 0.55;
+      const [tx, tz] = st.route[0];
+      if (trot(tx, tz, dt) < 0.03) { st.route.shift(); if (!st.route.length) st.mode = 'play'; }
+      return;
+    }
+    if (st.mode === 'play') {                            // hop, spin and wag for the owners
+      face(Math.sin(t * 1.3) > -0.3 ? 'happy' : 'pleased');
+      tail.rotation.z = Math.sin(t * 20) * 0.55;
+      const cycle = t % 6;
+      if (cycle < 2.2) {                                 // little hops on the spot
+        body.position.y = Math.abs(Math.sin(t * 7)) * 0.16;
+        legs.forEach((l, i) => { l.rotation.x = Math.sin(t * 14 + i) * 0.4; });
+      } else if (cycle < 3.6) {                          // spin round in a circle
+        st.heading += dt * 4.5; joe.rotation.y = st.heading;
+        body.position.y = Math.abs(Math.sin(t * 10)) * 0.04;
+        legs.forEach((l, i) => { l.rotation.x = Math.sin(t * 16 + (i % 2) * Math.PI) * 0.5; });
+      } else {                                           // sit up and paw at them
+        body.position.y += (0.05 - body.position.y) * Math.min(1, dt * 6);
+        body.rotation.x += (-0.4 - body.rotation.x) * Math.min(1, dt * 6);
+        legs[0].rotation.x = -0.8 + Math.sin(t * 9) * 0.4; legs[1].rotation.x = -0.8 + Math.sin(t * 9 + 1.5) * 0.4;
+        head.rotation.x = -0.25 + Math.sin(t * 5) * 0.08;
+        return;
+      }
+      body.rotation.x *= 0.8;
+      return;
+    }
     tail.rotation.z = Math.sin(t * (st.mode === 'walk' ? 14 : st.mode === 'nap' ? 2 : 9)) * (st.mode === 'nap' ? 0.1 : 0.45);
 
     if (st.mode === 'walk') {
@@ -127,5 +194,5 @@ export function roamingJoe(floor) {
     }
   }
 
-  return { group: joe, update };
+  return { group: joe, update, visit, release, get playing() { return st.mode === 'play'; } };
 }

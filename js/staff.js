@@ -89,6 +89,8 @@ const CAFE_PAIRS = [
 // welcome lounge (right half): the facing sofas, used by Ivan & Phil after coffee
 chain('1:j9', node(1, 'loungeA', -4.3, -0.75), '1:j10');
 chain('1:loungeA', node(1, 'loungeStandI', -3.1, -0.8), node(1, 'loungeStandP', -1.9, -0.8));
+link('1:loungeA', node(1, 'loungeB', -4.3, 0.75)); link('1:loungeB', '1:j10');   // where Phil plays with Joe
+const JOE_PLAY = [-3.55, 0.0];                       // Joe's play spot, between Ivan and Phil
 
 // ---- Floor 2: music room (glass lounge, front-left)
 // music room: its only outside door is in the middle of its right wall (real x -12)
@@ -858,7 +860,7 @@ async function mary(a) {
 //   'dinner'  dinner together at the dining table (Sally cooks, serves and clears up)
 //   'coffee'  coffee together: down to Joe's Café, then the welcome-lounge sofas
 //   'console' console gaming together on the game-room sofa
-const own = { phase: 'gym', philAt: null };
+const own = { phase: 'gym', philAt: null, joePlay: false };
 const philThere = (where) => () => own.philAt === where;
 
 async function ivan(a) {
@@ -929,8 +931,20 @@ async function ivan(a) {
     a.status = 'Coffee with Phil in the welcome lounge';
     await a.waitFor(philThere('coffee'), 120);
     a.talking = true;
-    await a.sleep(R(12, 18));
+    await a.sleep(R(8, 12));
     a.talking = false;
+    // play with Joe before heading back up
+    a.status = 'Calling Joe over 🐾';
+    a.w.joe?.visit(...JOE_PLAY);
+    own.joePlay = true;
+    await a.goStand('1:loungeA');
+    await a.face(...JOE_PLAY);
+    await a.waitFor(() => a.w.joe?.playing, 30);
+    a.act = 'garden'; a.talking = true; a.status = 'Playing with Joe with Phil';
+    await a.sleep(R(14, 18));
+    a.act = null; a.talking = false;
+    own.joePlay = false;
+    a.w.joe?.release();
     a.rig.cup.visible = false; a.holdCup = false;
 
     // 5. console gaming together
@@ -985,6 +999,14 @@ async function phil(a) {
       await a.goSit(CAFE_SOFA_PHIL);
       own.philAt = 'coffee';
       a.talking = true; a.status = 'Coffee with Ivan in the welcome lounge';
+      await a.waitFor(() => own.joePlay || changed(), 120);
+      if (own.joePlay) {
+        await a.goStand('1:loungeB');
+        await a.face(...JOE_PLAY);
+        a.act = 'garden'; a.status = 'Playing with Joe with Ivan';
+        await a.waitFor(() => !own.joePlay || changed(), 60);
+        a.act = null;
+      }
     } else if (ph === 'console') {
       a.status = 'Back to the game room for console games';
       await a.goSit(CONSOLE_PHIL, 'stairs');
@@ -1205,8 +1227,8 @@ const SPAWN = {                        // where the owners and cleaners start
 };
 
 // ======================================================================== setup
-export function createStaff({ floors, lift, employees, doors = {} }) {
-  const world = { floors, lift, doors, puffs: createPuffs(), serve() {}, cafeQueue: 0, jennieAtTill: true, actors: [] };
+export function createStaff({ floors, lift, employees, doors = {}, joe = null }) {
+  const world = { floors, lift, doors, puffs: createPuffs(), serve() {}, cafeQueue: 0, jennieAtTill: true, actors: [], joe };
   // two plates of food on the Floor 2 dining table (shown when Ivan serves dinner)
   world.plates = new THREE.Group();
   world.plates.userData.dynamic = true;
