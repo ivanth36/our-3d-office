@@ -47,7 +47,7 @@ export const EMPLOYEES = [
     name: 'Kenny', home: 3, role: 'Manager · keeps the team on track', floor: 3,
     hair: '#1f1a17', outfit: 'blazer', shirt: '#2b3550', blouse: '#ffffff', pants: '#2b2a2c', glasses: true,
     tasks: [
-      { name: 'Kenny team check (manager)', when: 'Every day, 1:07 pm · only messages you if a task has a problem', at: { every: 'day', h: 13, m: 7 } },
+      { name: 'Kenny team check (manager)', when: 'Every day, 1:07 pm · messages you only if a task has a problem', at: { every: 'day', h: 13, m: 7 } },
     ],
   },
   {

@@ -22,7 +22,7 @@ Context about the owner's setup to remember in every session:
   its `created_at` -> write `{"sentAt", "text"}` under the task name -> commit + push to `main`.
 - **Never publish Eugene's tasks** in any form (no text, no timestamp): they hold Ivan's personal
   health info and the repo/site are public. Sally's nutrition reads are fine to publish in full.
-- **Kenny** (Floor 3 manager) runs the scheduled task "Kenny team check (manager)" daily at 1:07 pm
-  SGT (created by Ivan with the Claude Code Remote connector, so it can call list_triggers). It
-  messages Ivan only if a task failed, is overdue, or is switched off. Ivan can also ask
-  "Kenny, check the team" in a chat for an instant check.
+- **Kenny** (Floor 3 manager) checks the team every day at 1:07 pm SGT with his scheduled task
+  "Kenny team check (manager)" (it has the Claude Code Remote connector so it can call list_triggers).
+  He messages Ivan + sends a push notification only when a task failed, is overdue or is switched off.
+  Ivan can also say "Kenny, check the team" any time: use list_triggers and report the same way.
