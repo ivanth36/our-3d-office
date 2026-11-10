@@ -117,13 +117,17 @@ export function createPanel({ employees, floors }) {
     }
     for (const task of e.tasks ?? []) {
       const rep = reports[task.name];
-      const card = document.createElement(rep ? 'button' : 'div');
-      card.className = 'emp-task' + (rep ? '' : ' empty');
+      const readable = rep && typeof rep.text === 'string' && rep.text.length > 0;
+      const card = document.createElement(readable ? 'button' : 'div');
+      card.className = 'emp-task' + (readable ? '' : ' empty');
       const fresh = rep && sgtDay(rep.sentAt) === sgtDay(Date.now());
-      card.innerHTML = `<div class="t-name">📋 ${esc(task.name)}</div>` + (rep
-        ? `<div class="t-when ${fresh ? 'fresh' : ''}">${fresh ? '✅ ' : ''}Sent ${esc(when(rep.sentAt))}</div><div class="t-prev">${esc(plain(rep.text).slice(0, 150))}…</div><div class="t-more">Tap to read ›</div>`
-        : `<div class="t-when">Nothing sent yet · ${esc(task.when)}</div>`);
-      if (rep) card.addEventListener('click', () => openReader(e, task, rep));
+      const sent = rep ? `<div class="t-when ${fresh ? 'fresh' : ''}">${fresh ? '✅ ' : ''}Sent ${esc(when(rep.sentAt))}</div>` : '';
+      card.innerHTML = `<div class="t-name">📋 ${esc(task.name)}</div>` + (readable
+        ? `${sent}<div class="t-prev">${esc(plain(rep.text).slice(0, 150))}…</div><div class="t-more">Tap to read ›</div>`
+        : rep
+          ? `${sent}<div class="t-prev">🔒 Content kept private (personal health details)</div>`
+          : `<div class="t-when">Nothing sent yet · ${esc(task.when)}</div>`);
+      if (readable) card.addEventListener('click', () => openReader(e, task, rep));
       col.append(card);
     }
     return col;

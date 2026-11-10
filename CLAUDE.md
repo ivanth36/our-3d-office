@@ -12,3 +12,7 @@ Context about the owner's setup to remember in every session:
 - Employees are linked to the owner's scheduled tasks by task name. The floor panel shows the
   latest message of each task from `reports/latest.json`.
 - Always merge finished work into `main` (GitHub Pages publishes from `main`).
+- The floor panel is refreshed by the scheduled task "Update office floor panel", which writes
+  `reports/latest.json` on `main`. Health-related tasks (Eugene's check-in, Sally's nutrition
+  read) are stored without their text ("private": true) because the repo and site are public,
+  unless Ivan says otherwise.
