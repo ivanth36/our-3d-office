@@ -216,6 +216,7 @@ export function floorSurface(parent, w, d, x, z, tex, tile = 2) {
   m.rotation.x = -Math.PI / 2;
   m.position.set(x, 0.015, z);
   m.receiveShadow = true;
+  m.userData.noShift = true;        // already sized for the full floor
   parent.add(m);
   return m;
 }

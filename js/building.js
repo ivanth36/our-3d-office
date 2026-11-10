@@ -1,12 +1,19 @@
 // The 5-storey shell: slabs, walls, windows, stairs, lift shaft, railings.
-// Building footprint: x -12..12, z -8..8. Street (front) is +Z.
+// Building footprint: x -21.6..12, z -8..8 (40% longer than the original 24 m). Street (front) is +Z.
 // Service core on the right: lift x 9.6..12 / z -8..-5.6 (door faces the front),
 // a roomy lift lobby z -5.6..0.4, stairs x 9.6..12 / z 0.4..6 (moved towards the front).
 import * as THREE from 'three';
 import { H, SLAB, CEIL, box, cyl, grp, glassMat, mat, makeLabel, optimize } from './helpers.js';
 import { C } from './furniture.js';
 
-export const W = 24, D = 16, X0 = -12, X1 = 12, Z0 = -8, Z1 = 8;
+// The building was made 40% longer (24 m -> 33.6 m) by moving the left wall out.
+// Each floor's furniture was designed for the old 24 m layout: anything left of
+// SPLIT[floor] moved left with the wall (by EXT), opening new space in the middle.
+export const EXT = 9.6;
+export const X1 = 12, X0 = -12 - EXT, W = X1 - X0, D = 16, Z0 = -8, Z1 = 8, XC = (X0 + X1) / 2;
+export const SPLIT = { 1: -4.0, 2: -1.5, 3: 1.0, 4: 1.0, 5: -1.0 };
+/** Design x (old 24 m layout) -> real x on floor f. */
+export const sx = (f, x) => (x < SPLIT[f] ? x - EXT : x);
 export const CORE_X = 9.6;              // rooms are x < CORE_X
 export const STAIR = { x0: 9.6, x1: 12, z0: 0.4, z1: 6.0 };
 export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };
@@ -71,7 +78,7 @@ function slab(p, n) {
   }
   if (n === 1) box(p, sw, SLAB, LIFT.z1 - LIFT.z0, SLAB_C, sx, -SLAB, (LIFT.z0 + LIFT.z1) / 2, { cast: false }); // pit floor
   // slab edge trim along the front
-  box(p, W + 0.1, 0.12, 0.12, TRIM, 0, -SLAB, Z1, { cast: false });
+  box(p, W + 0.1, 0.12, 0.12, TRIM, XC, -SLAB, Z1, { cast: false });
   // core floor finish
   if (n > 1) {
     box(p, sw, 0.02, Z1 - STAIR.z1, '#d9c7aa', sx, 0, (STAIR.z1 + Z1) / 2, { cast: false });
@@ -139,14 +146,14 @@ export function shell(p, n) {
       walls[side].userData.wallSide = side;
     }
     // back wall (z = -8) with windows
-    box(walls.back, W, CEIL, 0.3, WALL, 0, 0, Z0 + 0.15, { cast: false });
+    box(walls.back, W, CEIL, 0.3, WALL, XC, 0, Z0 + 0.15, { cast: false });
     if (n === 1) {
       // Floor 1 café: one style everywhere — tall glass with slim black frames
       glassStrip(walls.back, Z0 + 0.15, X0 + 0.35, CORE_X - 0.2, 0.75, CEIL - 0.45);
     } else {
       windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
     }
-    box(walls.back, W - 0.6, 0.12, 0.05, TRIM, 0, 0, Z0 + 0.32, { cast: false });
+    box(walls.back, W - 0.6, 0.12, 0.05, TRIM, XC, 0, Z0 + 0.32, { cast: false });
     // left wall (x = -12)
     box(walls.left, 0.3, CEIL, D, WALL, X0 + 0.15, 0, 0, { cast: false });
     if (n === 1) glassStripZ(walls.left, X0 + 0.15, Z0 + 0.35, Z1 - 0.6, 0.75, CEIL - 0.45);

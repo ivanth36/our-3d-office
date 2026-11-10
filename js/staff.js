@@ -11,6 +11,7 @@ import { H } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
 import { seat as deskSeat } from './floors.js';
+import { sx } from './building.js';   // original-layout x -> real x on the longer floors
 
 const R = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -252,7 +253,7 @@ class Actor {
   }
   set status(s) { this.e.status = s; }
   toFloor(f) { this.floor = f; this.w.floors[f - 1].add(this.g); }
-  at(id) { const n = nodes.get(id); this.node = id; this.toFloor(n.f); this.g.position.set(n.x, 0, n.z); }
+  at(id) { const n = nodes.get(id); this.node = id; this.toFloor(n.f); this.g.position.set(sx(n.f, n.x), 0, n.z); }
 
   // ---- promise helpers (resolved from update())
   _task(fn) { return new Promise((res) => { this.task = { fn, res }; }); }
@@ -266,8 +267,9 @@ class Actor {
       return Math.abs(d) < 0.03;
     });
   }
-  face(x, z) { return this.turnTo(Math.atan2(x - this.g.position.x, z - this.g.position.z)); }
+  face(x, z) { x = sx(this.floor, x); return this.turnTo(Math.atan2(x - this.g.position.x, z - this.g.position.z)); }
   moveTo(x, z, speed = 1.25) {
+    x = sx(this.floor, x);
     this.anim = 'walk';
     return this._task((dt) => {
       const p = this.g.position, dx = x - p.x, dz = z - p.z, dist = Math.hypot(dx, dz);
@@ -335,7 +337,7 @@ class Actor {
       } else if (type === 'lift') {
         await lift.bring(B.f);
         this.toFloor(B.f);
-        this.g.position.set(B.x, 0, B.z);
+        this.g.position.set(sx(B.f, B.x), 0, B.z);
         releaseAfterWalk = true;
       } else {                                 // stairs
         await this.climb(Math.min(A.f, B.f), B.f > A.f);
@@ -951,11 +953,11 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
   world.plates.userData.dynamic = true;
   for (const px of [3.4, 4.68]) {
     const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.02, 16), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6 }));
-    pl.position.set(px, 0.83, 3.4);
+    pl.position.set(sx(2, px), 0.83, 3.4);
     const food = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), new THREE.MeshStandardMaterial({ color: '#e2a356', roughness: 0.9 }));
-    food.scale.set(1.3, 0.6, 1); food.position.set(px, 0.87, 3.4);
+    food.scale.set(1.3, 0.6, 1); food.position.set(sx(2, px), 0.87, 3.4);
     const veg = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), new THREE.MeshStandardMaterial({ color: '#6aa84f', roughness: 0.9 }));
-    veg.position.set(px + 0.06, 0.87, 3.36);
+    veg.position.set(sx(2, px) + 0.06, 0.87, 3.36);
     world.plates.add(pl, food, veg);
   }
   world.plates.visible = false;
@@ -972,7 +974,7 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
         a.heading = sp.ry ?? 0; a.g.rotation.y = a.heading;
       } else {
         a.at(sp.seat.node);
-        a.g.position.set(sp.seat.x, sp.seat.y ?? 0, sp.seat.z);
+        a.g.position.set(sx(2, sp.seat.x), sp.seat.y ?? 0, sp.seat.z);
         a.heading = sp.seat.ry; a.g.rotation.y = sp.seat.ry;
         a.rig.setPose('sit');
         a.seat = sp.seat;
@@ -993,7 +995,7 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
     } else {                                        // desk seat
       const s = deskSeatFor(e.floor, e.seat);
       a.at(s.node);
-      a.g.position.set(s.x, 0, s.z);
+      a.g.position.set(sx(e.floor, s.x), 0, s.z);
       a.heading = s.ry; a.g.rotation.y = s.ry;
       a.rig.setPose('sit', { typing: true });
       a.seat = s;

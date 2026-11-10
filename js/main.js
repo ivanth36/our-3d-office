@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { H, CEIL, box, cyl, sphere, mat, makeLabel, optimize } from './helpers.js';
-import { shell, liftCar, LIFT } from './building.js';
+import { shell, liftCar, LIFT, X0, XC, EXT, SPLIT } from './building.js';
 import { floor1, floor2, officeFloor, floor5 } from './floors.js';
 import { EMPLOYEES } from './employees.js';
 import { createStaff, createLift } from './staff.js';
@@ -55,10 +55,10 @@ controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 scene.add(new THREE.HemisphereLight('#fff4e0', '#b9a07f', 1.5));
 const sun = new THREE.DirectionalLight('#ffe2b8', 2.2);
 sun.position.set(18, 40, 26);
-sun.target.position.set(0, 10, 0);
+sun.target.position.set(XC, 10, 0);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 100 });
+Object.assign(sun.shadow.camera, { left: -36, right: 36, top: 34, bottom: -34, near: 1, far: 110 });
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 0.03;
 scene.add(sun, sun.target);
@@ -72,7 +72,7 @@ function surroundings() {
   const grass = new THREE.Mesh(new THREE.CircleGeometry(120, 40), mat('#a9c47f'));
   grass.rotation.x = -Math.PI / 2; grass.position.y = -0.32; grass.receiveShadow = true;
   g.add(grass);
-  box(g, 34, 0.32, 22, '#e3d6c3', 0, -0.32, 0.5, { cast: false });      // plaza / sidewalk
+  box(g, 34 + EXT, 0.32, 22, '#e3d6c3', XC, -0.32, 0.5, { cast: false });      // plaza / sidewalk
   box(g, 120, 0.05, 8, '#6f6a66', 0, -0.32, 16, { cast: false });       // street
   for (let x = -56; x < 60; x += 6) box(g, 2.5, 0.02, 0.25, '#f5f0e6', x, -0.27, 16, { cast: false });
   const tree = (x, z, s = 1) => {
@@ -81,8 +81,8 @@ function surroundings() {
     sphere(g, 1.1 * s, '#86b562', x + 0.7 * s, 3.3 * s, z + 0.3 * s);
   };
   [[-17, 4, 1.2], [-17, -6, 1.4], [17, 6, 1.1], [17, -5, 1.5], [-22, 12, 1], [23, 11, 1.2], [-6, -16, 1.6], [8, -15, 1.3], [-30, -8, 1.8], [30, -10, 1.6]]
-    .forEach(([x, z, s]) => tree(x, z, s));
-  for (const x of [-13.5, 13.5]) {           // street lamps
+    .forEach(([x, z, s]) => tree(x < -12 ? x - EXT : x, z, s));   // keep the left-side trees clear of the longer building
+  for (const x of [-13.5 - EXT, 13.5]) {     // street lamps
     cyl(g, 0.08, 4.2, '#3a3a3a', x, -0.3, 11.5, { seg: 6 });
     sphere(g, 0.25, mat('#ffe2a0', { emissive: '#ffd27a' }), x, 4.0, 11.5, { cast: false });
   }
@@ -117,7 +117,7 @@ const MIN_WALL_OPACITY = 0.1;
 const _dir = new THREE.Vector3();
 function updateWalls() {
   // direction from the building's centre to the camera
-  _dir.set(camera.position.x, camera.position.y - controls.target.y, camera.position.z).normalize();
+  _dir.set(camera.position.x - XC, camera.position.y - controls.target.y, camera.position.z).normalize();
   for (const side in WALL_SIDES) {
     const ws = WALL_SIDES[side];
     // facing = 1 when looking straight at that wall from outside
@@ -145,14 +145,25 @@ for (const f of FLOORS) {
   g.name = `floor${f.n}`;
   scene.add(g);
   const walls = shell(g, f.n);
-  if (f.n === 1) floor1(g, anim);
-  else if (f.n === 2) floor2(g, anim);
-  else if (f.n === 5) floor5(g, anim);
-  else officeFloor(g, f.n, [], anim);
+  // furniture goes in its own group: it was laid out for the original 24 m floor, so
+  // everything left of SPLIT moves left with the wall (the building is now 40% longer)
+  const c = new THREE.Group();
+  g.add(c);
+  if (f.n === 1) floor1(c, anim);
+  else if (f.n === 2) floor2(c, anim);
+  else if (f.n === 5) floor5(c, anim);
+  else officeFloor(c, f.n, [], anim);
+  c.updateMatrixWorld(true);
+  const _bb = new THREE.Box3(), _bc = new THREE.Vector3();
+  for (const o of [...c.children]) {
+    if (o.userData.noShift) continue;
+    _bb.setFromObject(o).getCenter(_bc);           // judge by where the piece actually is
+    if (_bc.x < SPLIT[f.n]) o.position.x -= EXT;
+  }
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
   const lbl = makeLabel(`${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
-  lbl.position.set(-12.6, (f.n - 1) * H + CEIL - 0.5, 8.6);
+  lbl.position.set(X0 - 0.6, (f.n - 1) * H + CEIL - 0.5, 8.6);
   lbl.center.set(0, 0.5);
   scene.add(lbl);
   floorLabels.push(lbl);
@@ -166,7 +177,7 @@ const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doo
 anim.fxBoard.start();
 
 // ---------------------------------------------------------------- camera presets
-const BUILD_CENTER = new THREE.Vector3(0, H * 2.25, 0);
+const BUILD_CENTER = new THREE.Vector3(XC, H * 2.25, 0);
 const VIEW_DIR = new THREE.Vector3(0.55, 0.5, 1).normalize();
 
 function fitDistance(w, h) {
@@ -177,12 +188,12 @@ function fitDistance(w, h) {
 
 function preset(n) {
   if (n === 0) {
-    const d = fitDistance(27, 31) + 8;
+    const d = fitDistance(37, 31) + 8;
     return { target: BUILD_CENTER.clone(), pos: BUILD_CENTER.clone().addScaledVector(VIEW_DIR, d) };
   }
-  const target = new THREE.Vector3(-0.5, (n - 1) * H + 0.5, 0.5);
+  const target = new THREE.Vector3(XC - 0.5, (n - 1) * H + 0.5, 0.5);
   const dir = new THREE.Vector3(0.3, 1.15, 1).normalize();
-  const d = fitDistance(23, 15) * 0.78 + 4;
+  const d = fitDistance(32, 15) * 0.78 + 4;
   return { target, pos: target.clone().addScaledVector(dir, d) };
 }
 

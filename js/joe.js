@@ -1,6 +1,7 @@
 // Joe roams around Floor 1 (Joe's Café) along open aisles between the furniture.
 import * as THREE from 'three';
 import { shihTzu } from './characters.js';
+import { sx } from './building.js';
 
 // Waypoints in the café's open aisles (floor-local x, z). Edges = walkable straight lines.
 export const NODES = [
@@ -29,7 +30,8 @@ const SPEED = 1.0; // m/s
 const SPOTS = { 0: 'nap', 5: 'beg', 13: 'admire' }; // 'admire' = sits and looks up at the street // special things Joe likes to do at some nodes
 
 export function roamingJoe(floor) {
-  const joe = shihTzu(floor, NODES[2][0], 0.02, NODES[2][1], 0, 1.0);
+  const WP = NODES.map(([x, z]) => [sx(1, x), z]); // waypoints on the (40% longer) café floor
+  const joe = shihTzu(floor, WP[2][0], 0.02, WP[2][1], 0, 1.0);
   joe.userData.dynamic = true;
   // soft blob shadow (shadow maps are static for speed, so Joe brings his own)
   const blob = new THREE.Mesh(
@@ -64,7 +66,7 @@ export function roamingJoe(floor) {
 
     if (st.mode === 'walk') {
       face('neutral');
-      const [tx, tz] = NODES[st.to];
+      const [tx, tz] = WP[st.to];
       const dx = tx - joe.position.x, dz = tz - joe.position.z;
       const dist = Math.hypot(dx, dz);
       // turn smoothly towards the target

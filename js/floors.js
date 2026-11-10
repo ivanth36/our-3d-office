@@ -10,7 +10,7 @@ import {
   bookshelf, frame, glassWall, glassDoor, monitor, laptop, officeChair,
 } from './furniture.js';
 import { roamingJoe } from './joe.js';
-import { CORE_X } from './building.js';
+import { CORE_X, X0, X1, XC, EXT } from './building.js';
 
 // Joe's photo cut-out (transparent PNG in /assets)
 const JOE_ASPECT = 459 / 452;
@@ -42,7 +42,7 @@ function addDoor(anim, id, leaf, closed, open) {
   };
 }
 
-const RW = CORE_X + 12, RX = (CORE_X - 12) / 2; // room floor width / centre x
+const RW = CORE_X - X0, RX = (CORE_X + X0) / 2; // room floor width / centre x
 
 // ---------------------------------------------------------------- signs
 function drawDogFace(ctx, cx, cy, r) {
@@ -211,7 +211,11 @@ export function floor1(p, anim) {
   frame(p, -8.5, 2.0, -7.68, 1.0, 0.8, 0, '#97b88f');
 
   // ---- long high bar table along the back window (sofa corner -> lift), stools facing out
-  const bx0 = -6.0, bx1 = 9.3, backZ = -7.68, walnut = '#6b4423', walnut2 = '#7a4e2a', iron = '#262426';
+  const barG = grp(p);
+  barG.userData.noShift = true;               // built for the full (longer) floor
+  {
+  const p = barG;
+  const bx0 = -6.0 - EXT, bx1 = 9.3, backZ = -7.68, walnut = '#6b4423', walnut2 = '#7a4e2a', iron = '#262426';
   // live-edge walnut top: short segments with a gently wavy front edge
   for (let x = bx0; x < bx1 - 0.01; x += 0.5) {
     const w = Math.min(0.5, bx1 - x), d = 0.46 + Math.sin(x * 1.3) * 0.04 + Math.sin(x * 3.1) * 0.02;
@@ -249,7 +253,8 @@ export function floor1(p, anim) {
   const love = canvasTex(256, 96, (ctx) => { ctx.fillStyle = '#1f1d1e'; ctx.fillRect(0, 0, 256, 96); ctx.fillStyle = '#e9dcc4'; ctx.font = 'italic 52px Georgia, serif'; ctx.fillText('Joe ♥', 52, 64); });
   box(p, 0.42, 0.17, 0.05, '#1f1d1e', -0.6, barTop, -7.5, { rx: -0.15 });
   panel(p, 0.4, 0.15, love, -0.6, barTop + 0.085, -7.47, { rx: -0.15 });
-  for (let i = 0; i < 6; i++) pendant(p, bx0 + 1.2 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
+  for (let i = 0; i < 10; i++) pendant(p, bx0 + 1.2 + i * 2.6, -7.25, { drop: 1.05, shade: '#2f3a2c' });
+  }
 
   // ---- two red vending machines against the left wall (between the sofa corner and the counter)
   vendingMachine(p, -11.32, -1.9, Math.PI / 2, { body: '#c8312b', trim: '#9c1f1b', title: 'COLD DRINKS', sub: 'ice cold 🧊', cols: ['#e85d3d', '#f2f2f2', '#2b2a2c', '#f1c84b', '#4fb0e0'] });
@@ -277,7 +282,7 @@ export function floor1(p, anim) {
   for (const [x, z] of [[-3.6, 7.2], [8.8, 7.3], [-11.3, 0.55]]) plant(p, x, z, { tall: (x * z) % 2 > 0 });
 
   // ---- façade: fascia sign, awning, mascot
-  box(p, 24, 0.55, 0.25, '#f1e0c3', 0, CEIL - 0.55, 7.95, { cast: false });
+  box(p, X1 - X0, 0.55, 0.25, '#f1e0c3', XC, CEIL - 0.55, 7.95, { cast: false }).userData.noShift = true;
   const sy = CEIL - 3.7; // signs sit relative to the ceiling
   box(p, 4.0, 1.05, 0.2, '#5c3d26', -1.5, 2.67 + sy, 7.98, { cast: false });
   panel(p, 3.9, 0.975, cafeSignTex(), -1.5, 3.195 + sy, 8.09, { glow: 0.25 });
@@ -295,6 +300,20 @@ export function floor1(p, anim) {
   roundTable(p, 6.0, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
   // ---- the real Joe, roaming around his café
   anim.joe = roamingJoe(p);
+  anim.joe.group.userData.noShift = true;   // Joe positions himself on the (already shifted) map
+
+  // ---- the new café space (building is 40% longer): more round tables, plants
+  {
+    const nb = grp(p);
+    nb.userData.noShift = true;
+    [[-11.5, 1.5], [-7.6, 1.9], [-9.6, 4.8]].forEach(([x, z], i) => {
+      roundTable(nb, x, z, { chairs: 4, start: i % 2 ? 0.3 : Math.PI / 4, chair: { seat: i % 2 ? C.sage : C.fabric } });
+      pendant(nb, x, z, { shade: '#c8935a' });
+    });
+    plant(nb, -13.2, -2.3, { tall: true });
+    plant(nb, -5.2, 5.6, { tall: true });
+    plant(nb, -6.0, -1.8);
+  }
 }
 
 // ---------------------------------------------------------------- Floor 2
@@ -494,6 +513,28 @@ export function floor2(p, anim = {}) {
   for (let i = 0; i < 4; i++) pendant(p, dx - 2.4 + i * 1.6, dz, { drop: 1.3, shade: '#c8935a' });
   for (let i = 0; i < 3; i++) { cyl(p, 0.07, 0.2, C.white, dx - 1.5 + i * 1.5, 0.82, dz, { seg: 8 }); sphere(p, 0.1, ['#f2a1a8', '#f1d08a', '#f2a1a8'][i], dx - 1.5 + i * 1.5, 1.1, dz); }
   plant(p, -0.8, 0.9, { tall: true });
+
+  // ---- the new space (building is 40% longer): pool table + reading nook
+  {
+    const nb = grp(p);
+    nb.userData.noShift = true;
+    const pt = grp(nb, -6.3, 0, 3.0);
+    for (const lx of [-1.1, 1.1]) for (const lz of [-0.5, 0.5]) box(pt, 0.18, 0.72, 0.18, C.woodDark, lx, 0, lz);
+    box(pt, 2.6, 0.14, 1.4, C.woodDark, 0, 0.72, 0);
+    box(pt, 2.32, 0.04, 1.12, '#2f7a4a', 0, 0.84, 0, { cast: false });
+    ['#f1c84b', '#d94f3d', '#3e6b9a', '#2b2a2c', '#ffffff', '#f08a5d', '#7ab87a'].forEach((c, i) => sphere(pt, 0.035, c, -0.5 + (i % 4) * 0.09 + Math.floor(i / 4) * 0.05, 0.9, -0.1 + Math.floor(i / 4) * 0.09));
+    box(pt, 1.4, 0.025, 0.025, C.wood, 0.5, 0.9, 0.35, { ry: 0.2 });
+    pendant(nb, -6.9, 3.0, { drop: 1.4, shade: '#2f3a2c' });
+    pendant(nb, -5.7, 3.0, { drop: 1.4, shade: '#2f3a2c' });
+    rug(nb, -6.3, -5.6, 4.0, 2.6, '#efe2c8', '#a77b4f');
+    sofa(nb, -7.6, -5.6, 1.3, Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
+    sofa(nb, -5.0, -5.6, 1.3, -Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
+    rectTable(nb, -6.3, -5.6, 0.8, 0.8, { h: 0.45, top: C.woodLight });
+    bookshelf(nb, -6.3, -7.5, 3.6, 2.6, 0);
+    floorLamp(nb, -8.6, -7.0);
+    plant(nb, -10.2, -7.2, { tall: true });
+    plant(nb, -2.4, -7.2, { tall: true });
+  }
   plant(p, 8.8, 7.2, { tall: true });
 }
 
@@ -595,6 +636,22 @@ export function officeFloor(p, n, employees, anim) {
   box(p, 0.4, 0.45, 0.35, '#c9ccd0', -10.9, 0.9, 5.6, { metalness: 0.5 });
   for (const [px, pz] of [[-11.3, -1.5], [-11.3, 7.2], [0.8, 7.2], [8.9, 7.2], [1.1, -7.3]]) plant(p, px, pz, { tall: true });
   frame(p, -11.68, 2.1, -4.5, 1.6, 1.0, Math.PI / 2, accent);
+
+  // ---- the new space (building is 40% longer): breakout lounge + more bookshelves
+  {
+    const nb = grp(p);
+    nb.userData.noShift = true;
+    bookshelf(nb, -6.4, -7.6, 3.6, 2.6, 0);
+    bookshelf(nb, -2.4, -7.6, 3.6, 2.6, 0);
+    rug(nb, -3.8, 5.3, 5.0, 3.0, '#ece2cf', '#a77b4f');
+    sofa(nb, -3.8, 6.4, 3.0, Math.PI, { color: n === 3 ? '#c8935a' : '#8fa6c0' });
+    rectTable(nb, -3.8, 5.2, 1.4, 0.7, { h: 0.4, top: C.woodLight });
+    chair(nb, -5.6, 4.4, faceTo(-5.6, 4.4, -3.8, 5.2));
+    chair(nb, -2.0, 4.4, faceTo(-2.0, 4.4, -3.8, 5.2));
+    pendant(nb, -3.8, 5.3, { drop: 1.0, shade: '#2f3a2c' });
+    plant(nb, -8.0, 4.2, { tall: true });
+    plant(nb, 0.3, 4.8, { tall: true });
+  }
 }
 
 // ---------------------------------------------------------------- Floor 5 (roof)
@@ -666,9 +723,11 @@ export function floor5(p, anim) {
     box(l, 0.66, 0.08, 1.2, C.white, 0, 0.3, 0.25);
     box(l, 0.66, 0.08, 0.7, C.white, 0, 0.45, -0.6, { rx: -0.6 });
   }
-  // planters along the edges
-  for (let i = 0; i < 6; i++) {
-    const px = -1.2 + i * 1.7;
+  // planters along the front edge (whole longer roof)
+  const pg = grp(p);
+  pg.userData.noShift = true;
+  for (let i = 0; i < 14; i++) {
+    const p = pg, px = -15.3 + i * 1.7;
     box(p, 1.4, 0.5, 0.7, C.woodDark, px, 0, 7.3);
     sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, px, 0.75, 7.3, { s: [1.4, 0.8, 0.8] });
   }
@@ -678,18 +737,35 @@ export function floor5(p, anim) {
   cyl(p, 0.08, 1.6, '#6b4126', -9.6, 0.6, 3.4, { seg: 6 });
   sphere(p, 0.9, C.leaf, -9.6, 2.6, 3.4, { s: [1, 0.9, 1] });
   sphere(p, 0.6, C.leaf2, -9.1, 2.3, 3.7);
-  // string lights between four poles
-  const poles = [[-1.4, -0.4], [8.6, -0.4], [8.6, 6.4], [-1.4, 6.4]];
-  for (const [px, pz] of poles) cyl(p, 0.05, 3.0, C.black, px, 0, pz, { seg: 6 });
+  // string lights between four poles (spanning the longer garden)
+  const lg = grp(p);
+  lg.userData.noShift = true;
+  const poles = [[-1.4 - EXT, -0.4], [8.6, -0.4], [8.6, 6.4], [-1.4 - EXT, 6.4]];
+  for (const [px, pz] of poles) cyl(lg, 0.05, 3.0, C.black, px, 0, pz, { seg: 6 });
   const bulb = glowMat('#ffd27a');
   for (let k = 0; k < 4; k++) {
     const [ax, az] = poles[k], [bx, bz] = poles[(k + 1) % 4];
-    const n = 14;
+    const n = Math.round(Math.hypot(bx - ax, bz - az) / 0.7);
     for (let i = 1; i < n; i++) {
       const t = i / n, sag = Math.sin(t * Math.PI) * 0.45;
-      sphere(p, 0.06, bulb, ax + (bx - ax) * t, 2.95 - sag, az + (bz - az) * t, { cast: false });
+      sphere(lg, 0.06, bulb, ax + (bx - ax) * t, 2.95 - sag, az + (bz - az) * t, { cast: false });
     }
   }
-  // roof-top lift lobby sign
+  // ---- the new space (building is 40% longer): outdoor dining under a pergola
+  {
+    const nb = grp(p);
+    nb.userData.noShift = true;
+    box(nb, 6.0, 0.05, 3.6, '#7fae5a', -6.0, 0.02, -4.4, { cast: false });   // lawn
+    rectTable(nb, -6.0, 3.5, 4.0, 1.2, { top: C.wood });
+    for (let i = 0; i < 4; i++) {
+      chair(nb, -7.5 + i * 1.0, 2.55, 0, { color: C.wood, seat: '#efe4cf' });
+      chair(nb, -7.5 + i * 1.0, 4.45, Math.PI, { color: C.wood, seat: '#efe4cf' });
+    }
+    for (const [px, pz] of [[-8.6, 1.9], [-3.4, 1.9], [-8.6, 5.1], [-3.4, 5.1]]) box(nb, 0.12, 2.8, 0.12, C.woodDark, px, 0, pz);
+    for (const pz of [1.9, 5.1]) box(nb, 5.4, 0.14, 0.14, C.woodDark, -6.0, 2.8, pz);
+    for (let i = 0; i < 7; i++) box(nb, 0.1, 0.1, 3.5, C.wood, -8.6 + i * 0.87, 2.94, 3.5);
+    plant(nb, -9.4, 1.4, { tall: true });
+    plant(nb, -2.6, 1.4, { tall: true });
+  }
   void anim;
 }
