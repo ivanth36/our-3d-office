@@ -39,7 +39,7 @@ export const EMPLOYEES = [
     ],
   },
   {
-    name: 'Eugene', role: 'Wellness Coach', floor: 5, pos: [-7.4, -3.2], ry: 0.3, idle: 'Coaching in the gym',
+    name: 'Eugene', role: 'Wellness Coach', floor: 5, pos: [-6.2, -1.2], ry: 0.6, idle: 'Coaching in the gym',
     hair: '#2a1d16', outfit: 'sport', shirt: '#3fa58f', pants: '#2f3a44',
     tasks: [
       { name: 'Weekly weight check-in', when: 'Every Sunday, 8:40 pm', at: { every: 'week', dow: 0, h: 20, m: 40 } },

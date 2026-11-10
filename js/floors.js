@@ -643,6 +643,56 @@ export function officeFloor(p, n, employees, anim) {
     nb.userData.noShift = true;
     bookshelf(nb, -6.4, -7.6, 3.6, 2.6, 0);
     bookshelf(nb, -2.4, -7.6, 3.6, 2.6, 0);
+
+    // manager's office: glass room at the back of the new space (around the bookshelves)
+    const ox0 = -8.6, ox1 = -0.3, oz1 = -3.4;
+    box(nb, ox1 - ox0, 0.03, 8 + oz1, '#7a5a43', (ox0 + ox1) / 2, 0.02, (-8 + oz1) / 2, { cast: false });   // wood floor
+    rug(nb, -4.4, -5.6, 4.2, 2.8, '#d9c7a8', '#7a5a43');
+    glassWall(nb, ox0, oz1, ox1, oz1, CEIL, { gap: [3.6, 4.6] });           // front, door in the middle
+    glassWall(nb, ox0, -7.85, ox0, oz1, CEIL);
+    glassWall(nb, ox1, -7.85, ox1, oz1, CEIL);
+    addDoor(anim, `${n}:mgr`, glassDoor(nb, ox0 + 3.6, oz1, 1.0, CEIL, 0), 0, -1.45);
+    const mgrSign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 54px -apple-system, sans-serif'; ctx.fillText("Manager's Office", 30, 68); });
+    panel(nb, 1.9, 0.36, mgrSign, -2.2, 3.1, oz1 + 0.04, { transparent: true });
+    // executive desk (walnut, with a modesty panel) facing the door
+    const ed = grp(nb, -4.4, 0, -5.7);
+    box(ed, 2.4, 0.06, 1.0, '#5c3d26', 0, 0.74, 0);
+    box(ed, 0.08, 0.74, 0.95, '#4a3020', -1.15, 0, 0);
+    box(ed, 0.08, 0.74, 0.95, '#4a3020', 1.15, 0, 0);
+    box(ed, 2.3, 0.55, 0.04, '#4a3020', 0, 0.15, 0.45);                     // modesty panel (front)
+    box(ed, 0.5, 0.6, 0.85, '#4a3020', 0.85, 0.12, 0);                      // drawer pedestal
+    monitor(ed, -0.4, 0.8, -0.25, 0);
+    laptop(ed, 0.35, 0.8, -0.1, 0);
+    box(ed, 0.42, 0.02, 0.14, '#e8e4dc', -0.4, 0.8, 0.05);                  // keyboard
+    cyl(ed, 0.07, 0.02, C.black, -1.0, 0.8, -0.25, { seg: 10 });            // desk lamp
+    box(ed, 0.03, 0.4, 0.03, C.black, -1.0, 0.82, -0.25, { rz: 0.3 });
+    cyl(ed, 0.1, 0.12, '#e8c48a', -0.93, 1.12, -0.25, { top: 0.4, bottom: 1, seg: 10, emissive: '#ffcf80', emissiveIntensity: 0.5 });
+    const np = canvasTex(256, 64, (ctx) => { ctx.fillStyle = '#c9a24a'; ctx.fillRect(0, 0, 256, 64); ctx.fillStyle = '#2b2a2c'; ctx.font = 'bold 34px Georgia, serif'; ctx.fillText('MANAGER', 50, 44); });
+    box(ed, 0.5, 0.11, 0.06, '#2b2a2c', 0.0, 0.8, 0.38, { rx: -0.3 });      // nameplate
+    panel(ed, 0.46, 0.09, np, 0.0, 0.86, 0.42, { rx: -0.3 });
+    box(ed, 0.18, 0.06, 0.12, C.black, 0.85, 0.8, 0.25);                    // desk phone
+    cyl(ed, 0.04, 0.09, C.white, 1.0, 0.8, -0.3, { seg: 10 });              // coffee mug
+    box(ed, 0.3, 0.02, 0.22, '#f6f2ea', 0.5, 0.8, 0.2, { ry: 0.2 });        // papers
+    // high-back leather executive chair behind the desk, two guest chairs in front
+    const ec = grp(nb, -4.4, 0, -6.6, 0);
+    for (let i = 0; i < 5; i++) { const ang = i / 5 * Math.PI * 2; box(ec, 0.05, 0.04, 0.34, C.black, Math.sin(ang) * 0.16, 0.04, Math.cos(ang) * 0.16, { ry: ang }); }
+    cyl(ec, 0.04, 0.42, C.metal, 0, 0.05, 0, { seg: 8 });
+    box(ec, 0.58, 0.12, 0.55, '#2b1d14', 0, 0.45, 0);
+    box(ec, 0.56, 0.95, 0.12, '#2b1d14', 0, 0.55, -0.27, { rx: -0.08 });   // tall back
+    box(ec, 0.4, 0.18, 0.1, '#3a2a20', 0, 1.42, -0.32, { rx: -0.08 });     // headrest
+    for (const sxx of [-0.3, 0.3]) box(ec, 0.06, 0.22, 0.4, '#2b1d14', sxx, 0.55, 0.02);
+    for (const gx of [-5.1, -3.7]) chair(nb, gx, -4.4, Math.PI, { seat: '#7a3b3b', color: '#4a3020' });
+    // corner lounge chair, side table, filing cabinet, plant, wall clock, awards shelf
+    sofa(nb, -7.7, -4.2, 1.2, Math.PI / 2 + 0.4, { color: '#3b2a20', cushion: '#5c3d26', pillow: '#c9a24a' });
+    rectTable(nb, -7.8, -5.3, 0.5, 0.5, { h: 0.55, top: '#5c3d26' });
+    box(nb, 0.5, 1.3, 0.6, '#6f757d', -0.9, 0, -4.2);                        // filing cabinet
+    for (let i = 0; i < 3; i++) box(nb, 0.04, 0.03, 0.02, C.metal, -0.9, 0.3 + i * 0.4, -3.89, { cast: false });
+    plant(nb, -0.9, -7.2, { tall: true });
+    box(nb, 0.9, 0.05, 0.3, '#5c3d26', -1.4, 1.55, -5.6, { ry: Math.PI / 2 });  // awards shelf on the side glass? keep it free-standing
+    for (let i = 0; i < 3; i++) cyl(nb, 0.05, 0.22, '#c9a24a', -1.4, 1.6, -5.9 + i * 0.3, { top: 0.6, seg: 8, metalness: 0.6, roughness: 0.3 });
+    cyl(nb, 0.03, 1.55, '#5c3d26', -1.4, 0, -5.6, { seg: 6 });
+    pendant(nb, -4.4, -5.7, { drop: 1.0, shade: '#c9a24a' });
+    floorLamp(nb, -7.9, -7.0);
     rug(nb, -3.8, 5.3, 5.0, 3.0, '#ece2cf', '#a77b4f');
     sofa(nb, -3.8, 6.4, 3.0, Math.PI, { color: n === 3 ? '#c8935a' : '#8fa6c0' });
     rectTable(nb, -3.8, 5.2, 1.4, 0.7, { h: 0.4, top: C.woodLight });
@@ -661,48 +711,110 @@ export function floor5(p, anim) {
   box(p, 7.0, 0.05, 3.0, '#7fae5a', 4.5, 0.02, 6.0, { cast: false });
   box(p, 3.5, 0.05, 4.5, '#7fae5a', -0.2, 0.02, -5.5, { cast: false });
 
-  // ---- glass gym (back-left)
-  const gx0 = -11.8, gx1 = -2.4, gz0 = -7.8, gz1 = -0.6, gh = 3.0;
-  box(p, gx1 - gx0, 0.04, gz1 - gz0, '#7d838b', (gx0 + gx1) / 2, 0.02, (gz0 + gz1) / 2, { cast: false });
-  glassWall(p, gx0, gz1, gx1, gz1, gh, { gap: [7.6, 8.8] });
-  addDoor(anim, '5:gym', glassDoor(p, gx0 + 7.6, gz1, 1.2, gh, 0), 0, -1.45);
-  glassWall(p, gx1, gz0, gx1, gz1, gh);
-  glassWall(p, gx0, gz0, gx1, gz0, gh);
-  glassWall(p, gx0, gz0, gx0, gz1, gh);
-  // pergola beams on top (open roof so you can see in)
-  for (let i = 0; i <= 6; i++) box(p, 0.08, 0.1, gz1 - gz0, C.black, gx0 + i * (gx1 - gx0) / 6, gh, (gz0 + gz1) / 2, { cast: false });
-  // treadmills facing the view (+z)
-  for (const tx of [-10.6, -9.0]) {
-    const t = grp(p, tx, 0, -6.4);
-    box(t, 0.8, 0.2, 1.9, '#2b2a2c', 0, 0, 0);
-    box(t, 0.6, 0.03, 1.7, '#4a4a4f', 0, 0.2, 0);
-    box(t, 0.05, 1.1, 0.05, C.metal, -0.35, 0.2, 0.85);
-    box(t, 0.05, 1.1, 0.05, C.metal, 0.35, 0.2, 0.85);
-    box(t, 0.8, 0.35, 0.15, '#2b2a2c', 0, 1.25, 0.9, { rx: -0.4 });
-    box(t, 0.5, 0.25, 0.02, mat('#7fd0c0', { emissive: '#4fb0a0', emissiveIntensity: 0.6 }), 0, 1.3, 0.97, { rx: -0.4, cast: false });
+  // ---- big glass gym filling the whole left end of the roof (built in final positions)
+  {
+    const gg = grp(p);
+    gg.userData.noShift = true;
+    const p = gg;
+    const gx0 = X0 + 0.2, gx1 = -12.0, gz0 = -7.8, gz1 = 7.7, gh = 3.0, gcx = (gx0 + gx1) / 2;
+    const rubber = '#6f757d', dark = '#2b2a2c';
+    box(p, gx1 - gx0, 0.04, gz1 - gz0, rubber, gcx, 0.02, (gz0 + gz1) / 2, { cast: false });  // rubber floor
+    box(p, 4.4, 0.045, 3.4, '#5c626a', -18.6, 0.02, 5.0, { cast: false });                     // stretching zone
+    glassWall(p, gx0, gz1, gx1, gz1, gh);                                    // front
+    glassWall(p, gx0, gz0, gx1, gz0, gh);                                    // back
+    glassWall(p, gx0, gz0, gx0, gz1, gh);                                    // left (building edge)
+    glassWall(p, gx1, gz0, gx1, gz1, gh, { gap: [6.2, 7.4] });              // right, door to the garden
+    addDoor(anim, '5:gym', glassDoor(p, gx1, -1.6, 1.2, gh, -Math.PI / 2), -Math.PI / 2, 0);
+    for (let i = 0; i <= 10; i++) box(p, 0.08, 0.1, gz1 - gz0, C.black, gx0 + i * (gx1 - gx0) / 10, gh, (gz0 + gz1) / 2, { cast: false }); // pergola
+    const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 60px -apple-system, sans-serif'; ctx.fillText('💪 GYM', 150, 70); });
+    panel(p, 1.6, 0.3, sign, gx1 + 0.03, 2.6, -1.0, { ry: Math.PI / 2, transparent: true });
+
+    // treadmills along the left edge, facing outside (-X)
+    for (const tz of [-6.3, -4.8, -3.3, -1.8]) {
+      const t = grp(p, -20.0, 0, tz, -Math.PI / 2);
+      box(t, 0.8, 0.2, 1.9, dark, 0, 0, 0);
+      box(t, 0.6, 0.03, 1.7, '#4a4a4f', 0, 0.2, 0);
+      box(t, 0.05, 1.1, 0.05, C.metal, -0.35, 0.2, 0.85);
+      box(t, 0.05, 1.1, 0.05, C.metal, 0.35, 0.2, 0.85);
+      box(t, 0.8, 0.35, 0.15, dark, 0, 1.25, 0.9, { rx: -0.4 });
+      box(t, 0.5, 0.25, 0.02, mat('#7fd0c0', { emissive: '#4fb0a0', emissiveIntensity: 0.6 }), 0, 1.3, 0.97, { rx: -0.4, cast: false });
+    }
+    // exercise bikes (also facing outside)
+    for (const bz of [0.1, 1.5]) {
+      const b = grp(p, -20.2, 0, bz, -Math.PI / 2);
+      box(b, 0.5, 0.08, 1.1, dark, 0, 0, 0);
+      box(b, 0.1, 0.75, 0.1, C.metal, 0, 0.08, -0.25, { rx: -0.2 });
+      box(b, 0.3, 0.08, 0.35, dark, 0, 0.82, -0.32);                      // saddle
+      box(b, 0.08, 0.9, 0.08, C.metal, 0, 0.08, 0.35, { rx: 0.25 });
+      box(b, 0.5, 0.05, 0.08, dark, 0, 1.0, 0.48);                        // handlebar
+      cyl(b, 0.22, 0.12, '#c8312b', 0, 0.2, 0.25, { rz: Math.PI / 2, seg: 16 }); // flywheel
+    }
+    // rowing machine
+    const rw = grp(p, -14.2, 0, 2.6, Math.PI / 2);
+    box(rw, 0.35, 0.12, 2.2, dark, 0, 0, 0);
+    box(rw, 0.4, 0.08, 0.4, '#3a3d42', 0, 0.2, -0.3);
+    cyl(rw, 0.28, 0.12, C.metal, 0, 0.12, 0.95, { rx: Math.PI / 2, seg: 18 });
+    // weights zone (back): dumbbell racks, squat rack, cable tower, bench
+    for (const rx of [-17.4, -14.4]) {
+      const rk = grp(p, rx, 0, -7.4);
+      box(rk, 2.2, 0.08, 0.5, C.black, 0, 0.4, 0); box(rk, 2.2, 0.08, 0.5, C.black, 0, 0.8, 0);
+      for (const lx of [-1.05, 1.05]) box(rk, 0.06, 0.9, 0.5, C.black, lx, 0, 0);
+      for (let i = 0; i < 7; i++) for (const ly of [0.48, 0.88]) {
+        cyl(rk, 0.06 + i * 0.007, 0.08, '#555a60', -0.9 + i * 0.3 - 0.07, ly + 0.07, 0, { rz: Math.PI / 2, seg: 8 });
+        cyl(rk, 0.06 + i * 0.007, 0.08, '#555a60', -0.9 + i * 0.3 + 0.07, ly + 0.07, 0, { rz: Math.PI / 2, seg: 8 });
+      }
+    }
+    box(p, 3.0, 2.0, 0.04, mat('#dfeff5', { roughness: 0.05, metalness: 0.6 }), -15.9, 0.6, gz0 + 0.1, { cast: false }); // mirror
+    const sr = grp(p, -13.0, 0, -3.4);                                    // squat / power rack
+    for (const [lx, lz] of [[-0.6, -0.6], [0.6, -0.6], [-0.6, 0.6], [0.6, 0.6]]) box(sr, 0.08, 2.3, 0.08, C.black, lx, 0, lz);
+    for (const lz of [-0.6, 0.6]) box(sr, 1.28, 0.08, 0.08, C.black, 0, 2.22, lz);
+    cyl(sr, 0.025, 1.8, C.metal, 0, 1.35, -0.1, { rz: Math.PI / 2, seg: 6 });
+    for (const lx of [-0.75, 0.75]) cyl(sr, 0.22, 0.08, dark, lx, 1.35, -0.1, { rz: Math.PI / 2, seg: 14 });
+    const ct = grp(p, -12.8, 0, -6.9);                                    // cable tower
+    box(ct, 0.6, 2.3, 0.5, '#3a3d42', 0, 0, 0);
+    box(ct, 0.4, 0.9, 0.06, C.metal, 0, 0.3, 0.28);
+    const wb = grp(p, -13.0, 0, -5.4);                                    // flat bench
+    box(wb, 0.35, 0.42, 1.2, C.black, 0, 0, 0);
+    box(wb, 0.4, 0.1, 1.2, '#7a3b3b', 0, 0.42, 0);
+    // kettlebells + medicine balls along the right wall
+    for (let i = 0; i < 6; i++) {
+      const kz = 0.7 + i * 0.32;
+      sphere(p, 0.1 + i * 0.008, '#2b2a2c', -12.45, 0.11, kz, { s: [1, 0.95, 1] });
+      cyl(p, 0.05, 0.08, '#2b2a2c', -12.45, 0.2, kz, { rx: Math.PI / 2, seg: 8 });
+    }
+    // punching bag hanging from the pergola
+    cyl(p, 0.015, 0.6, C.black, -15.8, gh - 0.6, 3.0, { seg: 4 });
+    cyl(p, 0.2, 1.0, '#7a3b3b', -15.8, gh - 1.6, 3.0, { seg: 14 });
+    // yoga & stretching: 5 mats, balls, foam rollers, blocks
+    ['#a98bd6', '#7fc4b4', '#f0a3a3', '#f1c84b', '#8fb0e0'].forEach((c, i) => box(p, 0.65, 0.025, 1.8, c, -20.6 + i * 1.05, 0.05, 5.0, { cast: false }));
+    sphere(p, 0.33, '#8f5fd6', -20.7, 0.38, 3.0);
+    sphere(p, 0.3, '#4fb0a0', -20.0, 0.35, 3.1);
+    for (let i = 0; i < 3; i++) cyl(p, 0.07, 0.45, ['#4fb0e0', '#e85d3d', '#2b2a2c'][i], -16.4, 0.07, 6.6 + i * 0.2, { rz: Math.PI / 2, seg: 10 });
+    for (let i = 0; i < 4; i++) box(p, 0.15, 0.1, 0.23, '#a98bd6', -17.2 + i * 0.2, 0.05, 6.7);
+    // lockers, towel shelf, water cooler by the door
+    for (let i = 0; i < 4; i++) {
+      box(p, 0.5, 1.9, 0.45, i % 2 ? '#4f7d6a' : '#5f8f7a', -15.2 + i * 0.52, 0.05, gz1 - 0.3);
+      box(p, 0.04, 0.12, 0.02, C.metal, -15.05 + i * 0.52, 1.0, gz1 - 0.53, { cast: false });
+    }
+    const ts = grp(p, -12.45, 0, 4.6, -Math.PI / 2);
+    box(ts, 1.2, 0.04, 0.35, C.wood, 0, 0.6, 0); box(ts, 1.2, 0.04, 0.35, C.wood, 0, 1.1, 0);
+    for (const lx of [-0.58, 0.58]) box(ts, 0.04, 1.3, 0.35, C.wood, lx, 0, 0);
+    for (let i = 0; i < 4; i++) box(ts, 0.22, 0.12, 0.3, ['#ffffff', '#cfe3b0', '#ffffff', '#bfe0ee'][i], -0.4 + i * 0.27, 0.64, 0);
+    const wc = grp(p, -12.5, 0, 6.6);
+    box(wc, 0.4, 1.0, 0.4, '#e9e6e0', 0, 0, 0);
+    cyl(wc, 0.15, 0.45, mat('#bfe0ee', { transparent: true, opacity: 0.6 }), 0, 1.0, 0, { seg: 14, cast: false });
+    plant(p, -12.6, -7.3, { tall: true });
+    plant(p, -20.9, 7.2, { tall: true });
   }
-  // dumbbell rack
-  const rk = grp(p, -6.6, 0, -7.4);
-  box(rk, 2.0, 0.08, 0.5, C.black, 0, 0.4, 0); box(rk, 2.0, 0.08, 0.5, C.black, 0, 0.8, 0);
-  for (const lx of [-0.95, 0.95]) box(rk, 0.06, 0.9, 0.5, C.black, lx, 0, 0);
-  for (let i = 0; i < 6; i++) for (const ly of [0.48, 0.88]) {
-    cyl(rk, 0.06 + i * 0.008, 0.08, '#555a60', -0.75 + i * 0.3 - 0.07, ly + 0.07, 0, { rz: Math.PI / 2, seg: 8 });
-    cyl(rk, 0.06 + i * 0.008, 0.08, '#555a60', -0.75 + i * 0.3 + 0.07, ly + 0.07, 0, { rz: Math.PI / 2, seg: 8 });
+  // vending machines outside the gym door: 2 green, 2 blue
+  {
+    const vg = grp(p);
+    vg.userData.noShift = true;
+    vendingMachine(vg, -11.55, -2.3, Math.PI / 2, { title: 'PROTEIN · ISOTONIC', sub: 'stay hydrated 💧' });
+    vendingMachine(vg, -11.55, -3.35, Math.PI / 2, { body: '#3f9a4a', trim: '#2c7336', title: 'GREEN SMOOTHIES', sub: 'fresh & healthy 🥬', cols: ['#7ab87a', '#a5c98a', '#f2f2f2', '#5f8a5b', '#cfe3b0'] });
+    vendingMachine(vg, -11.55, -4.4, Math.PI / 2, { body: '#2f6fb0', trim: '#1f4f85', title: 'SPORTS DRINKS', sub: 'recharge ⚡', cols: ['#4fb0e0', '#f1c84b', '#f2f2f2', '#2f6fb0', '#e85d3d'] });
+    vendingMachine(vg, -11.55, -5.45, Math.PI / 2, { body: '#2f6fb0', trim: '#1f4f85', title: 'PROTEIN BARS', sub: 'refuel 🍫', cols: ['#8a5a33', '#e2a356', '#f2f2f2', '#c96f4a', '#f1c84b'] });
   }
-  // weight bench + barbell
-  const wb = grp(p, -5.0, 0, -4.6, Math.PI / 2);
-  box(wb, 0.35, 0.42, 1.3, C.black, 0, 0, 0);
-  box(wb, 0.4, 0.1, 1.3, '#7a3b3b', 0, 0.42, 0);
-  for (const lx of [-0.5, 0.5]) box(wb, 0.05, 1.1, 0.05, C.metal, lx, 0, -0.55);
-  cyl(wb, 0.025, 1.8, C.metal, 0, 1.08, -0.55, { rz: Math.PI / 2, seg: 6 });
-  for (const lx of [-0.8, 0.8]) cyl(wb, 0.2, 0.08, '#2b2a2c', lx, 1.08, -0.55, { rz: Math.PI / 2, seg: 14 });
-  // yoga mats + exercise ball + mirror
-  ['#a98bd6', '#7fc4b4', '#f0a3a3'].forEach((c, i) => box(p, 0.65, 0.025, 1.8, c, -10.6 + i * 1.0, 0.03, -2.2, { cast: false }));
-  sphere(p, 0.33, '#8f5fd6', -7.0, 0.36, -1.6);
-  box(p, 0.05, 2.2, 4.0, mat('#dfeff5', { roughness: 0.05, metalness: 0.6 }), gx0 + 0.12, 0.2, -4.2, { cast: false });
-  plant(p, -3.0, -7.2);
-  // vending machine just outside the gym: protein & isotonic drinks
-  vendingMachine(p, -1.95, -2.3, Math.PI / 2, { title: 'PROTEIN · ISOTONIC', sub: 'stay hydrated 💧' });
 
   // ---- chill area: lounge set, umbrella table, loungers, planters, string lights
   rug(p, 2.2, 2.2, 5.0, 3.4, '#f0e6d2', '#c8935a');
@@ -716,9 +828,11 @@ export function floor5(p, anim) {
   roundTable(p, 5.4, -4.6, { r: 0.6, vase: false, chairs: 4, start: Math.PI / 4, chair: { color: C.wood, seat: '#efe4cf' } });
   cyl(p, 0.03, 2.4, C.woodDark, 5.4, 0.75, -4.6, { seg: 6 });
   cyl(p, 1.6, 0.5, '#f4ede2', 5.4, 2.7, -4.6, { top: 0.02, bottom: 1, seg: 8, cast: true });
-  // sun loungers
-  for (const lx of [-4.0, -2.2]) {
-    const l = grp(p, lx, 0, 5.6);
+  // sun loungers (in the garden, next to the gym)
+  const lgr = grp(p);
+  lgr.userData.noShift = true;
+  for (const lx of [-10.1, -9.2]) {
+    const l = grp(lgr, lx, 0, 5.9);
     box(l, 0.7, 0.3, 1.8, C.wood, 0, 0, 0);
     box(l, 0.66, 0.08, 1.2, C.white, 0, 0.3, 0.25);
     box(l, 0.66, 0.08, 0.7, C.white, 0, 0.45, -0.6, { rx: -0.6 });
@@ -726,17 +840,12 @@ export function floor5(p, anim) {
   // planters along the front edge (whole longer roof)
   const pg = grp(p);
   pg.userData.noShift = true;
-  for (let i = 0; i < 14; i++) {
-    const p = pg, px = -15.3 + i * 1.7;
+  for (let i = 0; i < 11; i++) {
+    const p = pg, px = -11.2 + i * 1.7;
     box(p, 1.4, 0.5, 0.7, C.woodDark, px, 0, 7.3);
     sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, px, 0.75, 7.3, { s: [1.4, 0.8, 0.8] });
   }
-  for (const [px, pz] of [[8.8, -2.6], [8.8, 2.5], [-1.4, -7.3], [-11.2, 7.0], [-8.0, 7.0], [8.8, 5.0]]) plant(p, px, pz, { tall: true, s: 1.2 });
-  // a small tree
-  cyl(p, 0.5, 0.6, C.woodDark, -9.6, 0, 3.4, { seg: 10 });
-  cyl(p, 0.08, 1.6, '#6b4126', -9.6, 0.6, 3.4, { seg: 6 });
-  sphere(p, 0.9, C.leaf, -9.6, 2.6, 3.4, { s: [1, 0.9, 1] });
-  sphere(p, 0.6, C.leaf2, -9.1, 2.3, 3.7);
+  for (const [px, pz] of [[8.8, -2.6], [8.8, 2.5], [-1.4, -7.3], [8.8, 5.0]]) plant(p, px, pz, { tall: true, s: 1.2 });
   // string lights between four poles (spanning the longer garden)
   const lg = grp(p);
   lg.userData.noShift = true;

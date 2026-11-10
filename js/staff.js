@@ -130,24 +130,24 @@ node(5, 'rMid', 7.6, 1.0);
 node(5, 'smokeJ', 3.7, 6.1);
 node(5, 'smokeE', 2.6, 6.1);
 node(5, 'rPole', -1.4, -1.2);
-node(5, 'gymOut', -3.6, 0.0);
-node(5, 'gymIn', -3.6, -1.3);
-node(5, 'treadFront', -9.0, -4.5);
-chain('5:coreW', '5:rMid', '5:smokeJ', '5:smokeE');
-link('5:rMid', '5:rPole');
-link('5:coreW', '5:rPole');
+// the big gym now fills the left end of the roof; its door is on the garden side (x = -12 real)
+// (coordinates here are in the original-layout system: real x = design x - 9.6 left of x = -1)
+node(5, 'gymOut', -1.8, -1.0);                      // outside the gym door
+node(5, 'gymIn', -3.0, -1.0);                       // just inside
 chain('5:rPole', '5:gymOut', '5:gymIn');
-chain('5:rPole', node(5, 'meetJ', -2.6, 0.6), '5:gymOut');   // JungKook waits here, just outside the gym
-node(5, 'yoga', -9.6, -2.2);
-node(5, 'barbell', -5.9, -2.5);
-// Ivan's gym spots (next to Eugene's) and the vending machine outside
-node(5, 'ivanMeet', -6.5, -2.6); link('5:ivanMeet', '5:gymIn');
-node(5, 'treadFront2', -10.6, -4.5); link('5:treadFront2', '5:gymIn'); link('5:treadFront2', '5:treadFront');
-node(5, 'ivanBarbell', -4.4, -2.6); link('5:ivanBarbell', '5:gymIn'); link('5:ivanBarbell', '5:ivanMeet');
-node(5, 'ivanYoga', -8.6, -2.2); link('5:ivanYoga', '5:ivanMeet');
+chain('5:rPole', node(5, 'meetJ', -1.6, 0.8), '5:gymOut');   // JungKook waits here, outside the gym
+node(5, 'treadFront', -9.1, -4.8);                  // behind Eugene's treadmill
+node(5, 'treadFront2', -9.1, -3.3);                 // behind Ivan's treadmill
+link('5:treadFront', '5:treadFront2');
+node(5, 'barbell', -6.6, -5.6);
+node(5, 'yoga', -8.9, 5.0);
+// Ivan's gym spots (next to Eugene's) and the vending machines outside
+node(5, 'ivanMeet', -5.4, -1.5); link('5:ivanMeet', '5:gymIn');
+node(5, 'ivanBarbell', -5.0, -5.6); link('5:ivanBarbell', '5:ivanMeet');
+node(5, 'ivanYoga', -7.85, 5.0); link('5:ivanYoga', '5:ivanMeet');
 node(5, 'vendFront', -1.1, -2.3); link('5:vendFront', '5:rPole');
-const TREAD = { x: -9.0, z: -6.3, y: 0.23 };
-const TREAD2_X = -10.6;
+// treadmills face the outside (-X): step on from behind, run facing the left edge
+const TREAD = { stepX: -10.3, y: 0.23, eugeneZ: -4.8, ivanZ: -3.3 };
 
 // glass doors: walking between these node pairs goes through a door
 const DOOR_EDGES = {};
@@ -479,20 +479,18 @@ const flags = {
 };
 
 // ---- shared gym moves (Eugene and Ivan use their own machine / spot)
-async function treadmillOn(a, tx, front) {
+async function treadmillOn(a, tz, front) {
   await a.go(front);
-  await a.moveTo(tx, -5.5);
   a.g.position.y = TREAD.y;
-  await a.moveTo(tx, TREAD.z, 0.6);
-  await a.turnTo(0);
+  await a.moveTo(TREAD.stepX, tz, 0.6);
+  await a.turnTo(-Math.PI / 2);
   a.anim = 'run';
 }
-async function treadmillOff(a, tx, front) {
+async function treadmillOff(a, tz, front) {
   a.anim = 'idle';
-  await a.moveTo(tx, -5.5, 0.8);
-  a.g.position.y = 0;
   const n = nodes.get(front);
-  await a.moveTo(n.x, n.z);
+  await a.moveTo(n.x, n.z, 0.8);
+  a.g.position.y = 0;
   a.node = front;
 }
 async function barbellOn(a, spot) { await a.go(spot); await a.turnTo(0.3); a.rig.barbell.visible = true; a.act = 'barbell'; }
@@ -507,7 +505,7 @@ async function jungkook(a) {
     await a.sleep(R(25, 40));
     a.status = 'Walking up the stairs to see Eugene';
     await a.goStand('5:meetJ', 'stairs');
-    await a.face(-3.6, 0.0);
+    await a.face(-1.8, -1.0);
     a.status = 'Waiting for Eugene outside the gym';
     flags.smokeCall = true;
     await a.waitFor(() => flags.eugeneReady, 240);
@@ -540,7 +538,7 @@ async function eugene(a) {
   const smokeTime = async () => {
     a.status = 'Heading out to meet JungKook';
     await a.go('5:gymOut');                          // through the glass door
-    await a.face(-2.6, 0.6);
+    await a.face(-1.6, 0.8);
     flags.eugeneReady = true;
     a.talking = true;
     await a.waitFor(() => flags.smokeGo, 30);
@@ -564,7 +562,7 @@ async function eugene(a) {
     flags.eugeneInSession = true;
     let cur = null;
     const stop = async () => {
-      if (cur === 'tread') await treadmillOff(a, TREAD.x, '5:treadFront');
+      if (cur === 'tread') await treadmillOff(a, TREAD.eugeneZ, '5:treadFront');
       else if (cur === 'barbell') barbellOff(a);
       else if (cur === 'yoga') yogaOff(a);
       a.talking = false; cur = null;
@@ -573,8 +571,8 @@ async function eugene(a) {
       const ph = flags.gymPhase;
       if (ph !== cur) {
         await stop();
-        if (ph === 'chat') { await a.go('5:home'); await a.face(-6.5, -2.6); a.talking = true; a.status = 'Chatting with Ivan'; holdBottle(true); }
-        else if (ph === 'tread') { a.status = 'Running on the treadmill with Ivan'; holdBottle(true); await treadmillOn(a, TREAD.x, '5:treadFront'); }
+        if (ph === 'chat') { await a.go('5:home'); await a.face(-5.4, -1.5); a.talking = true; a.status = 'Chatting with Ivan'; holdBottle(true); }
+        else if (ph === 'tread') { a.status = 'Running on the treadmill with Ivan'; holdBottle(true); await treadmillOn(a, TREAD.eugeneZ, '5:treadFront'); }
         else if (ph === 'barbell') { a.status = 'Lifting the barbell with Ivan'; holdBottle(false); await barbellOn(a, '5:barbell'); }
         else if (ph === 'yoga') { a.status = 'Yoga with Ivan'; holdBottle(false); await yogaOn(a, '5:yoga'); }
         cur = ph;
@@ -596,9 +594,9 @@ async function eugene(a) {
       await a.sleep(R(8, 14), called);
     } else if (act === 'treadmill') {
       a.status = 'Running on the treadmill';
-      await treadmillOn(a, TREAD.x, '5:treadFront');
+      await treadmillOn(a, TREAD.eugeneZ, '5:treadFront');
       await a.sleep(R(15, 25), called);
-      await treadmillOff(a, TREAD.x, '5:treadFront');
+      await treadmillOff(a, TREAD.eugeneZ, '5:treadFront');
       await backHome();
     } else if (act === 'barbell') {
       a.status = 'Lifting the barbell';
@@ -760,7 +758,7 @@ async function ivan(a) {
   for (;;) {
     // 1. gym session with Eugene
     if (a.node !== '5:ivanMeet') { a.status = 'Taking the lift up to the gym'; await a.goStand('5:ivanMeet', 'lift'); }
-    await a.face(-7.4, -3.2);
+    await a.face(-6.2, -1.2);
     flags.gymPhase = 'chat'; flags.ivanGym = true;
     a.status = 'Chatting with Eugene';
     a.talking = true;
@@ -769,9 +767,9 @@ async function ivan(a) {
     a.talking = false;
     flags.gymPhase = 'tread';
     a.status = 'Running on the treadmill with Eugene';
-    await treadmillOn(a, TREAD2_X, '5:treadFront2');
+    await treadmillOn(a, TREAD.ivanZ, '5:treadFront2');
     await a.sleep(R(15, 20));
-    await treadmillOff(a, TREAD2_X, '5:treadFront2');
+    await treadmillOff(a, TREAD.ivanZ, '5:treadFront2');
     flags.gymPhase = 'barbell';
     a.status = 'Lifting the barbell with Eugene';
     await barbellOn(a, '5:ivanBarbell');
@@ -982,7 +980,7 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
       a.status = 'Here';
     } else if (e.pos) {                             // standing post (Eugene in the gym, Jennie at the till)
       const id = node(e.floor, e.name === 'Eugene' ? 'home' : `home_${e.name}`, e.pos[0], e.pos[1]);
-      if (e.name === 'Eugene') for (const n of ['gymIn', 'treadFront', 'yoga', 'barbell']) link(id, `5:${n}`);
+      if (e.name === 'Eugene') for (const n of ['gymIn', 'treadFront', 'treadFront2', 'yoga', 'barbell', 'ivanMeet']) link(id, `5:${n}`);
       a.at(id);
       a.rig.setPose('stand');
       a.heading = e.ry ?? 0; a.g.rotation.y = a.heading;
