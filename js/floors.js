@@ -394,11 +394,6 @@ export function floor1(p, anim) {
   floorLamp(lg, -0.8, -1.5);
   floorLamp(lg, -0.8, 2.6);
   pendant(lg, -2.5, 0.5, { drop: 0.9, shade: '#e8c48a' });
-  // armchair corner by the lift
-  sofa(lg, 7.9, -2.6, 2.2, -Math.PI / 2, { color: '#7a8fb0', cushion: '#9fb3cf', pillow: '#f1d08a' });
-  sofa(lg, 6.3, -3.4, 0.95, Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
-  sofa(lg, 6.3, -1.8, 0.95, Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
-  rectTable(lg, 7.1, -2.6, 0.6, 1.0, { h: 0.4, top: C.woodLight });
   // long built-in sofa along the back wall with little side tables
   for (const bx of [-2.7, 1.1, 4.9]) {
     sofa(lg, bx, -7.25, 3.6, 0, { color: '#d9c3a0', pillow: '#8fae84' });
