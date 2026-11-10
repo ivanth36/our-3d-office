@@ -12,7 +12,13 @@ Context about the owner's setup to remember in every session:
 - Employees are linked to the owner's scheduled tasks by task name. The floor panel shows the
   latest message of each task from `reports/latest.json`.
 - Always merge finished work into `main` (GitHub Pages publishes from `main`).
-- The floor panel is refreshed by the scheduled task "Update office floor panel" (4x a day), which
-  writes `reports/latest.json` on `main`. Eugene's tasks are NEVER published in any form (no text,
-  no timestamp): they hold Ivan's personal health info and the repo/site are public. Sally's
-  nutrition reads are fine to publish in full.
+- **Floor panel refresh = on request only.** Ivan says "refresh the panel" and Claude updates
+  `reports/latest.json` on `main` (no background updater, to save his usage allowance; the
+  "Update office floor panel" scheduled task exists but is switched OFF because scheduled sessions
+  can't read other tasks' transcripts or push to GitHub). He may set up an automatic updater from
+  claude.ai later, once he has his own PC.
+  How to refresh: `list_triggers` -> each task's `last_run.session_id` -> `list_events`
+  (kinds ["assistant"]) -> take the last `SendUserMessage` message (or the last text block) and
+  its `created_at` -> write `{"sentAt", "text"}` under the task name -> commit + push to `main`.
+- **Never publish Eugene's tasks** in any form (no text, no timestamp): they hold Ivan's personal
+  health info and the repo/site are public. Sally's nutrition reads are fine to publish in full.
