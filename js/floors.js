@@ -383,17 +383,17 @@ export function floor1(p, anim) {
     box(seg, 0.66, 0.1, 0.55, '#f3e7d2', 0, 0.4, 0.03);
     box(seg, 0.68, 0.45, 0.14, col, 0, 0.4, -0.25);
   }
-  // two sofas facing each other around a coffee table
-  rug(lg, -2.5, 0.5, 4.0, 4.4, '#ece2cf', '#7a5a43');
-  sofa(lg, -2.5, -1.2, 2.4, 0, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
-  sofa(lg, -2.5, 2.2, 2.4, Math.PI, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
-  rectTable(lg, -2.5, 0.5, 1.4, 0.7, { h: 0.4, top: C.woodLight });
-  cyl(lg, 0.08, 0.2, C.white, -2.3, 0.47, 0.5, { seg: 10 });
-  sphere(lg, 0.1, '#f28cb0', -2.3, 0.75, 0.5);
-  box(lg, 0.5, 0.04, 0.35, '#e9e1cf', -2.9, 0.47, 0.45);                  // magazines
-  floorLamp(lg, -0.8, -1.5);
-  floorLamp(lg, -0.8, 2.6);
-  pendant(lg, -2.5, 0.5, { drop: 0.9, shade: '#e8c48a' });
+  // two sofas facing each other around a coffee table — centred on the same line as the tree sofa (z = 0)
+  rug(lg, -2.5, 0.0, 4.6, 4.6, '#efe2c8', '#a77b4f');                     // same size and colours as the tree-sofa rug
+  sofa(lg, -2.5, -1.7, 2.4, 0, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
+  sofa(lg, -2.5, 1.7, 2.4, Math.PI, { color: '#8fae84', cushion: '#a9c49c', pillow: '#f1d08a' });
+  rectTable(lg, -2.5, 0.0, 1.4, 0.7, { h: 0.4, top: C.woodLight });
+  cyl(lg, 0.08, 0.2, C.white, -2.3, 0.47, 0.0, { seg: 10 });
+  sphere(lg, 0.1, '#f28cb0', -2.3, 0.75, 0.0);
+  box(lg, 0.5, 0.04, 0.35, '#e9e1cf', -2.9, 0.47, -0.05);                 // magazines
+  floorLamp(lg, -0.8, -2.0);
+  floorLamp(lg, -0.8, 2.0);
+  pendant(lg, -2.5, 0.0, { drop: 0.9, shade: '#e8c48a' });
   // long built-in sofa along the back wall with little side tables
   for (const bx of [-2.7, 1.1, 4.9]) {
     sofa(lg, bx, -7.25, 3.6, 0, { color: '#d9c3a0', pillow: '#8fae84' });
