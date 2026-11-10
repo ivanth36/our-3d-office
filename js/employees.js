@@ -44,6 +44,13 @@ export const EMPLOYEES = [
     ],
   },
   {
+    name: 'Kenny', home: 3, role: 'Manager · keeps the team on track', floor: 3,
+    hair: '#1f1a17', outfit: 'blazer', shirt: '#2b3550', blouse: '#ffffff', pants: '#2b2a2c', glasses: true,
+    tasks: [
+      { name: 'Kenny team check (manager)', when: 'On request · ask Claude "Kenny, check the team" (daily auto-check once set up on a PC)' },
+    ],
+  },
+  {
     name: 'Mary', home: 3, role: 'Personal Assistant', floor: 3, seat: 9,
     hair: '#6b4a2b', hairStyle: 'bun', shirt: '#e8f0dd', tie: '#5f8a5b',
     tasks: [
@@ -64,8 +71,18 @@ export const EMPLOYEES = [
     tasks: [],   // no scheduled tasks yet
   },
   {
-    name: 'Violet', home: 1, role: 'Receptionist · welcome lounge', floor: 1, pos: [2.0, 4.55], y: 0.25, ry: 0, idle: 'Welcoming guests at reception',
+    name: 'Rose', home: 1, role: 'Receptionist · welcome lounge', floor: 1, pos: [2.0, 4.55], y: 0.25, ry: 0, idle: 'Welcoming guests at reception',
     hair: '#2a1a12', hairStyle: 'long', outfit: 'blazer', skirt: '#2b3550', shirt: '#2b3550', blouse: '#ffffff', pants: '#f6d6bd',
+    tasks: [],
+  },
+  {
+    name: 'Lisa', home: 1, role: "Barista · Joe's Café", floor: 1, pos: [-19.0, 4.3], ry: -Math.PI / 2, idle: 'Brewing coffee',
+    hair: '#3b2418', hairStyle: 'bun', outfit: 'apron', apron: '#5c3d26', shirt: '#fbf7f0', pants: '#2b2a2c',
+    tasks: [],
+  },
+  {
+    name: 'Jisoo', home: 1, role: 'Usher · welcome lounge', floor: 1, pos: [-2.6, 6.1], ry: 0.3, idle: 'Welcoming guests at the entrance',
+    hair: '#1a1210', hairStyle: 'long', outfit: 'blazer', skirt: '#1b1b1e', shirt: '#1b1b1e', blouse: '#ffffff', pants: '#f6d6bd',
     tasks: [],
   },
   // ---- cleaners: push their carts around floors 1-5 (never on the same floor); routines in js/staff.js

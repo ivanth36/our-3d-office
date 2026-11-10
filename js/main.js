@@ -268,7 +268,7 @@ function employeeText(e) {
   if (!e.tasks?.length) lines.push(e.owner ? 'No scheduled tasks · just enjoying the house 🏠' : e.cleaner ? 'No scheduled tasks · keeping the house clean 🧹' : 'No scheduled tasks yet');
   for (const task of e.tasks ?? []) {
     lines.push(`📋 ${task.name}`);
-    lines.push(`     ${task.when} (SGT) · next in ${fmtIn(msUntil(task.at))}`);
+    lines.push(task.at ? `     ${task.when} (SGT) · next in ${fmtIn(msUntil(task.at))}` : `     ${task.when}`);
   }
   return lines.join('\n');
 }

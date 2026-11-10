@@ -7,8 +7,8 @@ Context about the owner's setup to remember in every session:
 - **Floor 4** is the **Outsource AI Team** office, kept for future use. Ivan may do business for
   other companies, with employees working for those clients. He may call himself the
   "outsource AI team" when talking about this floor.
-- Panel floors (`home` in `js/employees.js`): Floor 1 = Jennie, Violet, Lily, Robert;
-  Floor 2 = Ivan, Phil; Floor 3 = JungKook, XiaoMing, Sally, Aida, Mary; Floor 5 = Eugene.
+- Panel floors (`home` in `js/employees.js`): Floor 1 = Jennie (cashier), Lisa (barista), Rose (receptionist), Jisoo (usher), Lily, Robert;
+  Floor 2 = Ivan, Phil; Floor 3 = Kenny (manager), JungKook, XiaoMing, Sally, Aida, Mary; Floor 5 = Eugene.
 - Employees are linked to the owner's scheduled tasks by task name. The floor panel shows the
   latest message of each task from `reports/latest.json`.
 - Always merge finished work into `main` (GitHub Pages publishes from `main`).
@@ -22,3 +22,7 @@ Context about the owner's setup to remember in every session:
   its `created_at` -> write `{"sentAt", "text"}` under the task name -> commit + push to `main`.
 - **Never publish Eugene's tasks** in any form (no text, no timestamp): they hold Ivan's personal
   health info and the repo/site are public. Sally's nutrition reads are fine to publish in full.
+- **Kenny** (Floor 3 manager) checks the team **on request**: when Ivan says "Kenny, check the
+  team", use list_triggers and report any task whose last run failed, is overdue, or is switched
+  off. His scheduled task "Kenny team check (manager)" is switched OFF (scheduled sessions can't
+  read the task list); Ivan may set it up from claude.ai on his PC later.

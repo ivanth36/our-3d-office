@@ -354,21 +354,21 @@ export function floor1(p, anim) {
   // ================= RIGHT HALF: welcome lounge with reception (real positions) =================
   const lg = grp(p);
   lg.userData.noShift = true;
-  // reception desk at the entrance; Violet stands behind it, facing the street
+  // reception desk at the entrance; Rose stands behind it, facing the street
   const rd = grp(lg, 2.0, 0, 5.6);
   box(rd, 4.0, 1.05, 0.7, '#f4ede2', 0, 0, 0);
   box(rd, 4.0, 0.14, 0.72, C.green, 0, 0, 0);
   box(rd, 4.12, 0.06, 0.86, '#5c3d26', 0, 1.05, 0);                       // walnut top
   box(rd, 3.7, 0.05, 0.42, '#5c3d26', 0, 0.8, -0.5);                     // work shelf (staff side)
   panel(rd, 2.8, 0.56, receptionSignTex(), 0, 0.6, 0.36, { glow: 0.15 });
-  monitor(rd, -0.9, 1.11, -0.1, Math.PI);                                 // faces Violet
+  monitor(rd, -0.9, 1.11, -0.1, Math.PI);                                 // faces Rose
   box(rd, 0.42, 0.02, 0.14, '#e8e4dc', -0.9, 1.11, -0.32);
   cyl(rd, 0.06, 0.05, '#c9a24a', 0.9, 1.11, 0.15, { seg: 12, metalness: 0.6, roughness: 0.3 });   // service bell
   cyl(rd, 0.07, 0.25, C.white, 1.5, 1.11, -0.1, { seg: 10 });            // flowers
   for (let i = 0; i < 5; i++) sphere(rd, 0.07, FLOWER_COLS[i], 1.45 + (i % 3) * 0.05, 1.42 + (i % 2) * 0.05, -0.12 + (i % 2) * 0.05);
   box(rd, 0.3, 0.3, 0.05, C.woodDark, 0.25, 1.11, 0.2, { rx: -0.3 });     // brochure stand
   for (let i = 0; i < 3; i++) box(rd, 0.08, 0.2, 0.01, ['#7fa8e0', '#f1c84b', '#97b88f'][i], 0.15 + i * 0.1, 1.2, 0.23, { rx: -0.3, cast: false });
-  box(lg, 1.1, 0.25, 0.6, C.woodDark, 2.0, 0, 4.55);                     // Violet's step behind the desk
+  box(lg, 1.1, 0.25, 0.6, C.woodDark, 2.0, 0, 4.55);                     // Rose's step behind the desk
   pendant(lg, 1.0, 5.6, { drop: 1.0, shade: '#c9a24a' });
   pendant(lg, 3.0, 5.6, { drop: 1.0, shade: '#c9a24a' });
   plant(lg, -0.6, 5.6, { tall: true });

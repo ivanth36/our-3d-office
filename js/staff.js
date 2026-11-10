@@ -139,6 +139,24 @@ for (const f of [3, 4]) {
   chain(`${f}:aisleE`, node(f, 'meetDoorOut', 2.6, -1.8), node(f, 'meetDoorIn', 2.6, -3.0), node(f, 'meetA', 4.15, -3.0), node(f, 'meetB', 5.45, -3.0));
 }
 const deskSeatFor = (f, i) => ({ node: `${f}:desk${i}`, ...deskSeat(i), y: 0, typing: true });
+// ---- Floor 3 manager's office (built in real positions): door at the front, Kenny's chair behind the desk
+chain(node(3, 'mgrOut', raw(-4.5), -2.6), node(3, 'mgrIn', raw(-4.5), -3.85), node(3, 'mgrW', raw(-6.3), -3.85), node(3, 'mgrBack', raw(-6.3), -6.75), node(3, 'mgrChair', raw(-5.2), -6.75));
+link('3:mgrOut', '3:desk9'); link('3:mgrOut', '3:aisleE');
+const KENNY_SEAT = { node: '3:mgrChair', x: raw(-4.4), z: -6.6, ry: 0, y: 0, typing: true };
+// team meeting in Meeting Room A (Kenny at the head of the table)
+node(3, 'meetC', 6.75, -3.0); link('3:meetB', '3:meetC');
+node(3, 'meetE', 8.0, -3.0); link('3:meetC', '3:meetE');
+node(3, 'meetRStand', 8.4, -4.0); link('3:meetE', '3:meetRStand');
+node(3, 'meetLStand', 2.75, -4.0); link('3:meetDoorIn', '3:meetLStand');
+chain('3:meetE', node(3, 'meetCorner', 9.0, -3.4), node(3, 'meetBackE', 9.0, -6.95), node(3, 'meetBackStand', 5.45, -6.95));
+const TEAM_SEATS = {
+  Kenny: { node: '3:meetRStand', x: 8.35, z: -5.0, ry: -Math.PI / 2, y: 0 },
+  Mary: { node: '3:meetA', x: 4.15, z: -3.65, ry: Math.PI, y: 0 },
+  Aida: { node: '3:meetB', x: 5.45, z: -3.65, ry: Math.PI, y: 0 },
+  Sally: { node: '3:meetC', x: 6.75, z: -3.65, ry: Math.PI, y: 0 },
+  XiaoMing: { node: '3:meetLStand', x: 2.55, z: -5.0, ry: Math.PI / 2, y: 0 },
+  JungKook: { node: '3:meetBackStand', x: 5.45, z: -6.35, ry: 0, y: 0 },
+};
 const MEET_SEATS = { mary: { node: '3:meetA', x: 4.15, z: -3.65, ry: Math.PI, y: 0 }, aida: { node: '3:meetB', x: 5.45, z: -3.65, ry: Math.PI, y: 0 } };
 
 // ---- Floor 5: roof garden + glass gym
@@ -191,6 +209,7 @@ const doorEdge = (a, b, id) => { DOOR_EDGES[`${a}|${b}`] = id; DOOR_EDGES[`${b}|
 doorEdge('2:musicOut', '2:musicIn', '2:music');
 doorEdge('2:gameOutM', '2:gameIn', '2:game');
 doorEdge('3:meetDoorOut', '3:meetDoorIn', '3:meet');
+doorEdge('3:mgrOut', '3:mgrIn', '3:mgr');
 doorEdge('4:meetDoorOut', '4:meetDoorIn', '4:meet');
 doorEdge('5:gymOut', '5:gymIn', '5:gym');
 
@@ -534,6 +553,7 @@ const flags = {
   aidaAtDesk: true, maryAtDesk: true, meetingCall: false, aidaInMeeting: false, meetingOver: false,
   cafeInvite: false, cafePair: null, marySeated: false, cafeDone: false,
   drumUser: null,
+  teamMeeting: false, inTeamMeeting: new Set(), teamExpected: 0,
   // Ivan & Phil
   ivanGym: false, gymPhase: null, eugeneInSession: false,
   dinnerReady: false, philSeated: false, dinnerDone: false,
@@ -560,11 +580,26 @@ function barbellOff(a) { a.act = null; a.rig.barbell.visible = false; }
 async function yogaOn(a, spot) { await a.go(spot); await a.turnTo(0); a.act = 'yoga'; }
 function yogaOff(a) { a.act = null; }
 
+// called from a Floor 3 employee's desk loop when Kenny calls a team meeting
+async function joinTeamMeeting(a, home) {
+  a.status = 'Called into a team meeting by Kenny';
+  await a.goSit(TEAM_SEATS[a.e.name]);
+  flags.inTeamMeeting.add(a.e.name);
+  a.talking = true; a.status = 'In the team meeting with Kenny';
+  await a.waitFor(() => !flags.teamMeeting, 240);
+  a.talking = false;
+  flags.inTeamMeeting.delete(a.e.name);
+  a.status = 'Back to my desk';
+  await a.goSit(home);
+}
+const meetingCalled = () => flags.teamMeeting;
+
 async function jungkook(a) {
   const home = deskSeatFor(3, a.e.seat);
   for (;;) {
     a.status = 'Working on the KRW analysis';
-    await a.sleep(R(25, 40));
+    await a.sleep(R(25, 40), meetingCalled);
+    if (flags.teamMeeting) { await joinTeamMeeting(a, home); continue; }
     a.status = 'Walking up the stairs to see Eugene';
     await a.goStand('5:meetJ', 'stairs');
     await a.face(-1.8, -1.0);
@@ -714,7 +749,8 @@ async function aida(a) {
   for (;;) {
     flags.aidaAtDesk = true;
     a.status = 'Writing the AI newsletter';
-    await a.sleep(R(20, 35), () => flags.meetingCall);
+    await a.sleep(R(20, 35), () => flags.meetingCall || flags.teamMeeting);
+    if (flags.teamMeeting) { flags.aidaAtDesk = false; await joinTeamMeeting(a, home); continue; }
     if (flags.meetingCall) { await meeting(); continue; }
     // coffee run — sometimes she asks Mary to come along
     flags.aidaAtDesk = false;
@@ -750,7 +786,8 @@ async function xiaoming(a) {
   const home = deskSeatFor(3, a.e.seat);
   for (;;) {
     a.status = 'Tracking the SGD to CNY rate';
-    await a.sleep(R(30, 45));
+    await a.sleep(R(30, 45), meetingCalled);
+    if (flags.teamMeeting) { await joinTeamMeeting(a, home); continue; }
     a.status = 'Walking down to the Floor 2 music room';
     await a.goSit(LOUNGE_SEAT, 'stairs');
     a.status = 'Chilling in the music room';
@@ -792,9 +829,10 @@ async function mary(a) {
   for (;;) {
     flags.maryAtDesk = true;
     a.status = 'Working hard at her desk';
-    await a.sleep(R(25, 40), () => flags.cafeInvite);
+    await a.sleep(R(25, 40), () => flags.cafeInvite || flags.teamMeeting);
+    if (flags.teamMeeting) { flags.maryAtDesk = false; await joinTeamMeeting(a, home); continue; }
     if (flags.cafeInvite) { await cafe(); continue; }
-    if (!flags.aidaAtDesk) continue;                 // Aida is out: keep working
+    if (!flags.aidaAtDesk || flags.teamMeeting) continue;   // Aida is out: keep working
     flags.maryAtDesk = false;
     flags.meetingCall = true;
     a.status = 'Going to a meeting with Aida';
@@ -966,7 +1004,8 @@ async function sally(a) {
   const w = a.w;
   for (;;) {
     a.status = 'Reading the latest nutrition research';
-    await a.sleep(R(30, 50), () => flags.dinnerRequest);
+    await a.sleep(R(30, 50), () => flags.dinnerRequest || flags.teamMeeting);
+    if (flags.teamMeeting && !flags.dinnerRequest) { await joinTeamMeeting(a, home); continue; }
     if (!flags.dinnerRequest) continue;
     flags.dinnerRequest = false; flags.dinnerDone = false;
     a.status = 'Heading down to cook dinner for Ivan & Phil';
@@ -1111,17 +1150,63 @@ async function cleaner(a) {
   }
 }
 
-const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, sally, ivan, phil, jennie, lily: cleaner, robert: cleaner };
+// ---- Kenny (manager): works in his glass office; now and then walks the floor to check on the team
+async function kenny(a) {
+  a.rig.setPose('sit', { typing: true });
+  for (;;) {
+    a.status = 'Reviewing the team\'s work';
+    await a.sleep(R(35, 55));
+    // now and then: gather everyone who is at their desk on Floor 3 for a team meeting
+    const atDesks = a.w.actors.filter((q) => q.e.home === 3 && q !== a && q.floor === 3 && q.seat && q.seat.typing);
+    if (Math.random() < 0.45 && atDesks.length >= 2 && !flags.meetingCall && !flags.aidaInMeeting) {
+      flags.teamExpected = atDesks.length;
+      flags.teamMeeting = true;
+      a.status = 'Calling the team into Meeting Room A';
+      await a.goSit(TEAM_SEATS.Kenny);
+      a.status = 'Waiting for the team to come in';
+      await a.waitFor(() => flags.inTeamMeeting.size >= flags.teamExpected, 120);
+      a.talking = true; a.status = `Leading a team meeting (${flags.inTeamMeeting.size} attending)`;
+      await a.sleep(R(20, 30));
+      a.talking = false;
+      flags.teamMeeting = false;
+      a.status = 'Back to the manager\'s office';
+      await a.goSit(KENNY_SEAT);
+      continue;
+    }
+    a.status = 'Walking the floor to check on the team';
+    await a.goStand(pick(['3:desk6', '3:desk8']));
+    await a.face(-4.4, 1.6);
+    a.status = 'Checking everyone is on track';
+    await a.sleep(R(6, 9));
+    a.status = 'Back to the manager\'s office';
+    await a.goSit(KENNY_SEAT);
+  }
+}
+
+// ---- Lisa (barista): works the coffee machine behind the café counter
+async function lisa(a) {
+  for (;;) {
+    a.act = 'cook'; a.status = 'Brewing coffee';
+    await a.sleep(R(7, 11));
+    a.act = 'wash'; a.status = 'Steaming milk';
+    await a.sleep(R(4, 6));
+    a.act = null; a.status = 'Wiping down the coffee machine';
+    await a.sleep(R(4, 7));
+  }
+}
+
+const ROUTINES = { lisa, kenny, jungkook, eugene, aida, xiaoming, mary, sally, ivan, phil, jennie, lily: cleaner, robert: cleaner };
 const SPAWN = {                        // where the owners and cleaners start
   Lily: { stand: '1:j9', ry: Math.PI },
   Robert: { stand: '4:aisleE', ry: 0 },
+  Kenny: { seat: KENNY_SEAT },
   Ivan: { stand: '5:ivanMeet', ry: -2.1 },
   Phil: { seat: COMPOSE_SEAT },
 };
 
 // ======================================================================== setup
 export function createStaff({ floors, lift, employees, doors = {} }) {
-  const world = { floors, lift, doors, puffs: createPuffs(), serve() {}, cafeQueue: 0, jennieAtTill: true };
+  const world = { floors, lift, doors, puffs: createPuffs(), serve() {}, cafeQueue: 0, jennieAtTill: true, actors: [] };
   // two plates of food on the Floor 2 dining table (shown when Ivan serves dinner)
   world.plates = new THREE.Group();
   world.plates.userData.dynamic = true;
@@ -1137,6 +1222,7 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
   world.plates.visible = false;
   floors[1].add(world.plates);
   const actors = [];
+  world.actors = actors;
   for (const e of employees) {
     const rig = employee(floors[e.floor - 1], 0, 0, 0, e);
     const a = new Actor(world, e, rig);
@@ -1189,18 +1275,16 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
     update(dt, t) {
       for (const a of actors) a.update(dt, t);
       for (const id in world.doors) world.doors[id].update(dt);
-      // Violet greets anyone walking past reception
-      const violet = actors.find((q) => q.e.name === 'Violet');
-      if (violet) {
-        violet.greetCool = (violet.greetCool ?? 0) - dt;
-        if (violet.greetCool <= 0) {
-          const v = violet.g.position;
-          const near = actors.find((q) => q !== violet && q.floor === 1 && q.g.parent === violet.g.parent && Math.hypot(q.g.position.x - v.x, q.g.position.z - v.z) < 3.0);
-          if (near) {
-            violet.talkFor = 2.5; violet.greetCool = 12;
-            violet.e.status = `Greeting ${near.e.name}`;
-            setTimeout(() => { violet.e.status = violet.e.idle; }, 2500);
-          }
+      // Rose (reception) and Jisoo (usher) greet anyone walking past
+      for (const greeter of actors.filter((q) => q.e.name === 'Rose' || q.e.name === 'Jisoo')) {
+        greeter.greetCool = (greeter.greetCool ?? 0) - dt;
+        if (greeter.greetCool > 0) continue;
+        const v = greeter.g.position;
+        const near = actors.find((q) => q !== greeter && q.floor === 1 && q.g.parent === greeter.g.parent && !['Rose', 'Jisoo', 'Lisa', 'Jennie'].includes(q.e.name) && Math.hypot(q.g.position.x - v.x, q.g.position.z - v.z) < 3.0);
+        if (near) {
+          greeter.talkFor = 2.5; greeter.greetCool = 12;
+          greeter.e.status = `Greeting ${near.e.name}`;
+          setTimeout(() => { greeter.e.status = greeter.e.idle; }, 2500);
         }
       }
       world.puffs.update(dt);
