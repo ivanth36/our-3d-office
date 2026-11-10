@@ -11,7 +11,7 @@ import { H, box, cyl, grp, mat } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
 import { seat as deskSeat } from './floors.js';
-import { sx } from './building.js';   // original-layout x -> real x on the longer floors
+import { sx, raw } from './building.js';   // original-layout x -> real x on the longer floors
 
 const R = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -102,8 +102,10 @@ const COMPOSE_SEAT = { node: '2:musicMid', x: -5.4, z: 3.25, ry: Math.PI, y: 0, 
 // ---- Floor 2: open space, living room sofa, kitchen, dining table
 node(2, 'f2mid', 1.5, -0.2);                        // open space between living room & kitchen
 link('2:coreW', '2:f2mid');
-chain('2:f2mid', node(2, 'livFront', -3.2, -2.0), node(2, 'sofaStandA', -5.3, -2.0), node(2, 'sofaStandB', -7.3, -2.0));
-chain('2:livFront', node(2, 'westAisle', -2.7, 0.8), '2:musicOut');           // short way to the music room
+// living room (moved to the middle of the floor: real positions)
+chain('2:f2mid', node(2, 'livFront', raw(-3.2), -2.0), node(2, 'sofaStandA', raw(-5.3), -2.0), node(2, 'sofaStandB', raw(-7.3), -2.0));
+// to the music room: up the side of the living room, then along the corridor between the game room and music room
+chain('2:livFront', node(2, 'livCorner', raw(-3.0), 1.2), node(2, 'westAisle', -2.7, 1.2), '2:musicOut');
 chain('2:coreW', node(2, 'kIn', 8.2, -1.8), node(2, 'kLane', 8.1, -5.2));
 link('2:kLane', node(2, 'stove', 6.7, -6.6));
 link('2:kLane', node(2, 'islandBack', 5.6, -4.7));
@@ -111,8 +113,8 @@ link('2:kLane', node(2, 'sink', 8.25, -6.1));
 link('2:stove', '2:islandBack');
 chain('2:kIn', node(2, 'dineE', 8.0, 1.8), node(2, 'dineStandP', 4.68, 2.2), node(2, 'dineStandI', 3.4, 2.2));
 link('2:f2mid', '2:dineStandI');
-const SOFA_TV_PHIL = { node: '2:sofaStandA', x: -5.3, z: -1.2, ry: Math.PI, y: 0.04 };   // facing the TV
-const SOFA_TV_IVAN = { node: '2:sofaStandB', x: -7.3, z: -1.2, ry: Math.PI, y: 0.04 };
+const SOFA_TV_PHIL = { node: '2:sofaStandA', x: raw(-5.3), z: -1.2, ry: Math.PI, y: 0.04 };   // facing the TV
+const SOFA_TV_IVAN = { node: '2:sofaStandB', x: raw(-7.3), z: -1.2, ry: Math.PI, y: 0.04 };
 const DINE_IVAN = { node: '2:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
 const DINE_PHIL = { node: '2:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
 // café sofa corner for the owners

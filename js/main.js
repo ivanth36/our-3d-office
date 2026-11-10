@@ -10,7 +10,7 @@ import { createPanel } from './panel.js';
 
 const FLOORS = [
   { n: 1, name: "Joe's Café", sub: 'Café · welcome lounge & reception' },
-  { n: 2, name: 'Chill Home', sub: 'Living room · music room · kitchen' },
+  { n: 2, name: 'Chill Home', sub: 'Living room · game room · music room · kitchen' },
   { n: 3, name: 'Office A', sub: 'Internal office · my AI team' },
   { n: 4, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 5, name: 'Roof Garden', sub: 'Glass gym · chill garden' },

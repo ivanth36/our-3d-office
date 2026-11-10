@@ -15,7 +15,9 @@ export const SPLIT = { 1: -4.0, 2: -1.5, 3: 1.0, 4: 1.0, 5: -1.0 };
 // Walking maps use the same rule, except Floor 1, which was re-laid out in real positions.
 const NAV_SPLIT = { ...SPLIT, 1: -Infinity };
 /** Walking-map x (old 24 m layout, real on Floor 1) -> real x on floor f. */
-export const sx = (f, x) => (x < NAV_SPLIT[f] ? x - EXT : x);
+export const sx = (f, x) => (x < -500 ? x + 1000 : x < NAV_SPLIT[f] ? x - EXT : x);
+/** Mark a walking-map x as already real (never shifted), e.g. furniture that was moved later. */
+export const raw = (x) => x - 1000;
 export const CORE_X = 9.6;              // rooms are x < CORE_X
 export const STAIR = { x0: 9.6, x1: 12, z0: 0.4, z1: 6.0 };
 export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };

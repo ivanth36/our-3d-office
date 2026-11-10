@@ -457,7 +457,12 @@ function keyboardOnStand(p, x, z, ry) {
 export function floor2(p, anim = {}) {
   floorSurface(p, RW, 16, RX, 0, plankTex('#d9ae7a', '#b8875a'), 3);
 
-  // ================= LIVING ROOM (back-left, x -11.7..-1, z -7.7..1) =================
+  // ================= LIVING ROOM (middle-back, real x -11.7..-1, z -7.7..1) =================
+  // Built in real positions (it was moved into the middle when the game room took its old spot).
+  const livG = grp(p);
+  livG.userData.noShift = true;
+  {
+  const p = livG;
   const tvx = -6.3;
   // wall-mounted TV
   box(p, 4.3, 2.45, 0.08, '#1b1b1e', tvx, 1.15, BACK_IN + 0.04);
@@ -485,7 +490,7 @@ export function floor2(p, anim = {}) {
   floorLamp(p, -2.2, -5.4);
   plant(p, -11.2, -0.1, { tall: true });
   for (let i = 0; i < 3; i++) pendant(p, tvx - 1.6 + i * 1.6, -3.8, { drop: 0.6, shade: '#e8c48a' });
-  frame(p, LEFT_IN + 0.02, 2.0, -3.9, 2.0, 1.1, Math.PI / 2, '#c96f4a');
+  }
 
   // ================= GLASS MUSIC ROOM (front-left, x -11.7..-3.4, z 1.8..7.75) =================
   const mx0 = LEFT_IN, mx1 = -3.4, mz0 = 1.8, mz1 = 7.75;
@@ -609,26 +614,82 @@ export function floor2(p, anim = {}) {
   for (let i = 0; i < 3; i++) { cyl(p, 0.07, 0.2, C.white, dx - 1.5 + i * 1.5, 0.82, dz, { seg: 8 }); sphere(p, 0.1, ['#f2a1a8', '#f1d08a', '#f2a1a8'][i], dx - 1.5 + i * 1.5, 1.1, dz); }
   plant(p, -0.8, 0.9, { tall: true });
 
-  // ---- the new space (building is 40% longer): pool table + reading nook
+  // ================= GLASS GAME ROOM (inner left, real x -21.3..-12, z -7.7..0.6) =================
+  const gr = grp(p);
+  gr.userData.noShift = true;
   {
-    const nb = grp(p);
-    nb.userData.noShift = true;
-    const pt = grp(nb, -6.3, 0, 3.0);
-    for (const lx of [-1.1, 1.1]) for (const lz of [-0.5, 0.5]) box(pt, 0.18, 0.72, 0.18, C.woodDark, lx, 0, lz);
-    box(pt, 2.6, 0.14, 1.4, C.woodDark, 0, 0.72, 0);
-    box(pt, 2.32, 0.04, 1.12, '#2f7a4a', 0, 0.84, 0, { cast: false });
-    ['#f1c84b', '#d94f3d', '#3e6b9a', '#2b2a2c', '#ffffff', '#f08a5d', '#7ab87a'].forEach((c, i) => sphere(pt, 0.035, c, -0.5 + (i % 4) * 0.09 + Math.floor(i / 4) * 0.05, 0.9, -0.1 + Math.floor(i / 4) * 0.09));
-    box(pt, 1.4, 0.025, 0.025, C.wood, 0.5, 0.9, 0.35, { ry: 0.2 });
-    pendant(nb, -6.9, 3.0, { drop: 1.4, shade: '#2f3a2c' });
-    pendant(nb, -5.7, 3.0, { drop: 1.4, shade: '#2f3a2c' });
-    rug(nb, -6.3, -5.6, 4.0, 2.6, '#efe2c8', '#a77b4f');
-    sofa(nb, -7.6, -5.6, 1.3, Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
-    sofa(nb, -5.0, -5.6, 1.3, -Math.PI / 2, { color: '#c96f4a', pillow: '#f1d08a' });
-    rectTable(nb, -6.3, -5.6, 0.8, 0.8, { h: 0.45, top: C.woodLight });
-    bookshelf(nb, -6.3, -7.5, 3.6, 2.6, 0);
-    floorLamp(nb, -8.6, -7.0);
-    plant(nb, -10.2, -7.2, { tall: true });
-    plant(nb, -2.4, -7.2, { tall: true });
+    const p = gr;
+    const x0 = X0 + 0.3, x1 = -12.0, z0 = -7.7, z1 = 0.6;
+    box(p, x1 - x0, 0.03, z1 - z0, '#2a2d3a', (x0 + x1) / 2, 0.02, (z0 + z1) / 2, { cast: false });   // dark carpet
+    rug(p, -16.4, -3.6, 4.6, 3.4, '#3a3f5c', '#7a5cff');
+    glassWall(p, x0 - 0.15, z1, x1, z1, CEIL, { gap: [7.3, 8.3] });   // front, door near the right
+    glassWall(p, x1, -7.85, x1, z1, CEIL);                              // right side
+    addDoor(anim, '2:game', glassDoor(p, -14.15, z1, 1.0, CEIL, 0), 0, -1.45);
+    const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#7a5cff'; ctx.font = 'bold 58px -apple-system, sans-serif'; ctx.fillText('🎮 Game Room', 40, 70); });
+    panel(p, 1.9, 0.36, sign, -16.6, 3.1, z1 + 0.04, { transparent: true });
+    panel(p, 1.9, 0.36, sign, -16.6, 3.1, z1 - 0.04, { transparent: true, ry: Math.PI });
+    const neon = (c) => mat(c, { emissive: c, emissiveIntensity: 1.4 });
+    box(p, 0.04, 0.04, z1 - z0 - 0.4, neon('#7a5cff'), x0 + 0.05, CEIL - 0.25, (z0 + z1) / 2, { cast: false });   // LED strips
+    box(p, x1 - x0 - 0.4, 0.04, 0.04, neon('#22d3ee'), (x0 + x1) / 2, CEIL - 0.25, z0 + 0.05, { cast: false });
+
+    // two gaming desks against the left wall, each with a gaming PC, two monitors and a gaming chair
+    const gamingChair = (cx, cz, accent) => {
+      const g = grp(p, cx, 0, cz, -Math.PI / 2);                      // faces the desk (-X)
+      for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; box(g, 0.05, 0.04, 0.34, C.black, Math.sin(a) * 0.16, 0.04, Math.cos(a) * 0.16, { ry: a }); }
+      cyl(g, 0.04, 0.42, C.metal, 0, 0.05, 0, { seg: 8 });
+      box(g, 0.56, 0.12, 0.54, '#1b1b1e', 0, 0.45, 0);
+      box(g, 0.4, 0.13, 0.5, accent, 0, 0.46, 0.0);                     // seat stripe
+      box(g, 0.56, 1.05, 0.14, '#1b1b1e', 0, 0.55, -0.28, { rx: -0.12 }); // tall racing back
+      box(g, 0.26, 0.95, 0.15, accent, 0, 0.58, -0.27, { rx: -0.12 });
+      box(g, 0.24, 0.16, 0.08, '#1b1b1e', 0, 1.42, -0.36, { rx: -0.12 }); // head pillow
+      for (const sx of [-0.31, 0.31]) box(g, 0.06, 0.22, 0.38, '#1b1b1e', sx, 0.55, 0.02);
+    };
+    [[-5.4, '#e8384f'], [-2.2, '#3b82f6']].forEach(([dz, accent]) => {
+      const d = grp(p, x0 + 0.45, 0, dz, Math.PI / 2);                 // desk front faces +X (into the room)
+      box(d, 1.9, 0.05, 0.8, '#1b1b1e', 0, 0.74, 0);
+      box(d, 1.9, 0.02, 0.8, neon(accent), 0, 0.72, 0, { cast: false });  // RGB glow under the top
+      for (const lx of [-0.9, 0.9]) box(d, 0.08, 0.74, 0.7, '#2b2a2c', lx, 0, 0);
+      monitor(d, -0.35, 0.79, -0.15, 0.25);                             // two angled monitors
+      monitor(d, 0.35, 0.79, -0.15, -0.25);
+      box(d, 0.5, 0.025, 0.16, '#111', 0, 0.79, 0.15);                  // keyboard
+      box(d, 0.48, 0.01, 0.14, neon(accent), 0, 0.815, 0.15, { cast: false });
+      box(d, 0.3, 0.005, 0.25, '#2b2a2c', 0.42, 0.79, 0.15);            // mouse pad + mouse
+      box(d, 0.06, 0.03, 0.1, '#111', 0.42, 0.795, 0.15);
+      const pc = grp(d, 0.72, 0.79, -0.1);                              // RGB gaming tower on the desk
+      box(pc, 0.22, 0.48, 0.45, '#111', 0, 0, 0);
+      box(pc, 0.01, 0.42, 0.4, glassMat(), 0.115, 0.03, 0, { cast: false });
+      for (const fy of [0.12, 0.3]) cyl(pc, 0.07, 0.02, neon(accent), 0.1, fy, 0.05, { rz: Math.PI / 2, seg: 14, cast: false });
+      sphere(d, 0.08, '#1b1b1e', -0.75, 0.86, 0.1, { s: [1, 0.4, 1] });  // headset
+      gamingChair(x0 + 1.4, dz, accent);
+    });
+
+    // TV with a game console on the other side (against the right glass wall)
+    const tv = grp(p, x1 - 0.45, 0, -3.6, -Math.PI / 2);               // faces -X (into the room)
+    box(tv, 2.6, 0.5, 0.5, '#1b1b1e', 0, 0, 0);                         // media unit
+    box(tv, 2.5, 0.02, 0.02, neon('#7a5cff'), 0, 0.02, 0.26, { cast: false });
+    box(tv, 0.1, 0.9, 0.1, '#2b2a2c', 0, 0.5, -0.1);
+    box(tv, 2.4, 1.4, 0.08, '#111', 0, 1.3, -0.1);                      // TV
+    const game = canvasTex(512, 288, (ctx, w, h) => {
+      const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#5b8cff'); g.addColorStop(1, '#a8e6ff');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#4caf50'; ctx.fillRect(0, h - 60, w, 60);
+      ctx.fillStyle = '#8d5a2b'; for (const bx of [140, 172, 204]) ctx.fillRect(bx, 150, 30, 30);
+      ctx.fillStyle = '#f1c84b'; ctx.beginPath(); ctx.arc(330, 120, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e8384f'; ctx.fillRect(70, h - 100, 28, 40);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 26px -apple-system, sans-serif'; ctx.fillText('1UP  ★ 1,250', 16, 34);
+    });
+    panel(tv, 2.3, 1.29, game, 0, 1.3 + 0.7 - 0.005, -0.055, { glow: 0.6 });
+    box(tv, 0.42, 0.08, 0.3, '#f4f4f4', -0.6, 0.5, 0.0);               // game console
+    box(tv, 0.38, 0.01, 0.02, neon('#3b82f6'), -0.6, 0.55, 0.15, { cast: false });
+    for (const [cx, col] of [[0.35, '#f4f4f4'], [0.65, '#1b1b1e']]) box(tv, 0.16, 0.04, 0.1, col, cx, 0.5, 0.1);   // controllers
+    for (const sx of [-1.45, 1.45]) box(tv, 0.22, 0.9, 0.22, '#1b1b1e', sx, 0, -0.05);   // speakers
+    // comfy seating facing the TV: a sofa and two bean bags
+    sofa(p, -15.0, -3.6, 2.4, Math.PI / 2, { color: '#3a3f5c', cushion: '#4a5070', pillow: '#7a5cff' });
+    sphere(p, 0.42, '#e8384f', -14.0, 0.32, -1.6, { s: [1, 0.7, 1] });
+    sphere(p, 0.42, '#3b82f6', -14.0, 0.32, -5.6, { s: [1, 0.7, 1] });
+    rectTable(p, -13.9, -3.6, 0.6, 1.1, { h: 0.38, top: '#2b2a2c' });
+    for (const pz of [-5.4, -2.2]) pendant(p, x0 + 1.0, pz, { drop: 1.2, shade: '#2b2a2c' });
+    plant(p, x1 - 0.5, -7.2, { tall: true });
   }
   plant(p, 8.8, 7.2, { tall: true });
 }
