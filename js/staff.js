@@ -7,7 +7,7 @@
 // - Each employee is an "actor" running an async routine: walk somewhere, sit,
 //   wait, smoke, run… Movements are promises that finish in the animation loop.
 import * as THREE from 'three';
-import { H } from './helpers.js';
+import { H, box, cyl, grp, mat } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
 import { seat as deskSeat } from './floors.js';
@@ -151,6 +151,22 @@ node(5, 'ivanYoga', -7.85, 5.0); link('5:ivanYoga', '5:ivanMeet');
 node(5, 'vendFront', -1.1, -2.3); link('5:vendFront', '5:rPole');
 // treadmills face the outside (-X): step on from behind, run facing the left edge
 const TREAD = { stepX: -10.3, y: 0.23, eugeneZ: -4.8, ivanZ: -3.3 };
+
+// ---- cleaners' work spots on every floor (mop the floor, water a plant, garden on the roof)
+node(1, 'treeW', 3.4, 0.0); link('1:treeW', '1:j11');                 // by the indoor tree
+node(2, 'plantW', -0.1, 0.3); link('2:plantW', '2:f2mid');
+for (const f of [3, 4]) { node(f, 'plantNW', -10.6, -1.2); link(`${f}:plantNW`, `${f}:desk5`); }
+node(5, 'gardenF1', 5.8, 6.4); link('5:gardenF1', '5:rMid');           // front flower planters
+node(5, 'gardenF0', -1.0, 6.4); link('5:gardenF0', '5:smokeE');
+node(5, 'gardenB', 1.9, -6.6); link('5:gardenB', '5:rMid');            // back flower planters
+node(5, 'plantE', 8.0, 2.5); link('5:plantE', '5:rMid');
+const CLEAN_JOBS = {
+  1: [{ n: '1:j8', k: 'mop' }, { n: '1:j3', k: 'mop' }, { n: '1:treeW', k: 'water', face: [4.7, 0.0] }, { n: '1:j4', k: 'water', face: [-3.6, 7.2] }],
+  2: [{ n: '2:f2mid', k: 'mop' }, { n: '2:dineE', k: 'mop' }, { n: '2:plantW', k: 'water', face: [-0.8, 0.9] }, { n: '2:coreFront', k: 'water', face: [8.8, 7.2] }],
+  3: [{ n: '3:aisleE', k: 'mop' }, { n: '3:desk7', k: 'mop' }, { n: '3:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '3:plantNW', k: 'water', face: [-11.3, -1.5] }],
+  4: [{ n: '4:aisleE', k: 'mop' }, { n: '4:desk7', k: 'mop' }, { n: '4:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '4:plantNW', k: 'water', face: [-11.3, -1.5] }],
+  5: [{ n: '5:rMid', k: 'mop' }, { n: '5:gardenF1', k: 'garden', face: [5.8, 7.3] }, { n: '5:gardenF0', k: 'garden', face: [-1.0, 7.3] }, { n: '5:gardenB', k: 'garden', face: [1.9, -7.35] }, { n: '5:plantE', k: 'water', face: [8.8, 2.5] }],
+};
 
 // glass doors: walking between these node pairs goes through a door
 const DOOR_EDGES = {};
@@ -430,6 +446,22 @@ class Actor {
       ease(hl.rotation, 'x', c === 2 ? 0.45 : 0); ease(hr.rotation, 'x', c === 1 ? -0.7 : c === 2 ? -0.35 : 0);
       ease(hr.rotation, 'z', c === 1 ? 0.8 : 0);
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
+    } else if (this.act === 'mop') {                    // mopping: sweep side to side
+      sl.rotation.x = -0.75; sr.rotation.x = -0.75;
+      r.body.rotation.y = Math.sin(t * 2.2) * 0.4;
+      r.head.rotation.x = 0.2;
+      r.body.position.y = r.baseY; r.head.position.y = 1.25;
+    } else if (this.act === 'water') {                  // watering a plant
+      sr.rotation.x = -1.0 + Math.sin(t * 1.5) * 0.12;
+      sr.rotation.z = -0.25;
+      r.head.rotation.x = 0.3;
+      r.body.position.y = r.baseY; r.head.position.y = 1.25;
+    } else if (this.act === 'garden') {                 // bending over the planter, tending flowers
+      r.body.rotation.x = 0.45;
+      sl.rotation.x = -0.9 + Math.sin(t * 3) * 0.15;
+      sr.rotation.x = -0.9 + Math.sin(t * 3 + 1.5) * 0.15;
+      r.head.rotation.x = 0.45;
+      r.body.position.y = r.baseY - 0.05; r.head.position.y = 1.15;
     } else if (this.act === 'cook' || this.act === 'wash' || this.act === 'restock') {   // hands busy
       const sp = this.act === 'wash' ? 9 : 5;
       sl.rotation.x = -1.15 + Math.sin(t * sp) * 0.15;
@@ -450,6 +482,7 @@ class Actor {
       sl.rotation.z *= 0.8;
       if (!this.smoking && !this.carry) { sr.rotation.x *= 0.8; sr.rotation.z *= 0.8; }
       r.body.position.y = r.baseY; r.head.position.y = 1.25;
+      r.body.rotation.x *= 0.8; r.body.rotation.y *= 0.8;          // straighten up after mopping / gardening
       r.head.rotation.x = chatting ? Math.sin(t * 5 + r.phase) * 0.07 : 0;
       // standing still with nothing to do: look around a little
       r.head.rotation.y = chatting ? r.head.rotation.y * 0.9 : Math.sin(t * 0.45 + r.phase) * 0.45;
@@ -940,8 +973,83 @@ async function jennie(a) {
   }
 }
 
-const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, ivan, phil, jennie };
-const SPAWN = {                        // where the owners start
+// ---- cleaners (Lily & Robert): push a cart around floors 1-5, never on the same floor at once
+function makeCart() {
+  const c = new THREE.Group();
+  box(c, 0.55, 0.06, 0.8, '#5b6b7a', 0, 0.15, 0);                    // base
+  box(c, 0.55, 0.06, 0.8, '#5b6b7a', 0, 0.65, 0);                    // top shelf
+  for (const [x, z] of [[-0.25, -0.37], [0.25, -0.37], [-0.25, 0.37], [0.25, 0.37]]) {
+    box(c, 0.04, 0.6, 0.04, '#8a96a3', x, 0.11, z);
+    cyl(c, 0.05, 0.04, '#2b2a2c', x, 0.0, z, { rx: Math.PI / 2, seg: 8 });
+  }
+  box(c, 0.5, 0.04, 0.04, '#8a96a3', 0, 0.95, -0.42);                // push handle
+  for (const x of [-0.24, 0.24]) box(c, 0.04, 0.3, 0.04, '#8a96a3', x, 0.68, -0.42);
+  cyl(c, 0.2, 0.3, '#f1c84b', 0, 0.21, 0.15, { seg: 14 });           // mop bucket
+  box(c, 0.32, 0.38, 0.28, '#2b2a2c', 0, 0.21, -0.2);                // trash bag
+  for (let i = 0; i < 3; i++) cyl(c, 0.04, 0.2, ['#4fb0e0', '#7ab87a', '#f08a5d'][i], -0.15 + i * 0.15, 0.71, 0.2, { seg: 8 });  // sprays
+  cyl(c, 0.015, 1.2, '#c9a24a', 0.22, 0.2, 0.32, { seg: 6 });        // spare mop
+  box(c, 0.2, 0.25, 0.12, '#3f8a3f', -0.15, 0.71, -0.15);            // watering can
+  c.traverse((o) => { if (o.isMesh) o.castShadow = false; });
+  return c;
+}
+function makeWetSign() {
+  const s = new THREE.Group();
+  box(s, 0.3, 0.55, 0.03, '#f1c84b', 0, 0, 0.08, { rx: 0.25 });
+  box(s, 0.3, 0.55, 0.03, '#f1c84b', 0, 0, -0.08, { rx: -0.25 });
+  box(s, 0.12, 0.12, 0.01, '#2b2a2c', 0, 0.3, 0.13, { rx: 0.25 });
+  s.traverse((o) => { if (o.isMesh) o.castShadow = false; });
+  return s;
+}
+const cleaners = [];
+// floors a cleaner is on or heading to: the other cleaner never goes to those
+const takenBy = (me) => { const s = new Set(); for (const c of cleaners) if (c !== me) { s.add(c.floorClaim); if (c.nextClaim) s.add(c.nextClaim); } return s; };
+
+async function cleaner(a) {
+  const cart = makeCart(), sign = makeWetSign();
+  const holdCart = () => { a.g.attach(cart); cart.position.set(0, 0, 0.75); cart.rotation.set(0, 0, 0); a.carry = true; };
+  const parkCart = () => { a.carry = false; a.g.parent.attach(cart); };
+  holdCart();
+  for (;;) {
+    // a few jobs on this floor
+    const jobs = [...CLEAN_JOBS[a.floor]].sort(() => Math.random() - 0.5).slice(0, 3);
+    for (const j of jobs) {
+      a.status = j.k === 'mop' ? 'Pushing the cart to mop the floor' : j.k === 'water' ? 'Off to water the plants' : 'Going to tend the flowers';
+      await a.goStand(j.n);
+      parkCart();
+      if (j.face) await a.face(...j.face);
+      if (j.k === 'mop') {
+        a.g.parent.attach(sign);
+        sign.position.set(a.g.position.x + 0.9, a.g.position.y, a.g.position.z + 0.5);
+        a.rig.mop.visible = true; a.act = 'mop'; a.status = `Mopping the floor (Floor ${a.floor})`;
+        await a.sleep(R(9, 13));
+        a.rig.mop.visible = false; sign.removeFromParent();
+      } else if (j.k === 'water') {
+        a.rig.can.visible = true; a.act = 'water'; a.status = `Watering the plants (Floor ${a.floor})`;
+        await a.sleep(R(6, 9));
+        a.rig.can.visible = false;
+      } else {
+        a.act = 'garden'; a.status = 'Gardening on the roof';
+        await a.sleep(R(9, 13));
+      }
+      a.act = null;
+      await a.turnTo(Math.atan2(cart.position.x - a.g.position.x, cart.position.z - a.g.position.z)); // back to the cart
+      holdCart();
+    }
+    // next floor: one the other cleaner isn't on or heading to
+    const free = [1, 2, 3, 4, 5].filter((f) => f !== a.floor && !takenBy(a).has(f));
+    const next = pick(free.length ? free : [a.floor]);
+    if (next === a.floor) { await a.sleep(5); continue; }
+    a.nextClaim = next;
+    a.status = `Taking the cart up/down to Floor ${next} in the lift`;
+    await a.goStand(`${next}:liftLobby`, 'lift');
+    a.floorClaim = next; a.nextClaim = null;
+  }
+}
+
+const ROUTINES = { jungkook, eugene, aida, xiaoming, mary, ivan, phil, jennie, lily: cleaner, robert: cleaner };
+const SPAWN = {                        // where the owners and cleaners start
+  Lily: { stand: '1:j9', ry: Math.PI },
+  Robert: { stand: '4:aisleE', ry: 0 },
   Ivan: { stand: '5:ivanMeet', ry: -2.1 },
   Phil: { seat: SOFA_TV_PHIL },
 };
@@ -1004,6 +1112,7 @@ export function createStaff({ floors, lift, employees, doors = {} }) {
       a.status = 'Working';
     }
     actors.push(a);
+    if (e.cleaner) { a.floorClaim = a.floor; cleaners.push(a); }   // reserve their starting floor right away
     const routine = ROUTINES[e.name.toLowerCase()];
     if (routine) {
       // start each routine after a short random delay so they don't all move together

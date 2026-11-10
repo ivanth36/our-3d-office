@@ -214,6 +214,17 @@ export function employee(p, x, z, ry, e) {
   }
   tray.visible = false;
 
+  // mop (held in front with both hands while mopping)
+  const mop = grp(body, 0, 0.1, 0.3);
+  cyl(mop, 0.018, 0.82, '#c9a24a', 0, -0.72, 0.13, { rx: 0.35, seg: 6 });
+  box(mop, 0.42, 0.06, 0.14, '#8fb0e0', 0, -0.72, 0.28);
+  mop.visible = false;
+  // watering can (right hand)
+  const can = grp(shoulders[1], 0, -0.46, 0.08);
+  cyl(can, 0.08, 0.16, '#3f8a3f', 0, -0.08, 0, { seg: 12 });
+  cyl(can, 0.015, 0.22, '#3f8a3f', 0, 0.0, 0.12, { rx: 1.0, seg: 6 });
+  can.visible = false;
+
   // cardboard crate of drinks (restocking the vending machines)
   const crate = grp(body, 0, 0.18, 0.32);
   box(crate, 0.42, 0.26, 0.3, '#c8a165', 0, -0.05, 0);
@@ -248,6 +259,10 @@ export function employee(p, x, z, ry, e) {
   sphere(head, 0.035, '#f2a7a0', -0.16, 0.03, 0.2, { s: [1, 0.6, 0.4], cast: false });
   sphere(head, 0.035, '#f2a7a0', 0.16, 0.03, 0.2, { s: [1, 0.6, 0.4], cast: false });
   box(head, 0.07, 0.015, 0.01, '#8a4a3a', 0, -0.0, 0.262, { cast: false });
+  if (e.cap) {                                              // work cap
+    sphere(head, 0.29, e.cap, 0, 0.27, -0.03, { s: [1.05, 0.6, 1.05] });
+    box(head, 0.36, 0.03, 0.2, e.cap, 0, 0.27, 0.26);
+  }
   if (e.glasses) {
     cyl(head, 0.06, 0.01, '#1c1410', -0.09, 0.1, 0.265, { rx: Math.PI / 2, seg: 12 });
     cyl(head, 0.06, 0.01, '#1c1410', 0.09, 0.1, 0.265, { rx: Math.PI / 2, seg: 12 });
@@ -261,7 +276,7 @@ export function employee(p, x, z, ry, e) {
   hit.userData.info = g.userData.info;
   g.add(hit);
 
-  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, drink, tray, crate, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
+  const rig = { group: g, body, head, tag, hips, shoulders, cup, cig, barbell, drink, tray, crate, mop, can, legsSit, legsStand, armsDesk, armsFree, pose: '', typing: false, phase: Math.random() * 6 };
   rig.setPose = (pose, opts = {}) => {
     rig.pose = pose;
     const sit = pose === 'sit';

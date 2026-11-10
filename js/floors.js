@@ -112,6 +112,20 @@ function tvTex() {
   });
 }
 
+// ---------------------------------------------------------------- flower planter
+const FLOWER_COLS = ['#f28cb0', '#f1c84b', '#e85d3d', '#a98bd6', '#ffffff', '#f08a3a', '#e8508f', '#7fa8e0'];
+/** Wooden planter box with a green bush and colourful flowers on top. */
+function flowerPlanter(p, x, z, i = 0) {
+  box(p, 1.4, 0.5, 0.7, C.woodDark, x, 0, z);
+  sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, x, 0.75, z, { s: [1.4, 0.75, 0.8] });
+  for (let k = 0; k < 9; k++) {
+    const fx = x - 0.5 + (k % 5) * 0.25 + ((k * 37) % 7) * 0.01, fz = z - 0.15 + (k % 3) * 0.15;
+    const col = FLOWER_COLS[(i * 3 + k) % FLOWER_COLS.length];
+    sphere(p, 0.07, col, fx, 0.98 + (k % 2) * 0.05, fz, { cast: false });
+    sphere(p, 0.025, '#f6d64a', fx, 1.03 + (k % 2) * 0.05, fz, { cast: false });  // flower centre
+  }
+}
+
 // ---------------------------------------------------------------- vending machine
 /** Drinks vending machine; its front faces local +Z (use ry to turn it). */
 function vendingMachine(p, x, z, ry, o = {}) {
@@ -661,9 +675,9 @@ export function officeFloor(p, n, employees, anim) {
     box(ed, 0.08, 0.74, 0.95, '#4a3020', 1.15, 0, 0);
     box(ed, 2.3, 0.55, 0.04, '#4a3020', 0, 0.15, 0.45);                     // modesty panel (front)
     box(ed, 0.5, 0.6, 0.85, '#4a3020', 0.85, 0.12, 0);                      // drawer pedestal
-    monitor(ed, -0.4, 0.8, -0.25, 0);
-    laptop(ed, 0.35, 0.8, -0.1, 0);
-    box(ed, 0.42, 0.02, 0.14, '#e8e4dc', -0.4, 0.8, 0.05);                  // keyboard
+    monitor(ed, -0.4, 0.8, 0.05, Math.PI);        // screens face the manager's chair
+    laptop(ed, 0.35, 0.8, -0.05, Math.PI);
+    box(ed, 0.42, 0.02, 0.14, '#e8e4dc', -0.4, 0.8, -0.3);                  // keyboard (manager's side)
     cyl(ed, 0.07, 0.02, C.black, -1.0, 0.8, -0.25, { seg: 10 });            // desk lamp
     box(ed, 0.03, 0.4, 0.03, C.black, -1.0, 0.82, -0.25, { rz: 0.3 });
     cyl(ed, 0.1, 0.12, '#e8c48a', -0.93, 1.12, -0.25, { top: 0.4, bottom: 1, seg: 10, emissive: '#ffcf80', emissiveIntensity: 0.5 });
@@ -840,11 +854,12 @@ export function floor5(p, anim) {
   // planters along the front edge (whole longer roof)
   const pg = grp(p);
   pg.userData.noShift = true;
-  for (let i = 0; i < 11; i++) {
-    const p = pg, px = -11.2 + i * 1.7;
-    box(p, 1.4, 0.5, 0.7, C.woodDark, px, 0, 7.3);
-    sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, px, 0.75, 7.3, { s: [1.4, 0.8, 0.8] });
-  }
+  for (let i = 0; i < 11; i++) flowerPlanter(pg, -11.2 + i * 1.7, 7.3, i);
+  // and a new row along the back edge, from the vending machines to the lift
+  for (let i = 0; i < 11; i++) flowerPlanter(pg, -10.0 + i * 1.7, -7.35, i + 5);
+  // a flower bed by the sun loungers
+  for (let k = 0; k < 14; k++) sphere(pg, 0.09, FLOWER_COLS[k % FLOWER_COLS.length], -11.3 + (k % 7) * 0.22, 0.1, 4.0 + Math.floor(k / 7) * 0.3, { cast: false });
+  box(pg, 1.7, 0.06, 0.9, '#6b8f4a', -10.65, 0.02, 4.15, { cast: false });
   for (const [px, pz] of [[8.8, -2.6], [8.8, 2.5], [-1.4, -7.3], [8.8, 5.0]]) plant(p, px, pz, { tall: true, s: 1.2 });
   // string lights between four poles (spanning the longer garden)
   const lg = grp(p);

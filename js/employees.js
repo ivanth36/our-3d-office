@@ -50,6 +50,17 @@ export const EMPLOYEES = [
     hair: '#2a1a12', hairStyle: 'long', outfit: 'apron', shirt: '#fbf7f0', pants: '#3a3a3e',
     tasks: [],   // no scheduled tasks yet
   },
+  // ---- cleaners: push their carts around floors 1-5 (never on the same floor); routines in js/staff.js
+  {
+    name: 'Lily', role: 'Cleaner', floor: 1, cleaner: true,
+    hair: '#3b2418', hairStyle: 'bun', outfit: 'apron', apron: '#2f5f8a', shirt: '#cfe0f0', pants: '#2f3a44',
+    tasks: [],
+  },
+  {
+    name: 'Robert', role: 'Cleaner', floor: 4, cleaner: true,
+    hair: '#2a1d16', outfit: 'apron', apron: '#2f5f8a', shirt: '#b8c8d8', pants: '#2f3a44', cap: '#2f5f8a',
+    tasks: [],
+  },
   // ---- the owners: no scheduled tasks, they just enjoy the house (routines in js/staff.js)
   {
     name: 'Ivan', role: 'Owner of the home office', floor: 5, owner: true,
