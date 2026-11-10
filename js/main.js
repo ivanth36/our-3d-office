@@ -8,7 +8,7 @@ import { createStaff, createLift } from './staff.js';
 import { createFxBoard } from './fx.js';
 
 const FLOORS = [
-  { n: 1, name: "Joe's Café", sub: 'Coffee, matcha & the boss dog' },
+  { n: 1, name: "Joe's Café", sub: 'Café · welcome lounge & reception' },
   { n: 2, name: 'Chill Home', sub: 'Living room · music room · kitchen' },
   { n: 3, name: 'Office A', sub: 'Shared desk · Meeting Room A' },
   { n: 4, name: 'Office B', sub: 'Shared desk · Meeting Room B' },

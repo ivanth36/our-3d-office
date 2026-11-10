@@ -368,6 +368,7 @@ export function floor1(p, anim) {
   for (let i = 0; i < 5; i++) sphere(rd, 0.07, FLOWER_COLS[i], 1.45 + (i % 3) * 0.05, 1.42 + (i % 2) * 0.05, -0.12 + (i % 2) * 0.05);
   box(rd, 0.3, 0.3, 0.05, C.woodDark, 0.25, 1.11, 0.2, { rx: -0.3 });     // brochure stand
   for (let i = 0; i < 3; i++) box(rd, 0.08, 0.2, 0.01, ['#7fa8e0', '#f1c84b', '#97b88f'][i], 0.15 + i * 0.1, 1.2, 0.23, { rx: -0.3, cast: false });
+  box(lg, 1.1, 0.25, 0.6, C.woodDark, 2.0, 0, 4.55);                     // Violet's step behind the desk
   pendant(lg, 1.0, 5.6, { drop: 1.0, shade: '#c9a24a' });
   pendant(lg, 3.0, 5.6, { drop: 1.0, shade: '#c9a24a' });
   plant(lg, -0.6, 5.6, { tall: true });

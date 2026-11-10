@@ -51,7 +51,7 @@ export const EMPLOYEES = [
     tasks: [],   // no scheduled tasks yet
   },
   {
-    name: 'Violet', role: 'Receptionist · welcome lounge', floor: 1, pos: [2.0, 4.75], ry: 0, idle: 'Welcoming guests at reception',
+    name: 'Violet', role: 'Receptionist · welcome lounge', floor: 1, pos: [2.0, 4.55], y: 0.25, ry: 0, idle: 'Welcoming guests at reception',
     hair: '#2a1a12', hairStyle: 'long', outfit: 'blazer', skirt: '#2b3550', shirt: '#2b3550', blouse: '#ffffff', pants: '#f6d6bd',
     tasks: [],
   },
