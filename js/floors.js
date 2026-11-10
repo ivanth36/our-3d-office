@@ -712,10 +712,10 @@ export function floor5(p, anim) {
   box(p, 3.5, 0.05, 4.5, '#7fae5a', -0.2, 0.02, -5.5, { cast: false });
 
   // ---- big glass gym filling the whole left end of the roof (built in final positions)
+  const gymG = grp(p);
+  gymG.userData.noShift = true;
   {
-    const gg = grp(p);
-    gg.userData.noShift = true;
-    const p = gg;
+    const p = gymG;
     const gx0 = X0 + 0.2, gx1 = -12.0, gz0 = -7.8, gz1 = 7.7, gh = 3.0, gcx = (gx0 + gx1) / 2;
     const rubber = '#6f757d', dark = '#2b2a2c';
     box(p, gx1 - gx0, 0.04, gz1 - gz0, rubber, gcx, 0.02, (gz0 + gz1) / 2, { cast: false });  // rubber floor
