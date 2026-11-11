@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { H, floorY, floorAt, box, cyl, grp, mat } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
-import { seat as deskSeat, PRIVATE, CAFE_ROW } from './floors.js';
+import { seat as deskSeat, PRIVATE, CAFE_TABLES } from './floors.js';
 import { sx, raw, real2, LANE_A, LANE_B } from './building.js';   // original-layout x -> real x on the longer floors
 
 const R = (a, b) => a + Math.random() * (b - a);
@@ -86,9 +86,9 @@ function cafeSeat(name, stand, access, x, z, ry, y = 0) {
 const barX = (k) => -19.85 + 0.8 * k;                               // back-window stools
 for (const [k, acc] of [[3, 'j0'], [7, 'j1']]) cafeSeat(`bar${k}`, [barX(k), -6.1], acc, barX(k), -6.85, Math.PI, 0.26);   // the bar now ends at the café
 cafeSeat('barL', [-19.8, -4.8], 'j0', -20.45, -4.8, -Math.PI / 2, 0.26);   // left-window stool
-for (const [i, tx] of [[1, CAFE_ROW[0]], [6, CAFE_ROW[1]]]) {   // front-right chair of the first two back-row tables
+for (const [i, [tx, tz]] of [[1, CAFE_TABLES[0]], [6, CAFE_TABLES[1]]]) {   // front-right chair of the two back tables
   const c = 0.97 * Math.SQRT1_2;
-  cafeSeat(`t${i}`, [real2(tx + c + 0.35), -3.4 + c + 0.35], 'j7', real2(tx + c), -3.4 + c, Math.PI / 4 + Math.PI);
+  cafeSeat(`t${i}`, [real2(tx + c + 0.35), tz + c + 0.35], 'j7', real2(tx + c), tz + c, Math.PI / 4 + Math.PI);
 }
 // seats used when Aida and Mary go for coffee together (next to each other)
 const pairSeat = (name, stand, access, x, z, ry, y = 0) => { const id = node(1, name, stand[0], stand[1]); link(id, `1:${access}`); return { node: id, x, z, ry, y }; };

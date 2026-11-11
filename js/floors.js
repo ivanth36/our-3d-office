@@ -38,7 +38,9 @@ function addDoor(anim, id, leaf, closed, open) {
 
 const RW = CORE_X - X0, RX = (CORE_X + X0) / 2; // room floor width / centre x
 // 1F café tables (real positions; js/staff.js seats people at the first two)
-export const CAFE_ROW = [-24.83, -21.53, -18.23, -14.93], CAFE_FRONT_Z = 3.1;   // front row: under the first two columns
+// four café tables only, in the café corner (real positions): two at the back, then two in a column in
+// front of the second one, all 4.3 m apart. Nothing behind the stage.
+export const CAFE_TABLES = [[-29.7, -3.4], [-23.9, -3.4], [-23.9, 0.9], [-23.9, 5.2]];
 const BACK_IN = -7.7, LEFT_IN = -11.7; // inner faces of the back / left walls
 
 // ---------------------------------------------------------------- signs
@@ -569,8 +571,6 @@ function atrium(p, anim) {
   for (const [ox, oy, oz, r] of [[-1.9, 0.2, -2.9, 0.42], [-1.6, 0.55, -3.1, 0.36], [-2.2, 0.75, -3.25, 0.3]]) sphere(g, r, '#8e8a80', cx + ox, oy, cz + oz, { s: [1.2, 0.8, 1] });
   box(g, 0.45, 0.6, 0.03, mat('#cfe8ee', { transparent: true, opacity: 0.6, emissive: '#cfe8ee', emissiveIntensity: 0.2 }), cx - 1.75, 0.15, cz - 2.75, { rx: -0.3, cast: false });
   for (let i = 0; i < 6; i++) box(g, 0.32, 0.015, 0.4, mat('#6fb0bd', { transparent: true, opacity: 0.8 }), cx - 1.7 + i * 0.28, 0.135, cz - 2.4 + i * 0.32, { ry: 0.6, cast: false });
-  bamboo(g, -12.35, 5.95, { n: 5, h: 3.2 });
-  bamboo(g, -7.35, 0.45, { n: 5, h: 2.8 });
   // koi (they swim: see anim.tickers)
   const koiG = grp(p);                                                          // one moving group (it moves with the pond)
   koiG.userData.dynamic = true; koiG.userData.noShift = true;
@@ -588,12 +588,10 @@ function atrium(p, anim) {
   box(g, sx1 - sx0 - 0.3, 0.02, sz1 - sz0 - 0.3, RED, cx, SH, (sz0 + sz1) / 2, { cast: false });
   const redRailX = (z) => { for (let x = sx0; x <= sx1 + 0.01; x += 0.9) box(g, 0.08, 0.65, 0.08, RED, Math.min(x, sx1), SH, z); box(g, sx1 - sx0, 0.07, 0.1, RED, cx, SH + 0.65, z); box(g, sx1 - sx0, 0.04, 0.05, RED, cx, SH + 0.3, z); };
   const redRailZ = (x) => { for (let z = sz0; z <= sz1 + 0.01; z += 0.9) box(g, 0.08, 0.65, 0.08, RED, x, SH, Math.min(z, sz1)); box(g, 0.1, 0.07, sz1 - sz0, RED, x, SH + 0.65, (sz0 + sz1) / 2); box(g, 0.05, 0.04, sz1 - sz0, RED, x, SH + 0.3, (sz0 + sz1) / 2); };
-  redRailX(sz0); redRailZ(sx0); redRailZ(sx1);
-  for (const [x, z] of [[sx0, sz0], [sx1, sz0], [sx0, sz1], [sx1, sz1]]) sphere(g, 0.07, '#c9a24a', x, SH + 0.75, z, { metalness: 0.6, roughness: 0.3 });   // giboshi caps
+  redRailX(sz0);                                                              // sides open onto the wooden platforms
+  for (const [x, z] of [[sx0, sz0], [sx1, sz0]]) sphere(g, 0.07, '#c9a24a', x, SH + 0.75, z, { metalness: 0.6, roughness: 0.3 });   // giboshi caps
   // walkway from the front of the pond up onto the stage
-  const wl = Math.hypot(6.95 - sz1, SH);
-  const wk = grp(g, cx, SH / 2, (sz1 + 6.95) / 2);
-  box(wk, 1.1, 0.1, wl, '#a87a4f', 0, -0.05, 0, { rx: Math.atan2(SH, 6.95 - sz1) });
+  // (now a staircase, built with the platforms in real positions)
   // folding screen (byōbu) behind the musician
   const by = grp(g, cx, SH, sz0 + 0.35);
   const scr = canvasTex(512, 256, (ctx, w, h) => { ctx.fillStyle = '#d9b45a'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = 'rgba(255,255,255,0.35)'; for (let i = 0; i < 9; i++) ctx.fillRect(i * 64, 0, 3, h); ctx.fillStyle = '#e9e2d0'; ctx.beginPath(); ctx.ellipse(170, 150, 140, 40, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#3f6b3a'; ctx.beginPath(); ctx.ellipse(330, 110, 90, 26, 0.1, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#c8352a'; ctx.beginPath(); ctx.arc(420, 60, 26, 0, Math.PI * 2); ctx.fill(); });
@@ -620,17 +618,32 @@ function atrium(p, anim) {
   spotBeam(g, 4.5, CEIL1 - 1.0, 2.0, 4.7, 5.6, 0, { r1: 2.0, pool: false });
   for (const [ux, uz] of [[3.0, 1.8], [6.4, 1.8], [4.7, -2.0]]) spotBeam(g, ux, 0.45, uz, 4.7, 5.2, 0, { r0: 0.06, r1: 1.5, pool: false, opacity: 0.07 });   // uplights from the sofa ring
   // ---- floor lanterns along the walkways round the pond
-  for (const [x, z] of [[-12.0, 7.05], [-11.05, 6.9], [-8.65, 6.9], [-7.6, 7.05], [-13.0, 2.6], [-6.7, 2.6]]) floorLantern(g, x, z);
+  for (const [x, z] of [[-12.0, 7.05], [-11.05, 6.9], [-8.65, 6.9], [-7.6, 7.05]]) floorLantern(g, x, z);
 
   // ---- the new space from the longer building: tea tables, lanterns, bamboo, roof beams with spotlights
   const fg = fillGroup(p);
   // café tables on an even grid (real positions): a back row of four, evenly spaced, and two in front of the
   // counter, all with their chairs set the same way; floor lanterns exactly half way between neighbouring tables
   const cafeTable = (x, z) => roundTable(fg, x, z, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
-  CAFE_ROW.forEach((x) => cafeTable(x, -3.4));
-  for (let i = 1; i < CAFE_ROW.length; i++) floorLantern(fg, (CAFE_ROW[i - 1] + CAFE_ROW[i]) / 2, -3.4);
-  cafeTable(CAFE_ROW[0], CAFE_FRONT_Z); cafeTable(CAFE_ROW[1], CAFE_FRONT_Z);
-  floorLantern(fg, (CAFE_ROW[0] + CAFE_ROW[1]) / 2, CAFE_FRONT_Z);
+  CAFE_TABLES.forEach(([x, z]) => cafeTable(x, z));
+
+  // ---- wooden platforms either side of the red stage (same height, plain wood, no carpet), joined to the
+  //      stage, each with its own staircase down to the floor; the stage's front walkway is a staircase too
+  const SX = -16.55, SW = 3.6, SZ0 = 1.0, SZ1 = 4.3, PH = 0.9;               // the stage in real positions
+  for (const side of [-1, 1]) {
+    const px = SX + side * SW, x0 = px - SW / 2, x1 = px + SW / 2, xo = side < 0 ? x0 : x1;
+    for (const [qx, qz] of [[x0 + 0.15, SZ0 + 0.15], [x1 - 0.15, SZ0 + 0.15], [x0 + 0.15, SZ1 - 0.15], [x1 - 0.15, SZ1 - 0.15]]) box(fg, 0.22, PH - 0.15, 0.22, '#5a3b26', qx, 0, qz);
+    box(fg, SW, 0.18, SZ1 - SZ0, '#8a5f3c', px, PH - 0.18, (SZ0 + SZ1) / 2);
+    box(fg, SW - 0.1, 0.02, SZ1 - SZ0 - 0.1, '#c99a63', px, PH, (SZ0 + SZ1) / 2, { cast: false });
+    for (let k = 1; k < 6; k++) box(fg, 0.015, 0.004, SZ1 - SZ0 - 0.1, '#a8784a', x0 + k * SW / 6, PH + 0.02, (SZ0 + SZ1) / 2, { cast: false });   // boards
+    railX(fg, PH, SZ0, x0, x1);                                                  // back rail
+    railZ(fg, PH, xo, SZ0, SZ1);                                                 // outer rail
+    railX(fg, PH, SZ1, x0, px - 0.65); railX(fg, PH, SZ1, px + 0.65, x1);        // front rail with the stair opening
+    stairRun(fg, px, 0, SZ1 + 1.5, px, PH, SZ1, 1.2);                            // stairs down to the floor
+    floorLantern(fg, xo - side * 0.35, SZ1 + 0.35, { y: PH, h: 0.6, pool: false });   // a lantern on each outer front corner
+  }
+  stairRun(fg, SX, 0, SZ1 + 1.5, SX, PH, SZ1, 1.2);                             // the stage's own stair, in the middle
+  for (const side of [-1, 1]) bamboo(fg, SX + side * 5.3, 0.4, { n: 5, h: 3.0 });   // bamboo at the two back corners
   // between the stage and reception: the same sofa setting as the welcome lounge
   // (same size, colours and line as the welcome-lounge set: rug 4.6 m, sofas 1.25 m either side of z = 0)
   // it mirrors the welcome-lounge set (centre x -2.5) exactly about the bamboo divider (x -5.4)

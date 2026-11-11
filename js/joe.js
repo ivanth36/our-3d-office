@@ -14,14 +14,14 @@ export const NODES = [
   [9.0, -5.0],    // 5  by the lift
   [-19.2, -1.3],  // 6  café middle aisle (by the vending machines)
   [-13.45, -1.3], // 7
-  [-6.2, -1.95],  // 8  (just behind the two sofa sets)
+  [-2010.6, -1.95],  // 8  (real x -10.6: clear of the stage platforms; just behind the sofa sets)
   [-4.6, -1.95],  // 9  through the divider
   [-4.6, 3.8],    // 10 lounge front-left
   [1.0, 3.8],     // 11 lounge middle (Joe's nap spot by the tree sofa)
   [9.0, 3.8],     // 12
-  [-6.2, 3.8],    // 13 café side of the divider gap
+  [-2010.6, 3.8],    // 13 café side of the divider gap
   [-13.45, 7.5],  // 14 café front aisle
-  [-6.2, 7.4],    // 15
+  [-2010.6, 7.4],    // 15
   [-19.6, 7.6],   // 16
   [-4.6, 7.2],    // 17 entrance, lounge side
   [2.0, 7.0],     // 18 in front of reception
