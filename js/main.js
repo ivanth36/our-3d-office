@@ -373,6 +373,8 @@ function loop() {
   if (anim.joe) anim.joe.update(dt, t);
   // employees: routines, walking, smoking…
   staff.update(simDt, t);
+  // only show name tags of people on the floor you're looking at (all of them in the whole-building view)
+  for (const p of staff.actors) p.rig.tag.visible = current === 0 || p.floor === current;
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
