@@ -42,6 +42,7 @@ const RW = CORE_X - X0, RX = (CORE_X + X0) / 2; // room floor width / centre x
 // front of the second one, all 4.3 m apart. Nothing behind the stage.
 export const CAFE_TABLES = [[-29.7, -3.4], [-23.9, -3.4], [-23.9, 0.9], [-23.9, 5.2]];
 const BACK_IN = -7.7, LEFT_IN = -11.7; // inner faces of the back / left walls
+export const TREADMILL_X = [-20.95, -20.05, -19.15, -18.25];   // dojo treadmills (real x), facing Mt Fuji, centred under the lantern row at x -19.6
 
 // ---------------------------------------------------------------- signs
 function paw(ctx, x, y, s, color) {
@@ -1286,11 +1287,13 @@ export function floor5(p, anim) {
     box(p, 0.06, 0.55, gz1 - gz0, '#8a5f3c', gx0 + 0.04, 0, (gz0 + gz1) / 2);
     // kamiza: a calligraphy scroll and a little shrine shelf on the back wall
     const kake = canvasTex(128, 384, (ctx, w, h) => { ctx.fillStyle = '#f4ecd8'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#6b4a33'; ctx.fillRect(0, 0, w, 16); ctx.fillRect(0, h - 16, w, 16); ctx.fillStyle = '#1b1b1e'; ctx.font = 'bold 96px "Hiragino Mincho ProN", serif'; ctx.textAlign = 'center'; ctx.fillText('道', w / 2, 150); ctx.font = 'bold 60px "Hiragino Mincho ProN", serif'; ctx.fillText('心', w / 2, 260); ctx.fillStyle = '#c8352a'; ctx.fillRect(w / 2 - 12, 300, 24, 24); });
-    panel(p, 0.55, 1.6, kake, -19.6, 1.55, gz0 + 0.12);
-    box(p, 1.2, 0.06, 0.3, '#e3c58f', -19.6, 2.55, gz0 + 0.2);
-    box(p, 0.5, 0.35, 0.22, '#e3c58f', -19.6, 2.61, gz0 + 0.2);
-    box(p, 0.6, 0.06, 0.28, '#3a3d42', -19.6, 2.96, gz0 + 0.2, { rx: 0.1 });
-    for (const sx of [-0.4, 0.4]) cyl(p, 0.04, 0.2, '#5f7a3a', -19.6 + sx, 2.61, gz0 + 0.24, { seg: 8 });
+    // (on the solid wall by the bedroom, so the back window stays clear for the view of Mt Fuji)
+    const kz = 1.2, kx = gx0 + 0.05;
+    panel(p, 0.55, 1.6, kake, kx + 0.08, 1.55, kz, { ry: Math.PI / 2 });
+    box(p, 0.3, 0.06, 1.2, '#e3c58f', kx + 0.15, 2.55, kz);
+    box(p, 0.22, 0.35, 0.5, '#e3c58f', kx + 0.15, 2.61, kz);
+    box(p, 0.28, 0.06, 0.6, '#3a3d42', kx + 0.15, 2.96, kz, { rz: -0.1 });
+    for (const sz of [-0.4, 0.4]) cyl(p, 0.04, 0.2, '#5f7a3a', kx + 0.19, 2.61, kz + sz, { seg: 8 });
     addDoor(anim, '5:gym', glassDoor(p, gx1, -1.6, 1.2, gh, -Math.PI / 2), -Math.PI / 2, 0);
     for (let i = 0; i <= 10; i++) box(p, 0.1, 0.14, gz1 - gz0, '#5a3b26', gx0 + i * (gx1 - gx0) / 10, gh, (gz0 + gz1) / 2, { cast: false }); // timber pergola
     // night lights: square paper lanterns hanging from the pergola, warm glow strips along the beams, andons in the corners
@@ -1307,9 +1310,9 @@ export function floor5(p, anim) {
     const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2a1f19'; ctx.fillRect(0, 0, 512, 96); ctx.fillStyle = '#f3e3c3'; ctx.font = 'bold 58px "Hiragino Mincho ProN", -apple-system, sans-serif'; ctx.fillText('道場 DOJO', 120, 70); });
     panel(p, 1.6, 0.3, sign, gx1 + 0.03, 2.6, -1.0, { ry: Math.PI / 2, transparent: true });
 
-    // treadmills along the left edge, facing outside (-X)
-    for (const tz of [-6.3, -4.8, -3.3, -1.8]) {
-      const t = grp(p, -20.0, 0, tz, -Math.PI / 2);
+    // treadmills in a row along the back window, facing Mt Fuji (-Z); Eugene and Ivan use the middle two
+    for (const tx of TREADMILL_X) {
+      const t = grp(p, tx, 0, -5.0, Math.PI);
       box(t, 0.8, 0.2, 1.9, dark, 0, 0, 0);
       box(t, 0.6, 0.03, 1.7, '#4a4a4f', 0, 0.2, 0);
       box(t, 0.05, 1.1, 0.05, C.metal, -0.35, 0.2, 0.85);
@@ -1333,7 +1336,7 @@ export function floor5(p, anim) {
     box(rw, 0.4, 0.08, 0.4, '#3a3d42', 0, 0.2, -0.3);
     cyl(rw, 0.28, 0.12, C.metal, 0, 0.12, 0.95, { rx: Math.PI / 2, seg: 18 });
     // weights zone (back): dumbbell racks, squat rack, cable tower, bench
-    for (const rx of [-17.4, -14.4]) {
+    for (const rx of [-14.9]) {                                        // one rack, centred under the mirror
       const rk = grp(p, rx, 0, -7.4);
       box(rk, 2.2, 0.08, 0.5, C.black, 0, 0.4, 0); box(rk, 2.2, 0.08, 0.5, C.black, 0, 0.8, 0);
       for (const lx of [-1.05, 1.05]) box(rk, 0.06, 0.9, 0.5, C.black, lx, 0, 0);
@@ -1342,7 +1345,7 @@ export function floor5(p, anim) {
         cyl(rk, 0.06 + i * 0.007, 0.08, '#555a60', -0.9 + i * 0.3 + 0.07, ly + 0.07, 0, { rz: Math.PI / 2, seg: 8 });
       }
     }
-    box(p, 3.0, 2.0, 0.04, mat('#dfeff5', { roughness: 0.05, metalness: 0.6 }), -15.9, 0.6, gz0 + 0.1, { cast: false }); // mirror
+    box(p, 3.0, 2.0, 0.04, mat('#dfeff5', { roughness: 0.05, metalness: 0.6 }), -14.9, 0.6, gz0 + 0.1, { cast: false }); // mirror
     const sr = grp(p, -13.0, 0, -3.4);                                    // squat / power rack
     for (const [lx, lz] of [[-0.6, -0.6], [0.6, -0.6], [-0.6, 0.6], [0.6, 0.6]]) box(sr, 0.08, 2.3, 0.08, C.black, lx, 0, lz);
     for (const lz of [-0.6, 0.6]) box(sr, 1.28, 0.08, 0.08, C.black, 0, 2.22, lz);
