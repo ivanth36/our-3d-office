@@ -157,6 +157,7 @@ export function employee(p, x, z, ry, e) {
     return hip;
   });
   if (e.skirt) cyl(legsStand, 0.2, 0.3, e.skirt, 0, 0.38, 0, { top: 0.85, bottom: 1, seg: 14 });   // short skirt
+  if (e.outfit === 'yukata') cyl(legsStand, 0.2, 0.56, shirt, 0, 0.08, 0, { top: 0.9, bottom: 1.05, seg: 14 });   // robe to the ankles
 
   // ---- torso
   const body = grp(g, 0, 0.62, 0);
@@ -171,6 +172,12 @@ export function employee(p, x, z, ry, e) {
     box(body, 0.05, 0.24, 0.02, '#1c2236', 0.07, 0.14, 0.17, { rz: -0.35, cast: false });
     for (const by of [0.0, 0.08]) sphere(body, 0.012, '#c9a24a', 0, by, 0.172, { cast: false });  // buttons
     box(body, 0.1, 0.05, 0.02, '#c9a24a', 0.09, 0.27, 0.165, { cast: false });                 // name badge
+  } else if (e.outfit === 'yukata') {                  // cotton yukata: crossed collar + obi sash
+    box(body, 0.05, 0.3, 0.02, e.collar ?? '#f4efe4', -0.05, 0.12, 0.165, { rz: -0.45, cast: false });
+    box(body, 0.05, 0.3, 0.02, e.collar ?? '#f4efe4', 0.05, 0.12, 0.17, { rz: 0.45, cast: false });
+    cyl(body, 0.18, 0.1, e.obi ?? '#c8a24a', 0, 0.02, 0, { seg: 14 });
+    box(body, 0.12, 0.08, 0.04, e.obi ?? '#c8a24a', 0.06, 0.03, -0.18);             // bow at the back
+    for (let i = 0; i < 5; i++) sphere(body, 0.018, e.pattern ?? '#ffffff', -0.1 + (i % 3) * 0.1, 0.2 + Math.floor(i / 3) * 0.12, 0.168, { s: [1, 1, 0.3], cast: false });
   } else if (e.outfit === 'casual') {
     box(body, 0.28, 0.04, 0.28, e.collar ?? '#ffffff', 0, 0.38, 0, { cast: false });   // collar / neckline
     box(body, 0.06, 0.12, 0.02, e.collar ?? '#ffffff', 0, 0.26, 0.165, { cast: false }); // placket

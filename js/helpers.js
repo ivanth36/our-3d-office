@@ -8,6 +8,26 @@ import { mergeGeometries } from 'three/addons/BufferGeometryUtils.js';
 export const H = 4.8;      // floor-to-floor height (ceiling 4.5 m)
 export const SLAB = 0.3;   // slab thickness
 export const CEIL = H - SLAB; // clear room height
+// Floor 1 is a tall atrium (three normal storeys); every floor above sits on top of it.
+export const H1 = 3 * H;
+/** Height of floor n (floor-to-floor). */
+export const floorH = (n) => (n === 1 ? H1 : H);
+/** Height of the floor surface of floor n above the ground. */
+export const floorY = (n) => (n <= 1 ? 0 : H1 + (n - 2) * H);
+/** Which floor a height belongs to (nearest floor surface). */
+export function floorAt(y) {
+  let best = 1;
+  for (let n = 1; n <= 5; n++) if (Math.abs(floorY(n) - y) < Math.abs(floorY(best) - y)) best = n;
+  return best;
+}
+
+// ---------- night glow: lanterns / lit windows register here so js/env.js can brighten them at night
+export const WINDOWS = new Set(); // window glass materials (warm at night)
+export const GLOW = new Map();   // material -> { base, night }
+export function registerGlow(m, night = 2.2) {
+  if (!GLOW.has(m)) GLOW.set(m, { base: m.emissiveIntensity, night });
+  return m;
+}
 
 // ---------- materials ----------
 const matCache = new Map();
@@ -31,7 +51,7 @@ export function mat(color, o = {}) {
   return m;
 }
 export const glassMat = () => mat('#cfeaf2', { transparent: true, opacity: 0.22, roughness: 0.1 });
-export const glowMat = (c = '#ffd98a') => mat(c, { emissive: c, emissiveIntensity: 1.2 });
+export const glowMat = (c = '#ffd98a', k = 1.2) => registerGlow(mat(c, { emissive: c, emissiveIntensity: k }));
 
 function toMat(c, o) { return (typeof c === 'string') ? mat(c, o) : c; }
 

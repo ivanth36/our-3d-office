@@ -5,13 +5,17 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 
 **Live site (after GitHub Pages is on):** https://ivanth36.github.io/our-3d-office/
 
+**Japanese theme:** dark timber facade with posts, tiled eaves and a noren curtain at the entrance; stone lanterns, a sakura tree and a glowing drinks vending machine out front. Seasons follow Japan's calendar (sakura in spring, momiji in autumn, more snow on Fuji in winter) and the sky, lights and lanterns follow the clock in Singapore. Ambient sounds (koto, shishi-odoshi, wind chimes, the shamisen on the stage, a station chime when the lift arrives) start after your first tap; 🔊 mutes them. Add `?season=spring`, `?time=21` or `?friday=1` to the address to preview.
+
 | Floor | What's there |
 |---|---|
-| 1F Joe's Café | Joe the Shih Tzu roams around! Jennie the cashier, a big indoor tree, two red vending machines, U-shaped counter (coffee machine · cashier · pick-up), stools, round tables, sofa corner, long table + bench, Joe statue, café sign with the Joe's Café logo |
-| 2F Outsource AI Team | Same layout as 3F, kept for future client work |
-| 3F In-house Office | Big shared desk with AI employees (JungKook, XiaoMing, Sally, Aida, Mary), live FX board (1 SGD → KRW / CNY, hourly — tap it to refresh), glass meeting room |
-| 4F Chill Home | Big living room (wall-mounted TV, 2 long sofas, armchair, rug), glass music room at the front-left (CDs, hi-fi, lounge chair, drum kit, keyboard, music desk + computer), large kitchen with island, dining table for 12 |
-| 5F Japanese Garden | Eugene the wellness coach in the glass gym (treadmills, weights, bench, yoga mats) with vending machines; outside, a Japanese roof garden: red torii gate, stepping stones, koi pond with a red arched bridge, zen rock garden, stone lanterns, sakura trees, cloud-pruned pines, bamboo, a tea pavilion, a red parasol bench and paper lanterns. Mt Fuji stands far away behind the building |
+| 1F Joe's Café | A three-storey atrium tea house: tall cedar pillars, exposed roof beams with small spotlights, two levels of wraparound wooden balconies with low tables, criss-crossing wooden staircases with softly lit steps. In the centre a raised stage with a red carpet and red railings over a shallow pond and stream with rocks and koi, where Hana plays the shamisen. Matcha counter under a little tiled roof (chawan and whisk display, wagashi case), paper lanterns, bamboo, genkan with slippers inside the noren entrance. Joe the Shih Tzu roams around; Jennie, Lisa, Rose and Jisoo work here |
+| 2F Outsource AI Team | Same calm Kyoto / Muji-style office as 3F, kept for future client work |
+| 3F In-house Office | Pale oak shared desk with bonsai and the AI employees, live FX board, frosted shoji-glass meeting room with ikebana, Kenny's glass office with his hanko stamp, and Kenny's daruma wall: one daruma per scheduled task (one eye = set up, both eyes = ran OK, red with a frown = error) |
+| 4F Chill Home | Tatami living room with shoji, kotatsu and floor cushions; jazz-kissa listening bar (records wall, warm amber light, drums, piano); game room; omakase counter kitchen; dining for 12 under red izakaya lanterns |
+| 5F Japanese Garden | Dojo (Eugene's gym), hinoki hot-spring tub facing Mt Fuji, torii gate, koi pond and red bridge, zen garden, shishi-odoshi, stone lanterns, sakura, pines, bamboo, tea pavilion |
+
+**Fridays (Singapore time):** JungKook, XiaoMing and Kenny wear yukata.
 
 **Walls:** the left, right and back walls fade to see-through when you rotate the camera to look from that side.
 
@@ -28,6 +32,9 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 - `js/floors.js`: furniture for each floor
 - `js/furniture.js`: reusable furniture pieces
 - `js/characters.js`: Joe the Shih Tzu + AI employee figures
+- `js/japan.js`: Japanese props (lanterns, trees, noren, kanban, tatami, shoji, daruma)
+- `js/env.js`: seasons, day/night, Mt Fuji
+- `js/audio.js`: ambient sounds + mute button
 - `js/joe.js`: Joe's roaming walk around the café
 - `js/staff.js`: the employees' and owners' (Ivan & Phil) daily routines (walking map, stairs, lift, smoke breaks, coffee runs, meetings)
 - `js/fx.js`: the live FX board (rates from Coinbase, falling back to ExchangeRate-API)

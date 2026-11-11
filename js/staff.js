@@ -7,11 +7,11 @@
 // - Each employee is an "actor" running an async routine: walk somewhere, sit,
 //   wait, smoke, run… Movements are promises that finish in the animation loop.
 import * as THREE from 'three';
-import { H, box, cyl, grp, mat } from './helpers.js';
+import { H, floorY, floorAt, box, cyl, grp, mat } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
 import { seat as deskSeat } from './floors.js';
-import { sx, raw } from './building.js';   // original-layout x -> real x on the longer floors
+import { sx, raw, LANE_A, LANE_B } from './building.js';   // original-layout x -> real x on the longer floors
 
 const R = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -28,7 +28,7 @@ function node(f, name, x, z) {
 function link(a, b, type = 'walk') {
   const A = nodes.get(a), B = nodes.get(b);
   if (!A || !B) throw new Error(`bad link ${a} ${b}`);
-  const cost = type === 'walk' ? Math.hypot(A.x - B.x, A.z - B.z) : type === 'stairs' ? 9 : 14 + Math.abs(A.f - B.f) * 2;
+  const cost = type === 'walk' ? Math.hypot(A.x - B.x, A.z - B.z) : type === 'stairs' ? (Math.min(A.f, B.f) === 1 ? 27 : 9) : 14 + Math.abs(A.f - B.f) * 2;
   adj.get(a).push({ to: b, type, cost });
   adj.get(b).push({ to: a, type, cost });
 }
@@ -36,6 +36,14 @@ function chain(...ids) { for (let i = 1; i < ids.length; i++) link(ids[i - 1], i
 
 const LX = 10.8; // walking line through the lift / stairs core
 const STAIR_BOTTOM_Z = 6.05, STAIR_TOP_Z = 0.3;
+// Points walked (local to floor `lower`) going up the stairs. Floor 1 is the tall atrium: three
+// switch-back flights on two lanes with landings at the balcony levels (see atriumStairs in js/building.js).
+function stairPath(lower) {
+  if (lower !== 1) return [[LX, 0, STAIR_BOTTOM_Z], [LX, H, STAIR_TOP_Z]];
+  const zf = 6.0, zb = 0.4;
+  return [[LX, 0, STAIR_BOTTOM_Z], [LANE_A, 0, zf], [LANE_A, H, zb], [LANE_A, H, -0.3], [LANE_B, H, -0.3], [LANE_B, H, zb],
+    [LANE_B, 2 * H, zf], [LANE_B, 2 * H, 6.7], [LANE_A, 2 * H, 6.7], [LANE_A, 2 * H, zf], [LANE_A, 3 * H, zb], [LX, 3 * H, STAIR_TOP_Z]];
+}
 
 // core of every floor: lift, lobby, landing, stairs
 for (let f = 1; f <= 5; f++) {
@@ -79,12 +87,12 @@ const barX = (k) => -19.85 + 0.8 * k;                               // back-wind
 for (const [k, acc] of [[3, 'j0'], [7, 'j1'], [12, 'j1'], [16, 'j2']]) cafeSeat(`bar${k}`, [barX(k), -6.1], acc, barX(k), -6.85, Math.PI, 0.26);
 cafeSeat('barL', [-19.8, -4.8], 'j0', -20.45, -4.8, -Math.PI / 2, 0.26);   // left-window stool
 cafeSeat('t1', [-10.86, -2.36], 'j7', -11.21, -2.71, Math.PI / 4 + Math.PI);
-cafeSeat('t6', [-7.36, 3.76], 'j13', -7.71, 4.11, 3 * Math.PI / 4 + Math.PI);
+cafeSeat('t6', [-7.76, -2.36], 'j8', -8.11, -2.71, Math.PI / 4 + Math.PI);   // second tea table (the old front tables are now the pond)
 // seats used when Aida and Mary go for coffee together (next to each other)
 const pairSeat = (name, stand, access, x, z, ry, y = 0) => { const id = node(1, name, stand[0], stand[1]); link(id, `1:${access}`); return { node: id, x, z, ry, y }; };
 const CAFE_PAIRS = [
   [pairSeat('bar10', [barX(10), -6.1], 'j1', barX(10), -6.85, Math.PI, 0.26), pairSeat('bar11', [barX(11), -6.1], 'j1', barX(11), -6.85, Math.PI, 0.26)],
-  [pairSeat('t3a', [-12.24, -0.24], 'j7', -11.89, 0.11, 5 * Math.PI / 4 + Math.PI), pairSeat('t3b', [-12.24, 1.84], 'j7', -11.89, 1.49, 7 * Math.PI / 4 + Math.PI)],
+  [pairSeat('bar8', [barX(8), -6.1], 'j1', barX(8), -6.85, Math.PI, 0.26), pairSeat('bar9', [barX(9), -6.1], 'j1', barX(9), -6.85, Math.PI, 0.26)],
 ];
 // welcome lounge (right half): the facing sofas, used by Ivan & Phil after coffee
 chain('1:j9', node(1, 'loungeA', -4.3, -0.75), '1:j10');
@@ -126,8 +134,9 @@ link('4:kLane', node(4, 'sink', 8.25, -6.1));
 link('4:stove', '4:islandBack');
 chain('4:kIn', node(4, 'dineE', 8.0, 1.8), node(4, 'dineStandP', 4.68, 2.2), node(4, 'dineStandI', 3.4, 2.2));
 link('4:f2mid', '4:dineStandI');
-const SOFA_TV_PHIL = { node: '4:sofaStandA', x: raw(-5.3), z: -1.2, ry: Math.PI, y: 0.04 };   // facing the TV
-const SOFA_TV_IVAN = { node: '4:sofaStandB', x: raw(-7.3), z: -1.2, ry: Math.PI, y: 0.04 };
+// on floor cushions at the kotatsu (legs under the quilt), facing the TV
+const SOFA_TV_PHIL = { node: '4:sofaStandA', x: raw(-5.3), z: -2.75, ry: Math.PI, y: -0.3 };
+const SOFA_TV_IVAN = { node: '4:sofaStandB', x: raw(-7.3), z: -2.75, ry: Math.PI, y: -0.3 };
 const DINE_IVAN = { node: '4:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
 const DINE_PHIL = { node: '4:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
 // café sofa corner for the owners
@@ -249,14 +258,17 @@ export function createLift(car) {
       const w = L.waiters.shift();
       if (w) w(); else { L.busy = false; L.target = null; }
     },
-    bring(f) { L.target = (f - 1) * H + 0.02; return new Promise((r) => { L.onArrive = r; }); },
-    floor() { return Math.round((car.position.y - 0.02) / H) + 1; },
+    bring(f) { L.target = floorY(f) + 0.02; return new Promise((r) => { L.onArrive = r; }); },
+    floor() { return floorAt(car.position.y - 0.02); },
     update(dt) {
       const ty = L.target ?? L.viewY;
       const d = ty - car.position.y;
       L.moved = Math.abs(d) > 0.001;
-      if (L.moved) car.position.y += Math.sign(d) * Math.min(Math.abs(d), dt * 2.4);
-      else if (L.onArrive && L.target !== null) { const r = L.onArrive; L.onArrive = null; r(); }
+      if (L.moved) { car.position.y += Math.sign(d) * Math.min(Math.abs(d), dt * 2.4); L.travelling = true; }
+      else {
+        if (L.travelling) { L.travelling = false; L.onStop?.(L.floor()); }   // arrival chime (js/audio.js)
+        if (L.onArrive && L.target !== null) { const r = L.onArrive; L.onArrive = null; r(); }
+      }
     },
   };
   return L;
@@ -340,24 +352,28 @@ class Actor {
       return false;
     });
   }
-  /** Walk the stair flight between floor `lower` and `lower+1` (up or down). */
+  /** Walk the stairs between floor `lower` and `lower+1` (up or down) along STAIR_PATH. */
   climb(lower, up) {
     this.toFloor(lower);
     this.anim = 'walk';
-    const len = Math.hypot(H, STAIR_BOTTOM_Z - STAIR_TOP_Z);
-    let u = up ? 0 : 1;
-    this.heading = up ? Math.PI : 0; this.g.rotation.y = this.heading;
+    const pts = stairPath(lower);
+    if (!up) pts.reverse();
+    const lens = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1], q[2] - pts[i][2]));
+    let seg = 0, s = 0;
+    this.g.position.set(...pts[0]);
     return this._task((dt) => {
-      u += (up ? 1 : -1) * dt * 0.9 / len;
-      const k = Math.min(1, Math.max(0, u));
-      this.g.position.set(LX, H * k, STAIR_BOTTOM_Z + (STAIR_TOP_Z - STAIR_BOTTOM_Z) * k);
-      if ((up && u >= 1) || (!up && u <= 0)) {
+      s += dt * 0.9;
+      while (seg < lens.length && s >= lens[seg]) { s -= lens[seg]; seg++; }
+      if (seg >= lens.length) {
         this.anim = 'idle';
         const f = up ? lower + 1 : lower;
         this.toFloor(f);
         this.g.position.set(LX, 0, up ? STAIR_TOP_Z : STAIR_BOTTOM_Z);
         return true;
       }
+      const A = pts[seg], B = pts[seg + 1], k = s / lens[seg];
+      this.g.position.set(A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k, A[2] + (B[2] - A[2]) * k);
+      if (Math.hypot(B[0] - A[0], B[2] - A[2]) > 0.01) { this.heading = Math.atan2(B[0] - A[0], B[2] - A[2]); this.g.rotation.y = this.heading; }
       return false;
     });
   }

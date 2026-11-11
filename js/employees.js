@@ -83,7 +83,7 @@ export const EMPLOYEES = [
     tasks: [],
   },
   {
-    name: 'Jisoo', home: 1, role: 'Usher · welcome lounge', floor: 1, pos: [-2.6, 6.1], ry: 0.3, idle: 'Welcoming guests at the entrance',
+    name: 'Jisoo', home: 1, role: 'Usher · welcome lounge', floor: 1, pos: [-2.6, 5.75], ry: 0.3, idle: 'Welcoming guests at the genkan',
     hair: '#1a1210', hairStyle: 'long', outfit: 'blazer', skirt: '#1b1b1e', shirt: '#1b1b1e', blouse: '#ffffff', pants: '#f6d6bd',
     tasks: [],
   },

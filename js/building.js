@@ -3,7 +3,7 @@
 // Service core on the right: lift x 9.6..12 / z -8..-5.6 (door faces the front),
 // a roomy lift lobby z -5.6..0.4, stairs x 9.6..12 / z 0.4..6 (moved towards the front).
 import * as THREE from 'three';
-import { H, SLAB, CEIL, box, cyl, grp, glassMat, mat, makeLabel, optimize } from './helpers.js';
+import { H, SLAB, CEIL, floorH, box, cyl, grp, glassMat, glowMat, mat, makeLabel, optimize, registerGlow, WINDOWS } from './helpers.js';
 import { C } from './furniture.js';
 
 // The building was made 40% longer (24 m -> 33.6 m) by moving the left wall out.
@@ -22,18 +22,23 @@ export const CORE_X = 9.6;              // rooms are x < CORE_X
 export const STAIR = { x0: 9.6, x1: 12, z0: 0.4, z1: 6.0 };
 export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };
 
-const WALL = '#f3e5cf', WALL_OUT = '#e9d3b4', TRIM = '#8a5a33', SLAB_C = '#e8d6bb';
+// Japanese look: dark timber outside (yakisugi-style posts and beams), each floor lined inside
+const WALL = '#4a3428', WALL_OUT = '#4a3428', TRIM = '#2a1f19', POST = '#2a1f19', SLAB_C = '#5a4030';
+const LINING = { 1: '#b8865a', 2: '#f1ece3', 3: '#f1ece3', 4: '#e8dcc6' };
+export const KANJI = ['', '一階', '二階', '三階', '四階', '五階'];
+// window glass: sky reflection by day, warm room light at night (see js/env.js)
+const winMat = () => { const m = mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }); WINDOWS.add(m); return m; };
 
 function windowsAlongX(p, z, x0, x1, every, h0 = 0.9, wh = CEIL - 1.6) {
   for (let x = x0 + every / 2; x < x1; x += every) {
-    box(p, every * 0.62, wh, 0.34, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), x, h0, z, { cast: false });
+    box(p, every * 0.62, wh, 0.34, winMat(), x, h0, z, { cast: false });
     box(p, every * 0.68, 0.08, 0.4, TRIM, x, h0 - 0.08, z, { cast: false });
     box(p, every * 0.68, 0.08, 0.4, TRIM, x, h0 + wh, z, { cast: false });
   }
 }
 function windowsAlongZ(p, x, z0, z1, every, h0 = 0.9, wh = CEIL - 1.6) {
   for (let z = z0 + every / 2; z < z1; z += every) {
-    box(p, 0.34, wh, every * 0.62, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), x, h0, z, { cast: false });
+    box(p, 0.34, wh, every * 0.62, winMat(), x, h0, z, { cast: false });
     box(p, 0.4, 0.08, every * 0.68, TRIM, x, h0 - 0.08, z, { cast: false });
     box(p, 0.4, 0.08, every * 0.68, TRIM, x, h0 + wh, z, { cast: false });
   }
@@ -41,7 +46,7 @@ function windowsAlongZ(p, x, z0, z1, every, h0 = 0.9, wh = CEIL - 1.6) {
 
 /** Long window with slim black mullions, set into a wall running along X. */
 function glassStrip(p, z, x0, x1, y0, y1) {
-  box(p, x1 - x0, y1 - y0, 0.34, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), (x0 + x1) / 2, y0, z, { cast: false });
+  box(p, x1 - x0, y1 - y0, 0.34, winMat(), (x0 + x1) / 2, y0, z, { cast: false });
   const n = Math.round((x1 - x0) / 1.3);
   for (let i = 0; i <= n; i++) box(p, 0.06, y1 - y0, 0.4, '#2b2a2c', x0 + (x1 - x0) * i / n, y0, z, { cast: false });
   box(p, x1 - x0, 0.07, 0.42, '#2b2a2c', (x0 + x1) / 2, y0, z, { cast: false });
@@ -51,7 +56,7 @@ function glassStrip(p, z, x0, x1, y0, y1) {
 
 /** Same long black-framed window, for a wall running along Z. */
 function glassStripZ(p, x, z0, z1, y0, y1) {
-  box(p, 0.34, y1 - y0, z1 - z0, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }), x, y0, (z0 + z1) / 2, { cast: false });
+  box(p, 0.34, y1 - y0, z1 - z0, winMat(), x, y0, (z0 + z1) / 2, { cast: false });
   const n = Math.round((z1 - z0) / 1.3);
   for (let i = 0; i <= n; i++) box(p, 0.4, y1 - y0, 0.06, '#2b2a2c', x, y0, z0 + (z1 - z0) * i / n, { cast: false });
   box(p, 0.42, 0.07, z1 - z0, '#2b2a2c', x, y0, (z0 + z1) / 2, { cast: false });
@@ -111,8 +116,38 @@ function stairs(p) {
   }
 }
 
+/** Floor 1 (the tall atrium): three flights in the core, switching back on two lanes,
+ *  with landings at the two balcony levels. Must match ATRIUM_STAIR_PATH in js/staff.js. */
+export const LANE_A = 10.2, LANE_B = 11.4;
+function flight(p, cx, y0, zA, zB, w = 1.1) {
+  const steps = Math.round(H / 0.22), rise = H / steps, run = (zB - zA) / steps;
+  const glow = glowMat('#ffcf80', 0.5);
+  for (let k = 0; k < steps; k++) {
+    const z = zA + run * (k + 0.5), y = y0 + rise * (k + 1);
+    box(p, w, 0.1, Math.abs(run) + 0.02, k % 2 ? '#c99a63' : '#bf8f58', cx, y - 0.1, z, { cast: false });     // floating cedar treads
+    if (k % 2 === 0) box(p, w - 0.1, 0.03, 0.04, glow, cx, y - 0.13, z + Math.sign(run) * (Math.abs(run) / 2 - 0.02), { cast: false }); // soft step light
+  }
+  const len = Math.hypot(H, zB - zA), ang = Math.atan2(H, zB - zA);
+  for (const sx of [-w / 2, w / 2]) {
+    const st = grp(p, cx + sx, y0 + H / 2, (zA + zB) / 2);
+    box(st, 0.08, 0.28, len, '#5a3b26', 0, -0.3, 0, { rx: -ang });                // stringer
+    box(st, 0.06, 0.06, len, '#3d2618', 0, 0.75, 0, { rx: -ang });                // handrail
+  }
+  for (let k = 2; k < steps; k += 5) for (const sx of [-w / 2, w / 2]) box(p, 0.04, 0.95, 0.04, '#3d2618', cx + sx, y0 + rise * (k + 1), zA + run * (k + 0.5), { cast: false });
+}
+function atriumStairs(p) {
+  const z0 = STAIR.z0, z1 = STAIR.z1;
+  flight(p, LANE_A, 0, z1, z0);              // ground -> 1st balcony level (back)
+  flight(p, LANE_B, H, z0, z1);              // 1st -> 2nd balcony level (front)
+  flight(p, LANE_A, 2 * H, z1, z0);          // 2nd balcony level -> Floor 2 (back)
+  const x0 = STAIR.x0, x1 = STAIR.x1;
+  box(p, x1 - x0, 0.25, 1.35, '#8a5f3c', (x0 + x1) / 2, H - 0.25, z0 - 0.65);          // back landing
+  box(p, x1 - x0, 0.25, 1.3, '#8a5f3c', (x0 + x1) / 2, 2 * H - 0.25, z1 + 0.65);     // front landing
+  for (const [y, z] of [[H, z0 - 0.65], [2 * H, z1 + 0.65]]) box(p, 0.06, 1.0, 1.3, '#3d2618', x1 - 0.1, y, z, { cast: false });
+}
+
 function liftShaftSegment(p, n, top = false) {
-  const h = top ? 3.4 : H;
+  const h = top ? 3.4 : floorH(n);
   const y0 = n === 1 ? 0 : -SLAB;
   const hh = h + (n === 1 ? 0 : SLAB) - (top ? 0 : SLAB);
   const { x0, x1, z0, z1 } = LIFT;
@@ -125,7 +160,7 @@ function liftShaftSegment(p, n, top = false) {
   box(p, 1.4, 0.12, 0.12, '#5b4a3c', cx, 2.3, z1, { cast: false });
   box(p, 0.08, 2.3, 0.12, '#5b4a3c', cx - 0.7, 0, z1, { cast: false });
   box(p, 0.08, 2.3, 0.12, '#5b4a3c', cx + 0.7, 0, z1, { cast: false });
-  const lbl = makeLabel(`LIFT · ${n}F`, { height: 0.3, px: 40, depthTest: true });
+  const lbl = makeLabel(`${KANJI[n]}  ${n}F`, { height: 0.34, px: 44, depthTest: true });
   lbl.position.set(cx, 2.7, z1 + 0.15);
   p.add(lbl);
   if (top) {
@@ -133,12 +168,32 @@ function liftShaftSegment(p, n, top = false) {
   }
 }
 
+/** Exterior timber frame on a wall running along X (posts between windows + a beam at the top). */
+function postsX(p, z, x0, x1, every, h, out) {
+  for (let x = x0; x <= x1 + 0.01; x += every) box(p, 0.16, h, 0.08, POST, x, 0, z + out, { cast: false });
+  box(p, x1 - x0 + 0.2, 0.32, 0.1, POST, (x0 + x1) / 2, h - 0.02, z + out, { cast: false });
+}
+function postsZ(p, x, z0, z1, every, h, out) {
+  for (let z = z0; z <= z1 + 0.01; z += every) box(p, 0.08, h, 0.16, POST, x + out, 0, z, { cast: false });
+  box(p, 0.1, 0.32, z1 - z0 + 0.2, POST, x + out, h - 0.02, (z0 + z1) / 2, { cast: false });
+}
+/** Dark tiled eave (hisashi) sticking out over the street side. */
+function eave(p, y, x0, x1, depth = 0.8) {
+  const g = grp(p, (x0 + x1) / 2, y, Z1);
+  box(g, x1 - x0, 0.08, depth, '#3a3d42', 0, 0, depth / 2, { rx: 0.22, cast: false });
+  for (let x = -(x1 - x0) / 2 + 0.15; x < (x1 - x0) / 2; x += 0.3) box(g, 0.05, 0.05, depth, '#2c2e33', x, 0.06, depth / 2, { rx: 0.22, cast: false }); // tile ribs
+  box(g, x1 - x0, 0.06, 0.08, POST, 0, -0.18, depth - 0.02, { cast: false });
+}
+
 /** Build the shell of floor n (1..5) into group p (positioned at floor height). */
 export function shell(p, n) {
   const roof = n === 5;
+  const ceil = floorH(n) - SLAB;
   slab(p, n);
   liftShaftSegment(p, n, roof);
-  if (n < 5) stairs(p);
+  if (n === 1) atriumStairs(p);
+  else if (n < 5) stairs(p);
+  if (n > 1) eave(p, -SLAB - 0.05, X0 - 0.1, X1 + 0.1);
 
   const walls = {};
   if (!roof) {
@@ -149,27 +204,37 @@ export function shell(p, n) {
       walls[side].userData.dynamic = true; // merged separately (see main.js)
       walls[side].userData.wallSide = side;
     }
+    const lin = LINING[n];
     // back wall (z = -8) with windows
-    box(walls.back, W, CEIL, 0.3, WALL, XC, 0, Z0 + 0.15, { cast: false });
+    box(walls.back, W, ceil, 0.3, WALL, XC, 0, Z0 + 0.15, { cast: false });
+    box(walls.back, W - 0.6, ceil, 0.01, lin, XC, 0, Z0 + 0.305, { cast: false });
     if (n === 1) {
-      // Floor 1 café: one style everywhere — tall glass with slim black frames
-      glassStrip(walls.back, Z0 + 0.15, X0 + 0.35, CORE_X - 0.2, 0.75, CEIL - 0.45);
+      // the atrium: tall glass at street level and a clerestory band under the roof beams
+      glassStrip(walls.back, Z0 + 0.15, X0 + 0.35, CORE_X - 0.2, 0.75, 4.25);
+      glassStrip(walls.back, Z0 + 0.15, X0 + 0.35, CORE_X - 0.2, ceil - 3.2, ceil - 0.5);
     } else {
       windowsAlongX(walls.back, Z0 + 0.15, X0 + 0.5, CORE_X - 0.5, 3.0);
     }
-    box(walls.back, W - 0.6, 0.12, 0.05, TRIM, XC, 0, Z0 + 0.32, { cast: false });
+    postsX(walls.back, Z0, X0 + 0.5, CORE_X - 0.5, 3.0, ceil, -0.04);
     // left wall (x = -12)
-    box(walls.left, 0.3, CEIL, D, WALL, X0 + 0.15, 0, 0, { cast: false });
-    if (n === 1) glassStripZ(walls.left, X0 + 0.15, Z0 + 0.35, Z1 - 0.6, 0.75, CEIL - 0.45);
-    else windowsAlongZ(walls.left, X0 + 0.15, Z0 + 0.5, Z1 - 1.0, 3.0);
-    box(walls.left, 0.05, 0.12, D - 0.6, TRIM, X0 + 0.32, 0, 0, { cast: false });
+    box(walls.left, 0.3, ceil, D, WALL, X0 + 0.15, 0, 0, { cast: false });
+    box(walls.left, 0.01, ceil, D - 0.6, lin, X0 + 0.305, 0, 0, { cast: false });
+    if (n === 1) {
+      glassStripZ(walls.left, X0 + 0.15, Z0 + 0.35, Z1 - 0.6, 0.75, 4.25);
+      glassStripZ(walls.left, X0 + 0.15, Z0 + 0.35, Z1 - 0.6, ceil - 3.2, ceil - 0.5);
+    } else windowsAlongZ(walls.left, X0 + 0.15, Z0 + 0.5, Z1 - 1.0, 3.0);
+    postsZ(walls.left, X0, Z0 + 0.5, Z1 - 1.0, 3.0, ceil, -0.04);
     // right wall (x = 12): outer wall of the core
-    box(walls.right, 0.3, CEIL, D, WALL_OUT, X1 - 0.15, 0, 0, { cast: false });
-    if (n === 1) glassStripZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.6, 0.75, CEIL - 0.45);
-    else windowsAlongZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.3, 3.2);
+    box(walls.right, 0.3, ceil, D, WALL_OUT, X1 - 0.15, 0, 0, { cast: false });
+    box(walls.right, 0.01, ceil, D - 0.6, lin, X1 - 0.305, 0, 0, { cast: false });
+    if (n === 1) {
+      glassStripZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.6, 0.75, 4.25);
+      glassStripZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.6, ceil - 3.2, ceil - 0.5);
+    } else windowsAlongZ(walls.right, X1 - 0.15, LIFT.z1 + 0.3, Z1 - 0.3, 3.2);
+    postsZ(walls.right, X1, Z0 + 0.3, Z1 - 0.3, 3.2, ceil, 0.04);
     // front corner columns
-    box(p, 0.5, CEIL, 0.5, WALL_OUT, X0 + 0.25, 0, Z1 - 0.25, { cast: false });
-    box(p, 0.5, CEIL, 0.5, WALL_OUT, X1 - 0.25, 0, Z1 - 0.25, { cast: false });
+    box(p, 0.5, ceil, 0.5, POST, X0 + 0.25, 0, Z1 - 0.25, { cast: false });
+    box(p, 0.5, ceil, 0.5, POST, X1 - 0.25, 0, Z1 - 0.25, { cast: false });
     // upper floors get a glass balustrade along the open front
     if (n > 1) glassRail(p, X0 + 0.5, Z1 - 0.15, X1 - 0.5, Z1 - 0.15);
     // rail around the stair hole (on this floor, from the flight below)
@@ -182,6 +247,12 @@ export function shell(p, n) {
     glassRail(p, X1 - 0.1, LIFT.z1, X1 - 0.1, Z1 - 0.1);
     glassRail(p, STAIR.x0 - 0.05, STAIR.z0 + 0.2, STAIR.x0 - 0.05, STAIR.z1);
     glassRail(p, STAIR.x0, STAIR.z1 + 0.05, X1 - 0.1, STAIR.z1 + 0.05);
+  }
+  // bilingual floor sign by the stairs (seen from the landing)
+  if (n < 5 || roof) {
+    const sg = makeLabel(`${KANJI[n]} ${n}F`, { height: 0.32, px: 44, depthTest: true });
+    sg.position.set(STAIR.x0 + 0.03, 2.4, Z1 - 0.9);
+    p.add(sg);
   }
   return walls;
 }

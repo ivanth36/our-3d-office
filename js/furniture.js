@@ -147,9 +147,10 @@ export function glassWall(p, x1, z1, x2, z2, h = CEIL, o = {}) {
   const segs = o.gap ? [[-len / 2, o.gap[0] - len / 2], [o.gap[1] - len / 2, len / 2]] : [[-len / 2, len / 2]];
   for (const [a, b] of segs) {
     if (b - a < 0.05) continue;
-    box(g, b - a, h, 0.04, glassMat(), (a + b) / 2, 0, 0, { cast: false });
+    box(g, b - a, h, 0.04, o.glass ?? glassMat(), (a + b) / 2, 0, 0, { cast: false });
     const n = Math.max(1, Math.round((b - a) / 1.2));
     for (let i = 0; i <= n; i++) box(g, 0.05, h, 0.07, fc, a + (b - a) * i / n, 0, 0, { cast: false });
+    if (o.shoji) for (let y = 0.45; y < h - 0.2; y += 0.45) box(g, b - a, 0.035, 0.06, fc, (a + b) / 2, y, 0, { cast: false });   // kumiko bars
   }
   box(g, len, 0.06, 0.08, fc, 0, h - 0.06, 0, { cast: false });
   box(g, len, 0.06, 0.08, fc, 0, 0, 0, { cast: false });

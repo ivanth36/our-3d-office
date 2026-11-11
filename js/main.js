@@ -1,19 +1,22 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
-import { H, CEIL, box, cyl, sphere, mat, makeLabel, optimize } from './helpers.js';
-import { shell, liftCar, LIFT, X0, XC, EXT, SPLIT } from './building.js';
-import { floor1, floor2, officeFloor, floor5 } from './floors.js';
+import { H, CEIL, floorY, floorH, box, cyl, sphere, mat, makeLabel, optimize, GLOW, WINDOWS } from './helpers.js';
+import { shell, liftCar, LIFT, X0, XC, EXT, SPLIT, KANJI } from './building.js';
+import { floor1, floor2, officeFloor, floor5, vendingMachine } from './floors.js';
+import { placeDarumas, stoneLantern } from './japan.js';
+import { createEnv, mtFuji, isFriday } from './env.js';
+import { initAudio, setView as audioView, chime, knock } from './audio.js';
 import { EMPLOYEES } from './employees.js';
 import { createStaff, createLift } from './staff.js';
 import { createFxBoard } from './fx.js';
 import { createPanel } from './panel.js';
 
 const FLOORS = [
-  { n: 1, name: "Joe's Café", sub: 'Café · welcome lounge & reception' },
+  { n: 1, name: "Joe's Café", sub: 'Atrium tea house · stage · welcome lounge' },
   { n: 2, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 3, name: 'In-house Office', sub: 'My in-house AI team' },
-  { n: 4, name: 'Chill Home', sub: 'Living room · game room · music room · kitchen' },
-  { n: 5, name: 'Japanese Garden', sub: 'Glass gym · Japanese roof garden' },
+  { n: 4, name: 'Chill Home', sub: 'Tatami room · jazz kissa · game room · omakase' },
+  { n: 5, name: 'Japanese Garden', sub: 'Dojo · roof garden · hinoki bath facing Fuji' },
 ];
 
 // ---------------------------------------------------------------- renderer
@@ -53,13 +56,14 @@ controls.screenSpacePanning = true;
 controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
 // ---------------------------------------------------------------- lights
-scene.add(new THREE.HemisphereLight('#fff4e0', '#b9a07f', 1.5));
+const hemi = new THREE.HemisphereLight('#fff4e0', '#b9a07f', 1.5);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight('#ffe2b8', 2.2);
 sun.position.set(18, 40, 26);
-sun.target.position.set(XC, 10, 0);
+sun.target.position.set(XC, 16, 0);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -36, right: 36, top: 34, bottom: -34, near: 1, far: 110 });
+Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 130 });
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 0.03;
 scene.add(sun, sun.target);
@@ -87,35 +91,16 @@ function surroundings() {
     cyl(g, 0.08, 4.2, '#3a3a3a', x, -0.3, 11.5, { seg: 6 });
     sphere(g, 0.25, mat('#ffe2a0', { emissive: '#ffd27a' }), x, 4.0, 11.5, { cast: false });
   }
+  // a glowing drinks vending machine on the street, by the entrance
+  vendingMachine(g, 9.3, 11.0, 0, { body: '#2f6fb0', trim: '#1f4f86', title: 'つめた〜い COLD', sub: 'green tea · ramune', cols: ['#7ab87a', '#4fb0e0', '#f2f2f2', '#e85d3d', '#f1c84b'] });
+  stoneLantern(g, 13.6, 9.6, 1.1);
   optimize(g);
   scene.add(g);
-  scene.add(mtFuji());
+
 }
 
-// Mt Fuji, far away behind the building: a concave cone with a jagged snow cap, hazy blue
-// at the foot. It ignores the fog so it stays visible on the horizon.
-function mtFuji() {
-  const H = 56, R = 150, pts = [];
-  for (let i = 0; i <= 24; i++) {
-    const t = i / 24;                                   // 0 = foot, 1 = crater rim
-    pts.push(new THREE.Vector2(R * Math.pow(1 - t, 1.9) + 9, H * t));
-  }
-  pts.push(new THREE.Vector2(0, H - 1.5));               // shallow crater
-  const geo = new THREE.LatheGeometry(pts, 96);
-  const pos = geo.attributes.position, col = [], c = new THREE.Color();
-  const rock = new THREE.Color('#5d6f93'), haze = new THREE.Color('#a9b6cf'), snow = new THREE.Color('#f7f9fc');
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(z, x);
-    const line = H * 0.68 + Math.sin(a * 9) * 4 + Math.sin(a * 23 + 1) * 2.5;   // jagged snow line
-    if (y > line) c.copy(snow);
-    else c.copy(haze).lerp(rock, Math.min(1, y / (H * 0.45)));
-    col.push(c.r, c.g, c.b);
-  }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, fog: false }));
-  m.position.set(-105, -38, -295);   // foot sunk below the horizon so the peak sits in view
-  return m;
-}
+const fuji = mtFuji();
+scene.add(fuji);
 surroundings();
 
 // ---------------------------------------------------------------- see-through walls
@@ -137,6 +122,8 @@ function addWall(side, group) {
       m.userData.baseTransparent = m.transparent;
       ws.mats.set(o.material, m);
     }
+    if (WINDOWS.has(o.material)) WINDOWS.add(m);             // keep night lighting working on the faded copies
+    if (GLOW.has(o.material)) GLOW.set(m, GLOW.get(o.material));
     o.material = m;
   });
 }
@@ -168,7 +155,7 @@ const floorGroups = [];
 const floorLabels = [];
 for (const f of FLOORS) {
   const g = new THREE.Group();
-  g.position.y = (f.n - 1) * H;
+  g.position.y = floorY(f.n);
   g.name = `floor${f.n}`;
   scene.add(g);
   const walls = shell(g, f.n);
@@ -189,12 +176,20 @@ for (const f of FLOORS) {
   }
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
-  const lbl = makeLabel(`${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
-  lbl.position.set(X0 - 0.6, (f.n - 1) * H + CEIL - 0.5, 8.6);
+  const lbl = makeLabel(`${KANJI[f.n]} ${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
+  lbl.position.set(X0 - 0.6, floorY(f.n) + Math.min(floorH(f.n), H) - 0.8, 8.6);
   lbl.center.set(0, 0.5);
   scene.add(lbl);
   floorLabels.push(lbl);
   floorGroups.push(g);
+}
+// Fridays (Singapore time): JungKook, XiaoMing and Kenny come to work in yukata
+if (isFriday()) {
+  const YUKATA = { JungKook: ['#2f3f6a', '#c9a24a'], XiaoMing: ['#3f5a4a', '#e8d6a8'], Kenny: ['#2a2a35', '#a8442e'] };
+  for (const e of EMPLOYEES) {
+    const y = YUKATA[e.name];
+    if (y) Object.assign(e, { outfit: 'yukata', shirt: y[0], pants: y[0], obi: y[1], collar: '#f4efe4', tie: undefined });
+  }
 }
 const car = liftCar(scene);
 car.traverse((o) => { o.castShadow = false; });   // it moves a lot now; keep the static shadow map valid
@@ -202,10 +197,22 @@ const lift = createLift(car);
 // the AI employees (they work, walk, take the stairs / lift — see js/staff.js)
 const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doors: anim.doors || {}, joe: anim.joe });
 anim.fxBoard.start();
+// seasons + day/night (Singapore time), sounds, lift chime
+const env = createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY: floorY(5) });
+initAudio(document.getElementById('mute'));
+lift.onStop = (f) => { if (f === current) chime(); };
+anim.onShishi = knock;
 const panel = createPanel({ employees: EMPLOYEES, floors: FLOORS });
+// Kenny's daruma wall on Floor 3: one daruma per scheduled task (private tasks stay off the public site)
+if (anim.darumaShelf) {
+  const tasks = EMPLOYEES.flatMap((e) => (e.tasks || []).filter((t) => !t.private).map((t) => ({ name: t.name, owner: e.name })));
+  const wall = placeDarumas(anim.darumaShelf, tasks);
+  fetch(`reports/latest.json?t=${Date.now()}`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j?.status) wall.update(j.status); }).catch(() => {});
+}
 
 // ---------------------------------------------------------------- camera presets
-const BUILD_CENTER = new THREE.Vector3(XC, H * 2.25, 0);
+const TOTAL_H = floorY(5) + 3.5;
+const BUILD_CENTER = new THREE.Vector3(XC, TOTAL_H * 0.5, 0);
 const VIEW_DIR = new THREE.Vector3(0.55, 0.5, 1).normalize();
 
 function fitDistance(w, h) {
@@ -216,12 +223,13 @@ function fitDistance(w, h) {
 
 function preset(n) {
   if (n === 0) {
-    const d = fitDistance(37, 31) + 8;
+    const d = fitDistance(40, TOTAL_H + 7) + 10;
     return { target: BUILD_CENTER.clone(), pos: BUILD_CENTER.clone().addScaledVector(VIEW_DIR, d) };
   }
-  const target = new THREE.Vector3(XC - 0.5, (n - 1) * H + 0.5, 0.5);
-  const dir = new THREE.Vector3(0.3, 1.15, 1).normalize();
-  const d = fitDistance(35, 15) * 0.82 + 4;
+  // Floor 1 is a tall atrium: look in from the open street side, just under the roof beams
+  const target = new THREE.Vector3(XC - 0.5, floorY(n) + (n === 1 ? 2.5 : 0.5), n === 1 ? -0.5 : 0.5);
+  const dir = new THREE.Vector3(0.28, n === 1 ? 0.5 : 1.15, 1).normalize();
+  const d = fitDistance(35, 15) * 0.82 + (n === 1 ? 3 : 4);
   return { target, pos: target.clone().addScaledVector(dir, d) };
 }
 
@@ -234,7 +242,7 @@ function goTo(n, instant = false) {
   floorLabels.forEach((l, i) => { l.visible = n === 0 || i + 1 === n; });
   renderer.shadowMap.needsUpdate = true;
   // lift travels to the selected floor
-  lift.viewY = (n === 0 ? 0 : (n - 1) * H) + 0.02; // idle lift waits on the floor you're viewing
+  lift.viewY = (n === 0 ? 0 : floorY(n)) + 0.02; // idle lift waits on the floor you're viewing
   const p = preset(n);
   if (instant) {
     camera.position.copy(p.pos); controls.target.copy(p.target); controls.update();
@@ -248,6 +256,8 @@ function goTo(n, instant = false) {
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
   if (typeof panel !== 'undefined') panel.show(n);   // floor team panel (hidden for the whole building)
+  audioView(n);
+  if (typeof env !== 'undefined') env.setView(n);
 }
 
 // ---------------------------------------------------------------- UI
@@ -399,6 +409,8 @@ function loop() {
   updateWalls();
   // Joe roams the café
   if (anim.joe) anim.joe.update(dt, t);
+  for (const tick of anim.tickers || []) tick(dt, t);   // koi, the shamisen player, steam…
+  env.update(dt, t);
   // employees: routines, walking, smoking…
   staff.update(simDt, t);
   // only show name tags of people on the floor you're looking at (all of them in the whole-building view)
@@ -408,7 +420,7 @@ function loop() {
 }
 
 goTo(0, true);
-window.__app = { camera, controls, scene, goTo, anim, THREE, staff, lift };
+window.__app = { camera, controls, scene, goTo, anim, THREE, staff, lift, renderer };
 renderer.shadowMap.needsUpdate = true;
 document.getElementById('loading').classList.add('done');
 requestAnimationFrame(loop);

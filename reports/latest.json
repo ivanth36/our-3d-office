@@ -1,5 +1,5 @@
 {
-  "note": "Latest message from each scheduled task, shown in the floor panel. Updated by Claude.",
+  "note": "Latest message from each scheduled task, shown in the floor panel. 'status' feeds Kenny's daruma wall on Floor 3 (ok | error | setup).",
   "updated": "2026-11-11T06:50:00Z",
   "tasks": {
     "Daily KRW trend analysis": {
@@ -26,5 +26,15 @@
       "sentAt": "2026-11-11T04:35:27.596182Z",
       "text": "**🛌 The Cheapest Calorie Cut: One More Hour of Sleep**\n*~2 min read*\n\nShort sleep doesn't just make you tired. It changes how much you eat the next day, and the evidence on this is fairly consistent.\n\n**What happens when sleep is cut short.** A 2016 meta-analysis from King's College London pooled 11 controlled studies (172 people). On days after restricted sleep, participants ate about **385 extra kcal**. They didn't burn noticeably more energy to make up for it. The studies were small and short, but they all pointed the same way.\n\n**Why it happens.** Sleep loss shifts the hormones that control appetite: ghrelin (which drives hunger) tends to rise and leptin (which signals fullness) tends to fall. Brain-imaging studies also show that reward areas react more strongly to high-calorie food when you're tired. That's why the late-night pull towards a snack or supper feels much stronger after a short night. More time awake also simply means more chances to eat.\n\n**The encouraging part: it works in reverse.** In a 2022 randomised trial in *JAMA Internal Medicine* (University of Chicago), 80 adults with overweight who normally slept under 6.5 hours got about **1.2 extra hours** of sleep a night, mostly after a single sleep-hygiene session. They kept living their normal lives, and intake was measured objectively with doubly labelled water. They ate about **270 fewer kcal a day** on average, without being told to diet. The trial lasted only 2 weeks, so long-term weight effects are still being studied. Still, it's one of the strongest real-world signals we have.\n\n**Why this matters for muscle too.** When people diet on short sleep, a larger share of the weight they lose tends to come from lean mass rather than fat. That makes sleep a partner to your ~120 g protein target, not a separate project.\n\n**What this means for you:** With your 8pm cut-off, protect your sleep window rather than fighting late-night hunger with willpower. Put your phone away about 30–45 minutes before bed and aim to sleep at a consistent time. The UChicago trial's main trick was simply limiting screens before bed. If you're still up and hungry well after 8pm, treat that as a sign you need to sleep, not a sign you need more food.\n\n**Sources**\n- [King's College London: sleep deprivation and calorie intake (meta-analysis)](https://www.kcl.ac.uk/archive/news/kings/newsrecords/2016/11%20november-/sleep-deprivation-may-cause-people-to-eat-more-calories)\n- [UChicago Medicine: more sleep reduces caloric intake (JAMA IM, 2022)](https://www.uchicagomedicine.org/en/forefront/research-and-discoveries-articles/2022/february/getting-more-sleep-reduces-caloric-intake)"
     }
+  },
+  "status": {
+    "Daily KRW trend analysis": "ok",
+    "Daily SGD rates (KRW + CNY)": "ok",
+    "Xiaoming daily China news": "ok",
+    "SGD rate target watch (silent)": "ok",
+    "Daily AI newsletter": "ok",
+    "Daily nutrition science read": "ok",
+    "Kenny team check (manager)": "ok",
+    "Morning usage reminder": "ok"
   }
 }
