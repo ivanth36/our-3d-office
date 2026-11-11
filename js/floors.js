@@ -283,8 +283,8 @@ export function floor1(p, anim) {
   box(p, 0.42, 0.22, 0.05, '#1f1d1e', -13.0, barTop, -7.5, { rx: -0.15 });
   panel(p, 0.4, 0.2, love, -13.0, barTop + 0.11, -7.47, { rx: -0.15 });
   // paper lanterns hang from the balcony above the window bar
-  for (let i = 0; i < 6; i++) chochin(p, -19.6 + i * 2.6, -7.1, { top: 4.55, drop: 1.6 });
-  for (const pz of [-4.6, -2.8]) chochin(p, leftX + 0.45, pz, { top: 4.55, drop: 1.6 });
+  for (let i = 0; i < 6; i++) chochin(p, -19.6 + i * 2.6, -7.1, { top: H - 0.25, drop: 1.6 });
+  for (const pz of [-4.6, -2.8]) chochin(p, leftX + 0.45, pz, { top: H - 0.25, drop: 1.6 });
   }
 
   // ---- two red vending machines against the left wall (between the sofa corner and the counter)
@@ -1328,13 +1328,10 @@ export function floor5(p, anim) {
       cyl(pivot, 0.06, 0.9, '#8fae4f', 0, 0, 0, { rz: Math.PI / 2, seg: 10 });                 // the rocking tube
       pivot.children[0].position.set(0.05, 0, 0);
       anim.tickers = anim.tickers || [];
-      let knocked = false;
       anim.tickers.push((dt, t) => {
         const k = (t % 12) / 12;                                                              // one cycle every 12 s
         const tip = k < 0.85 ? -0.25 + k * 0.12 : k < 0.9 ? -0.15 - (k - 0.85) / 0.05 * 0.45 : -0.6 + (k - 0.9) / 0.1 * 0.35;
         pivot.rotation.z = -tip;
-        if (k >= 0.85 && k < 0.9 && !knocked) { knocked = true; anim.onShishi?.(); }
-        if (k < 0.5) knocked = false;
       });
     }
     // -- zen rock garden (raked gravel, three rocks, moss)

@@ -5,7 +5,7 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 
 **Live site (after GitHub Pages is on):** https://ivanth36.github.io/our-3d-office/
 
-**Japanese theme:** dark timber facade with posts, tiled eaves; stone lanterns, a sakura tree and a glowing drinks vending machine out front. Seasons follow Japan's calendar (sakura in spring, momiji in autumn, more snow on Fuji in winter) and the sky, lights and lanterns follow the clock in Singapore. Ambient sounds, no music (shishi-odoshi fountain, wind chimes, a station chime when the lift arrives) start after your first tap; 🔊 mutes them. Add `?season=spring`, `?time=21` or `?friday=1` to the address to preview.
+**Japanese theme:** dark timber facade with posts, tiled eaves; stone lanterns, a sakura tree and a glowing drinks vending machine out front. Seasons follow Japan's calendar (sakura in spring, momiji in autumn, more snow on Fuji in winter) and the sky, lights and lanterns follow the clock in Singapore. Add `?season=spring`, `?time=21` or `?friday=1` to the address to preview.
 
 | Floor | What's there |
 |---|---|
@@ -34,7 +34,6 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 - `js/characters.js`: Joe the Shih Tzu + AI employee figures
 - `js/japan.js`: Japanese props (lanterns, trees, noren, kanban, tatami, shoji, daruma)
 - `js/env.js`: seasons, day/night, Mt Fuji
-- `js/audio.js`: ambient sounds + mute button
 - `js/joe.js`: Joe's roaming walk around the café
 - `js/staff.js`: the employees' and owners' (Ivan & Phil) daily routines (walking map, stairs, lift, smoke breaks, coffee runs, meetings)
 - `js/fx.js`: the live FX board (rates from Coinbase, falling back to ExchangeRate-API)

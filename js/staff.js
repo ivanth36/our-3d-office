@@ -264,9 +264,8 @@ export function createLift(car) {
       const ty = L.target ?? L.viewY;
       const d = ty - car.position.y;
       L.moved = Math.abs(d) > 0.001;
-      if (L.moved) { car.position.y += Math.sign(d) * Math.min(Math.abs(d), dt * 2.4); L.travelling = true; }
+      if (L.moved) car.position.y += Math.sign(d) * Math.min(Math.abs(d), dt * 2.4);
       else {
-        if (L.travelling) { L.travelling = false; L.onStop?.(L.floor()); }   // arrival chime (js/audio.js)
         if (L.onArrive && L.target !== null) { const r = L.onArrive; L.onArrive = null; r(); }
       }
     },

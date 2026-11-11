@@ -5,7 +5,6 @@ import { shell, liftCar, LIFT, X0, XC, EXT, SPLIT, KANJI } from './building.js';
 import { floor1, floor2, officeFloor, floor5, vendingMachine } from './floors.js';
 import { placeDarumas, stoneLantern } from './japan.js';
 import { createEnv, mtFuji, isFriday } from './env.js';
-import { initAudio, setView as audioView, chime, knock } from './audio.js';
 import { EMPLOYEES } from './employees.js';
 import { createStaff, createLift } from './staff.js';
 import { createFxBoard } from './fx.js';
@@ -63,7 +62,7 @@ sun.position.set(18, 40, 26);
 sun.target.position.set(XC, 16, 0);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 130 });
+Object.assign(sun.shadow.camera, { left: -44, right: 44, top: 46, bottom: -44, near: 1, far: 140 });
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 0.03;
 scene.add(sun, sun.target);
@@ -197,11 +196,8 @@ const lift = createLift(car);
 // the AI employees (they work, walk, take the stairs / lift — see js/staff.js)
 const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doors: anim.doors || {}, joe: anim.joe });
 anim.fxBoard.start();
-// seasons + day/night (Singapore time), sounds, lift chime
+// seasons + day/night (Singapore time)
 const env = createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY: floorY(5) });
-initAudio(document.getElementById('mute'));
-lift.onStop = (f) => { if (f === current) chime(); };
-anim.onShishi = knock;
 const panel = createPanel({ employees: EMPLOYEES, floors: FLOORS });
 // Kenny's daruma wall on Floor 3: one daruma per scheduled task (private tasks stay off the public site)
 if (anim.darumaShelf) {
@@ -256,7 +252,6 @@ function goTo(n, instant = false) {
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
   if (typeof panel !== 'undefined') panel.show(n);   // floor team panel (hidden for the whole building)
-  audioView(n);
   if (typeof env !== 'undefined') env.setView(n);
 }
 

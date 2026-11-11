@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/BufferGeometryUtils.js';
 
-export const H = 4.8;      // floor-to-floor height (ceiling 4.5 m)
+export const H = 5.4;      // floor-to-floor height (clear ceiling 5.1 m)
 export const SLAB = 0.3;   // slab thickness
 export const CEIL = H - SLAB; // clear room height
 // Floor 1 is a tall atrium (three normal storeys); every floor above sits on top of it.
