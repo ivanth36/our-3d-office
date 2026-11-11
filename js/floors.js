@@ -45,26 +45,6 @@ function addDoor(anim, id, leaf, closed, open) {
 const RW = CORE_X - X0, RX = (CORE_X + X0) / 2; // room floor width / centre x
 
 // ---------------------------------------------------------------- signs
-function drawDogFace(ctx, cx, cy, r) {
-  const line = '#1c1714';
-  ctx.lineWidth = r * 0.07; ctx.strokeStyle = line; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  // tan floppy ears
-  ctx.fillStyle = '#d2a062';
-  for (const sd of [-1, 1]) {
-    ctx.beginPath(); ctx.ellipse(cx + sd * r * 0.92, cy + r * 0.12, r * 0.3, r * 0.6, sd * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  }
-  // round white head
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath(); ctx.ellipse(cx, cy, r, r * 0.88, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  // dot eyes, nose, "w" mouth
-  ctx.fillStyle = line;
-  for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(cx + sd * r * 0.36, cy - r * 0.1, r * 0.1, 0, Math.PI * 2); ctx.fill(); }
-  ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.18, r * 0.14, r * 0.1, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.lineWidth = r * 0.06;
-  ctx.beginPath(); ctx.arc(cx - r * 0.09, cy + r * 0.3, r * 0.09, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx + r * 0.09, cy + r * 0.3, r * 0.09, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-}
-
 function paw(ctx, x, y, s, color) {
   ctx.fillStyle = color;
   ctx.beginPath(); ctx.ellipse(x, y + s * 0.25, s * 0.42, s * 0.34, 0, 0, Math.PI * 2); ctx.fill();
@@ -74,10 +54,10 @@ function paw(ctx, x, y, s, color) {
 }
 
 function cafeSignTex() {
-  return canvasTex(1024, 256, (ctx, w, h) => {
+  const draw = (ctx, w, h, logo) => {
     ctx.fillStyle = '#5c3d26'; roundRect(ctx, 0, 0, w, h, 40); ctx.fill();
     ctx.strokeStyle = '#e8c48a'; ctx.lineWidth = 10; roundRect(ctx, 14, 14, w - 28, h - 28, 30); ctx.stroke();
-    drawDogFace(ctx, 140, 118, 78);
+    if (logo) ctx.drawImage(logo, 30, 18, 222, 222);           // Joe's Café logo (Joe sipping matcha)
     ctx.fillStyle = '#fff3dc';
     ctx.font = 'bold 112px Georgia, "Times New Roman", serif';
     ctx.textBaseline = 'middle';
@@ -86,7 +66,12 @@ function cafeSignTex() {
     ctx.fillStyle = '#cfe3b0';
     ctx.fillText('MATCHA  ·  COFFEE  ·  TREATS', 276, 196);
     paw(ctx, 940, 90, 48, '#e8c48a');
-  });
+  };
+  const tex = canvasTex(1024, 256, (ctx, w, h) => draw(ctx, w, h));
+  const logo = new Image();
+  logo.onload = () => { draw(tex.image.getContext('2d'), 1024, 256, logo); tex.needsUpdate = true; };
+  logo.src = 'assets/joe-logo.png';
+  return tex;
 }
 
 function receptionSignTex() {
@@ -323,12 +308,7 @@ export function floor1(p, anim) {
   // striped awning over the counter
   const aw = grp(p, -7.8, 2.85, 8.35);
   for (let i = 0; i < 12; i++) box(aw, 0.5, 0.05, 1.0, i % 2 ? C.white : '#4f7d4a', -2.75 + i * 0.5, 0, 0, { rx: 0.35, cast: false });
-  // hanging round mascot sign by the café entrance + outdoor bistro tables
-  const ms = canvasTex(256, 256, (ctx, w, h) => { ctx.fillStyle = '#f6edd8'; ctx.beginPath(); ctx.arc(128, 128, 124, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#5c3d26'; ctx.lineWidth = 10; ctx.stroke(); drawDogFace(ctx, 128, 118, 70); });
-  box(signs, 0.06, 0.06, 0.9, C.black, -7.6, 2.95, 8.4, { cast: false });
-  cyl(signs, 0.6, 0.06, '#5c3d26', -7.6, 2.25, 8.75, { rx: Math.PI / 2, seg: 24 });
-  panel(signs, 1.1, 1.1, ms, -7.6, 2.25, 8.79);
-  panel(signs, 1.1, 1.1, ms, -7.6, 2.25, 8.71, { ry: Math.PI });
+  // outdoor bistro tables
   roundTable(signs, -11.5, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
   roundTable(signs, -8.5, 9.6, { r: 0.45, chairs: 2, start: Math.PI / 2, vase: false });
   // ---- the real Joe, roaming around his café
