@@ -126,7 +126,7 @@ const BED_TEA = { Ivan: { node: node(5, 'bedI', real2(-28.6), 0.0), x: real2(-28
   Phil: { node: node(5, 'bedP', real2(-27.2), 2.38), x: real2(-28.6), z: 2.38, ry: Math.PI, y: -0.27 } };
 const ONSEN = { Ivan: { node: node(6, 'onsenI', real2(OX - 1.0), 0.9), x: real2(OX - 1.0), z: -3.0, ry: Math.PI, y: -0.38 },
   Phil: { node: node(6, 'onsenP', real2(OX + 0.4), 0.9), x: real2(OX + 0.4), z: -3.0, ry: Math.PI, y: -0.38 } };
-const PANTRY_SEAT = { node: '4:pantryStand', x: real2(-6.2), z: -3.05, ry: Math.PI, y: -0.08 };
+const PANTRY_SEAT = { node: '4:pantryStand', x: real2(-6.2), z: -3.1, ry: Math.PI, y: -0.08 };   // the sofa faces -z, towards the tables
 const DRUM_SEAT = { node: '4:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
 const PIANO_SEAT = { node: '4:pianoStand', x: -4.6, z: 5.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
 const COMPOSE_SEAT = { node: '4:composeStand', x: -4.6, z: 3.25, ry: Math.PI, y: 0, typing: true };   // music PC desk
@@ -138,7 +138,9 @@ const CONSOLE_PHIL = { node: '4:consoleStandP', x: raw(-14.85), z: -3.0, ry: Mat
 // ---- Chill Home (4F): open space, living room sofa, kitchen, dining table
 node(4, 'f2mid', 1.5, -0.2);                        // open space between living room & kitchen
 link('4:coreW', '4:f2mid');
-link('4:f2mid', node(4, 'pantryStand', real2(-6.2), -1.9));   // pantry lounge (see PANTRY_SEAT)
+// pantry lounge (see PANTRY_SEAT): round the end of the sofas, then along the gap between the
+// sofa and the snack tables, so the seat is reached from the front (never through the backrest)
+chain('4:f2mid', node(4, 'pantryIn', real2(-3.4), -1.9), node(4, 'pantryLane', real2(-3.4), -4.0), node(4, 'pantryStand', real2(-6.2), -4.0));
 // living room (moved to the middle of the floor: real positions)
 chain('4:f2mid', node(4, 'livFront', raw(-3.2), -2.0), node(4, 'sofaStandA', raw(-5.3), -2.0), node(4, 'sofaStandB', raw(-7.3), -2.0));
 // to the music room: up the side of the living room, then along the corridor between the game room and music room
