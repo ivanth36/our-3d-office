@@ -134,9 +134,9 @@ link('4:kLane', node(4, 'sink', 8.25, -6.1));
 link('4:stove', '4:islandBack');
 chain('4:kIn', node(4, 'dineE', 8.0, 1.8), node(4, 'dineStandP', 4.68, 2.2), node(4, 'dineStandI', 3.4, 2.2));
 link('4:f2mid', '4:dineStandI');
-// on floor cushions at the kotatsu (legs under the quilt), facing the TV
-const SOFA_TV_PHIL = { node: '4:sofaStandA', x: raw(-5.3), z: -2.75, ry: Math.PI, y: -0.3 };
-const SOFA_TV_IVAN = { node: '4:sofaStandB', x: raw(-7.3), z: -2.75, ry: Math.PI, y: -0.3 };
+// on the low Japandi sofa (seat ~0.38 m, a little lower than a chair), facing the TV
+const SOFA_TV_PHIL = { node: '4:sofaStandA', x: raw(-5.3), z: -1.2, ry: Math.PI, y: -0.08 };
+const SOFA_TV_IVAN = { node: '4:sofaStandB', x: raw(-7.3), z: -1.2, ry: Math.PI, y: -0.08 };
 const DINE_IVAN = { node: '4:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
 const DINE_PHIL = { node: '4:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
 // café sofa corner for the owners

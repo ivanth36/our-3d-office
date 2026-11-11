@@ -190,7 +190,29 @@ export function ikebana(p, x, y, z) {
 }
 
 // ---------------------------------------------------------------- furniture
-export function zabuton(p, x, z, color = '#a8442e', y = 0) {
+/** Low Japandi sofa: exposed oak platform frame on short legs, thick linen seat and back cushions,
+ *  a low back and flat wide wooden armrests (handy for a cup of tea). Seat ~0.38 m high. Front faces +Z. */
+export function japaneseSofa(p, x, z, len, ry = 0, o = {}) {
+  const oak = o.wood ?? '#b88a5a', oakD = '#8a6440', linen = o.fabric ?? '#e3d6bf', linen2 = o.back ?? '#d6c7aa';
+  const g = grp(p, x, 0, z, ry), d = 0.95, inner = len - 0.36;
+  for (const [lx, lz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box(g, 0.07, 0.1, 0.07, oakD, lx * (len / 2 - 0.1), 0, lz * (d / 2 - 0.08));
+  box(g, len, 0.08, d, oak, 0, 0.1, 0);                                              // platform
+  for (let i = 0; i < Math.round(len / 0.35); i++) box(g, 0.02, 0.06, d - 0.04, oakD, -len / 2 + 0.17 + i * 0.35, 0.12, 0, { cast: false });   // slat lines
+  box(g, len, 0.42, 0.08, oak, 0, 0.1, -d / 2 + 0.04);                               // low back rail
+  for (const sx of [-1, 1]) {
+    box(g, 0.16, 0.3, d, oak, sx * (len / 2 - 0.08), 0.18, 0);                       // side panels
+    box(g, 0.22, 0.04, d + 0.04, oakD, sx * (len / 2 - 0.08), 0.48, 0);             // flat armrest
+  }
+  const n = Math.max(1, Math.round(inner / 0.8)), cw = inner / n;
+  for (let i = 0; i < n; i++) {
+    const cx = -inner / 2 + cw * (i + 0.5);
+    box(g, cw - 0.03, 0.18, d - 0.22, linen, cx, 0.18, 0.06);                        // seat cushion
+    box(g, cw - 0.05, 0.4, 0.16, linen2, cx, 0.34, -d / 2 + 0.16, { rx: -0.12 });    // back cushion
+  }
+  if (o.pillows !== false) for (const sx of [-1, 1]) box(g, 0.34, 0.3, 0.1, o.pillow ?? '#2f4a6a', sx * (inner / 2 - 0.3), 0.36, -d / 2 + 0.3, { rx: -0.25, ry: sx * 0.15 });
+  return g;
+}
+export function zabuton(p, x, z, color = '#a8442e', y = 0) {   // floor cushion
   box(p, 0.55, 0.08, 0.55, color, x, y, z);
 }
 /** Low wooden table (chabudai) with floor cushions around it. */

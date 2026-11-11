@@ -13,7 +13,7 @@ import { roamingJoe } from './joe.js';
 import { employee } from './characters.js';
 import {
   chochin, floorLantern, stoneLantern, sakuraTree, pineTree, bamboo, bonsai, ikebana, zabuton, lowTable,
-  kanbanTex, noren, logoCanvasTex, tatamiFloor, shojiScreen, frostedMat, seasonMat, darumaShelf,
+  kanbanTex, noren, logoCanvasTex, tatamiFloor, shojiScreen, frostedMat, seasonMat, darumaShelf, japaneseSofa,
 } from './japan.js';
 import { CORE_X, X0, X1, XC, EXT } from './building.js';
 
@@ -437,13 +437,9 @@ function counterRoof(p) {
   noren(g, (x0 + x1) / 2, eaveY - 0.05, zf + 0.1, 2.8, 0.55, { text: '抹茶 · Matcha' });
 }
 
-/** Front entrance: noren gate, genkan with slippers, stone lanterns, a sakura tree and red tea benches. */
+/** Front entrance: genkan with slippers, stone lanterns, a sakura tree and red tea benches. */
 function entrance(p, signs) {
   const g = realGroup(p);
-  const ex0 = -3.75, ex1 = -1.45, ez = 7.9;
-  for (const x of [ex0, ex1]) box(g, 0.14, 2.8, 0.14, BEAM, x, 0, ez);
-  box(g, ex1 - ex0 + 0.5, 0.16, 0.18, BEAM, (ex0 + ex1) / 2, 2.8, ez);
-  noren(g, (ex0 + ex1) / 2, 2.78, ez + 0.1, ex1 - ex0 - 0.15, 1.05);
   // genkan: stone entry floor, then a wooden step up where slippers wait
   box(g, 1.6, 0.012, 0.9, '#5d5b57', -2.6, 0.0, 7.35, { cast: false });
   box(g, 1.6, 0.15, 0.55, '#a87a4f', -2.6, 0, 6.575);
@@ -676,47 +672,63 @@ export function floor2(p, anim = {}) {
   {
   const p = livG;
   const tvx = -6.3;
-  // tatami floor, shoji sliding doors on the open sides
-  tatamiFloor(p, -11.6, BACK_IN + 0.05, -1.1, 0.6, 0.05);
-  box(p, 10.6, 0.03, 8.4, '#5a3b26', -6.35, 0.0, -3.5, { cast: false });         // raised edge under the mats
-  shojiScreen(p, -1.0, BACK_IN + 0.1, -1.0, -2.7);
-  shojiScreen(p, -11.6, 0.75, -9.0, 0.75);
+  // living room: oak floor with a woven rug, a low Japandi sofa (exposed oak frame, linen cushions)
+  rug(p, tvx, -3.2, 7.6, 5.2, '#d9cbb0', '#8a6a48');
+  japaneseSofa(p, tvx, -1.1, 4.4, Math.PI);                                        // facing the TV (Ivan & Phil sit here)
+  japaneseSofa(p, -10.95, -3.7, 3.0, Math.PI / 2);                                 // along the left wall
+  const zt = grp(p, tvx, 0, -3.4);                                                  // low oak coffee table (zataku height)
+  box(zt, 2.0, 0.06, 0.9, '#c49a68', 0, 0.32, 0);
+  for (const [lx, lz] of [[-0.9, -0.36], [0.9, -0.36], [-0.9, 0.36], [0.9, 0.36]]) box(zt, 0.08, 0.32, 0.08, '#a87c4f', lx, 0, lz);
+  box(zt, 1.8, 0.03, 0.7, '#a87c4f', 0, 0.08, 0);                                  // lower shelf
+  cyl(zt, 0.07, 0.12, '#5f7a3a', -0.5, 0.38, 0.1, { seg: 10 });                     // teapot + cups
+  for (const cx of [-0.25, -0.05]) cyl(zt, 0.04, 0.06, '#f4efe4', cx, 0.38, -0.15, { seg: 8 });
+  ikebana(zt, 0.55, 0.38, 0);
+  for (const zx of [-0.6, 0.6]) zabuton(p, tvx + zx, -4.4, '#2f4a6a');             // floor cushions on the far side
   // wall-mounted TV
   box(p, 4.3, 2.45, 0.08, '#1b1b1e', tvx, 1.15, BACK_IN + 0.04);
   panel(p, 4.1, 2.3, tvTex(), tvx, 1.15 + 1.225, BACK_IN + 0.09, { glow: 0.55 });
   box(p, 0.3, 0.3, 0.06, '#2b2a2c', tvx, 1.0, BACK_IN + 0.03);                  // wall bracket hint
-  // floating TV console + soundbar
-  box(p, 5.4, 0.45, 0.5, C.woodDark, tvx, 0.3, BACK_IN + 0.25);
-  for (let i = 0; i < 4; i++) box(p, 1.25, 0.35, 0.02, C.wood, tvx - 2.0 + i * 1.33, 0.35, BACK_IN + 0.51);
-  box(p, 1.6, 0.1, 0.12, '#2b2a2c', tvx, 0.75, BACK_IN + 0.3);
-  plant(p, tvx - 2.2, BACK_IN + 0.25, { s: 0.55, y: 0.75 });
+  // low oak TV board + soundbar
+  box(p, 5.4, 0.4, 0.5, '#a87c4f', tvx, 0.0, BACK_IN + 0.25);
+  for (let i = 0; i < 4; i++) box(p, 1.25, 0.3, 0.02, '#c49a68', tvx - 2.0 + i * 1.33, 0.05, BACK_IN + 0.51);
+  box(p, 1.6, 0.1, 0.12, '#2b2a2c', tvx, 0.4, BACK_IN + 0.3);
+  bonsai(p, tvx - 2.2, 0.4, BACK_IN + 0.25, 1.3);
   // bookshelves flanking the TV
   bookshelf(p, -10.4, BACK_IN + 0.2, 2.0, 2.4, 0);
   bookshelf(p, -2.2, BACK_IN + 0.2, 2.0, 2.4, 0);
-  // kotatsu: low table with a quilt, floor cushions all round (Ivan & Phil sit on the front two)
-  const kt = grp(p, tvx, 0, -3.8);
-  box(kt, 2.6, 0.36, 1.3, '#7a3b3b', 0, 0, 0);                                              // futon quilt
-  box(kt, 2.75, 0.04, 1.45, '#a8442e', 0, 0.06, 0, { cast: false });                         // quilt hem spread on the mats
-  for (let i = 0; i < 6; i++) box(kt, 0.08, 0.3, 1.32, '#c9a24a', -1.1 + i * 0.44, 0.03, 0, { cast: false });   // pattern stripes
-  box(kt, 2.5, 0.05, 1.2, '#5a3b26', 0, 0.36, 0);                                           // table top
-  cyl(kt, 0.22, 0.08, '#e9dcc4', 0.5, 0.41, 0, { seg: 14 });                                  // mikan bowl
-  for (let i = 0; i < 4; i++) sphere(kt, 0.05, '#f08a3a', 0.42 + (i % 2) * 0.12, 0.52, -0.06 + Math.floor(i / 2) * 0.12);
-  cyl(kt, 0.06, 0.12, '#5f7a3a', -0.5, 0.41, 0.1, { seg: 10 });                             // teapot + cups
-  for (const cx of [-0.8, -0.25]) cyl(kt, 0.04, 0.06, '#f4efe4', cx, 0.41, -0.2, { seg: 8 });
-  for (const zx of [-1.0, 1.0]) zabuton(p, tvx + zx, -2.75, '#2f4a6a');
-  for (const zx of [-0.7, 0.7]) zabuton(p, tvx + zx, -4.85, '#2f4a6a');
-  zabuton(p, tvx - 1.75, -3.8, '#a8442e'); zabuton(p, tvx + 1.75, -3.8, '#a8442e');
-  // tansu chest along the left wall, andon lamps, a tokonoma scroll
-  const ta = grp(p, -11.25, 0, -3.9, Math.PI / 2);
-  box(ta, 1.8, 1.1, 0.5, '#6b4a33', 0, 0, 0);
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 2; c++) { box(ta, 0.82, 0.3, 0.02, '#7d5a40', -0.44 + c * 0.88, 0.1 + r * 0.33, 0.26, { cast: false }); box(ta, 0.12, 0.03, 0.03, '#2b2a2c', -0.44 + c * 0.88, 0.25 + r * 0.33, 0.28, { cast: false }); }
-  bonsai(p, -11.25, 1.1, -3.4, 1.4);
+  shojiScreen(p, -1.0, BACK_IN + 0.1, -1.0, -2.7);                                  // shoji on the kitchen side
   floorLantern(p, -10.9, -6.8, { h: 0.7 });
   floorLantern(p, -2.0, -5.4, { h: 0.7 });
   floorLantern(p, -2.0, -0.6, { h: 0.7 });
   const scroll = canvasTex(128, 384, (ctx, w, h) => { ctx.fillStyle = '#f4ecd8'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#6b4a33'; ctx.fillRect(0, 0, w, 18); ctx.fillRect(0, h - 18, w, 18); ctx.fillStyle = '#1b1b1e'; ctx.font = 'bold 74px "Hiragino Mincho ProN", serif'; ctx.textAlign = 'center'; ctx.fillText('和', w / 2, 140); ctx.fillText('楽', w / 2, 250); });
   panel(p, 0.5, 1.5, scroll, -1.25, 1.9, BACK_IN + 0.05);
-  for (let i = 0; i < 3; i++) chochin(p, tvx - 1.6 + i * 1.6, -3.8, { top: CEIL, drop: 1.6 });
+  for (let i = 0; i < 3; i++) chochin(p, tvx - 1.6 + i * 1.6, -3.3, { top: CEIL, drop: 1.6 });
+
+  // ---- washitsu (tatami room) in front of the living room: raised tatami, shoji, kotatsu, tansu
+  const wx0 = -10.0, wx1 = -2.4, wz0 = 2.3, wz1 = 6.0, wcx = (wx0 + wx1) / 2, wcz = (wz0 + wz1) / 2;
+  box(p, wx1 - wx0, 0.16, wz1 - wz0, '#6b4a33', wcx, 0, wcz);                       // raised floor
+  box(p, wx1 - wx0 + 0.04, 0.04, 0.08, '#3d2618', wcx, 0.13, wz1, { cast: false });  // front edge (kamachi)
+  tatamiFloor(p, wx0 + 0.05, wz0 + 0.05, wx1 - 0.05, wz1 - 0.05, 0.165);
+  const shoji = grp(p, 0, 0.16, 0);
+  shojiScreen(shoji, wx0, wz0, wx0 + 1.8, wz0);                                     // back: slid open in the middle
+  shojiScreen(shoji, wx1 - 1.8, wz0, wx1, wz0);
+  shojiScreen(shoji, wx0, wz0, wx0, wz1);                                           // left side
+  const kt = grp(p, wcx + 0.6, 0.16, wcz);
+  box(kt, 2.2, 0.36, 1.3, '#7a3b3b', 0, 0, 0);                                     // kotatsu quilt
+  box(kt, 2.35, 0.04, 1.45, '#a8442e', 0, 0.06, 0, { cast: false });
+  for (let i = 0; i < 5; i++) box(kt, 0.08, 0.3, 1.32, '#c9a24a', -0.88 + i * 0.44, 0.03, 0, { cast: false });
+  box(kt, 2.1, 0.05, 1.2, '#5a3b26', 0, 0.36, 0);
+  cyl(kt, 0.22, 0.08, '#e9dcc4', 0.4, 0.41, 0, { seg: 14 });                        // mikan bowl
+  for (let i = 0; i < 4; i++) sphere(kt, 0.05, '#f08a3a', 0.32 + (i % 2) * 0.12, 0.52, -0.06 + Math.floor(i / 2) * 0.12);
+  for (const cx of [-0.5, -0.2]) cyl(kt, 0.04, 0.06, '#f4efe4', cx, 0.41, 0.1, { seg: 8 });
+  for (const zx of [-0.55, 0.55]) { zabuton(p, wcx + 0.6 + zx, wcz - 1.05, '#2f4a6a', 0.16); zabuton(p, wcx + 0.6 + zx, wcz + 1.05, '#2f4a6a', 0.16); }
+  zabuton(p, wcx + 0.6 - 1.45, wcz, '#a8442e', 0.16); zabuton(p, wcx + 0.6 + 1.45, wcz, '#a8442e', 0.16);
+  const ta = grp(p, wx0 + 0.4, 0.16, wcz, Math.PI / 2);                             // tansu chest
+  box(ta, 1.8, 1.1, 0.5, '#6b4a33', 0, 0, 0);
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 2; c++) { box(ta, 0.82, 0.3, 0.02, '#7d5a40', -0.44 + c * 0.88, 0.1 + r * 0.33, 0.26, { cast: false }); box(ta, 0.12, 0.03, 0.03, '#2b2a2c', -0.44 + c * 0.88, 0.25 + r * 0.33, 0.28, { cast: false }); }
+  bonsai(p, wx0 + 0.4, 1.26, wcz - 0.4, 1.4);
+  for (const [lx, lz] of [[wx1 - 0.35, wz0 + 0.35], [wx1 - 0.35, wz1 - 0.35]]) floorLantern(p, lx, lz, { h: 0.6, y: 0.16 });
+  chochin(p, wcx + 0.6, wcz, { top: CEIL, drop: 1.7 });
   }
 
   // ================= GLASS MUSIC ROOM (front-left, x -11.7..-3.4, z 1.8..7.75) =================

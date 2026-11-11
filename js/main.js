@@ -15,7 +15,7 @@ const FLOORS = [
   { n: 1, name: "Joe's Café", sub: 'Atrium tea house · stage · welcome lounge' },
   { n: 2, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 3, name: 'In-house Office', sub: 'My in-house AI team' },
-  { n: 4, name: 'Chill Home', sub: 'Tatami room · jazz kissa · game room · omakase' },
+  { n: 4, name: 'Chill Home', sub: 'Living room · tatami room · jazz kissa · omakase' },
   { n: 5, name: 'Japanese Garden', sub: 'Dojo · roof garden · hinoki bath facing Fuji' },
 ];
 
