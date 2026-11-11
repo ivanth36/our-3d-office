@@ -198,6 +198,20 @@ const staff = createStaff({ floors: floorGroups, lift, employees: EMPLOYEES, doo
 anim.fxBoard.start();
 // seasons + day/night (Singapore time)
 const env = createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY: floorY(5) });
+// day / night button: Auto (Singapore time) -> Day -> Night
+{
+  const btn = document.getElementById('sky'), MODES = ['auto', 'day', 'night'];
+  const LOOK = { auto: ['🕒', 'Sky: follows Singapore time. Tap for day'], day: ['☀️', 'Sky: day. Tap for night'], night: ['🌙', 'Sky: night. Tap for Singapore time'] };
+  let mode = 'auto';
+  try { mode = MODES.includes(localStorage.getItem('ipman.sky')) ? localStorage.getItem('ipman.sky') : 'auto'; } catch (e) { /* private mode */ }
+  const set = (m) => {
+    mode = m; env.setMode(m);
+    btn.textContent = LOOK[m][0]; btn.setAttribute('aria-label', LOOK[m][1]); btn.title = LOOK[m][1];
+    try { localStorage.setItem('ipman.sky', m); } catch (e) { /* ignore */ }
+  };
+  set(mode);
+  btn.addEventListener('click', (ev) => { ev.stopPropagation(); set(MODES[(MODES.indexOf(mode) + 1) % 3]); });
+}
 const panel = createPanel({ employees: EMPLOYEES, floors: FLOORS });
 // Kenny's daruma wall on Floor 3: one daruma per scheduled task (private tasks stay off the public site)
 if (anim.darumaShelf) {

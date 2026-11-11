@@ -14,6 +14,9 @@ function sgt() {
   return { h: d.getUTCHours() + d.getUTCMinutes() / 60, month: d.getUTCMonth(), dow: d.getUTCDay() };
 }
 export const hourSGT = () => (params.has('time') ? +params.get('time') : sgt().h);
+// the ☀️/🌙 button: 'auto' follows Singapore time, 'day' / 'night' force it
+let skyMode = 'auto';
+const skyHour = () => (skyMode === 'day' ? 12 : skyMode === 'night' ? 22 : hourSGT());
 export function seasonNow() {
   const s = params.get('season');
   if (['spring', 'summer', 'autumn', 'winter'].includes(s)) return s;
@@ -138,7 +141,7 @@ export function createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY }) {
   let last = -1;
   const state = { season, night: 0 };
   function apply() {
-    const h = hourSGT();
+    const h = skyHour();
     const day = smooth(6.4, 7.6, h) * (1 - smooth(18.8, 19.9, h));
     const dusk = Math.max(0, 1 - Math.abs(h - 7.0) / 0.9) + Math.max(0, 1 - Math.abs(h - 19.3) / 0.9);
     const night = 1 - day;
@@ -178,9 +181,10 @@ export function createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY }) {
   return {
     state,
     setView(n) { view = n; },
+    setMode(m) { skyMode = m; last = -1; apply(); },
     update(dt, t) {
       acc += dt;
-      if (acc > 60) { acc = 0; const h = Math.floor(hourSGT() * 12); if (h !== last) { last = h; apply(); } }   // re-check every minute
+      if (acc > 60) { acc = 0; const h = Math.floor(skyHour() * 12); if (h !== last) { last = h; apply(); } }   // re-check every minute
       fall.update(dt, t, (s) => (s[1] < 1 ? true : view === 0 || view === 5));
     },
   };
