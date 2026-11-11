@@ -84,15 +84,15 @@ function cafeSeat(name, stand, access, x, z, ry, y = 0) {
   return seat;
 }
 const barX = (k) => -19.85 + 0.8 * k;                               // back-window stools
-for (const [k, acc] of [[3, 'j0'], [7, 'j1'], [12, 'j1'], [16, 'j2']]) cafeSeat(`bar${k}`, [barX(k), -6.1], acc, barX(k), -6.85, Math.PI, 0.26);
+for (const [k, acc] of [[3, 'j0'], [7, 'j1']]) cafeSeat(`bar${k}`, [barX(k), -6.1], acc, barX(k), -6.85, Math.PI, 0.26);   // the bar now ends at the café
 cafeSeat('barL', [-19.8, -4.8], 'j0', -20.45, -4.8, -Math.PI / 2, 0.26);   // left-window stool
 cafeSeat('t1', [-10.86, -2.36], 'j7', -11.21, -2.71, Math.PI / 4 + Math.PI);
 cafeSeat('t6', [-7.76, -2.36], 'j8', -8.11, -2.71, Math.PI / 4 + Math.PI);   // second tea table (the old front tables are now the pond)
 // seats used when Aida and Mary go for coffee together (next to each other)
 const pairSeat = (name, stand, access, x, z, ry, y = 0) => { const id = node(1, name, stand[0], stand[1]); link(id, `1:${access}`); return { node: id, x, z, ry, y }; };
 const CAFE_PAIRS = [
-  [pairSeat('bar10', [barX(10), -6.1], 'j1', barX(10), -6.85, Math.PI, 0.26), pairSeat('bar11', [barX(11), -6.1], 'j1', barX(11), -6.85, Math.PI, 0.26)],
-  [pairSeat('bar8', [barX(8), -6.1], 'j1', barX(8), -6.85, Math.PI, 0.26), pairSeat('bar9', [barX(9), -6.1], 'j1', barX(9), -6.85, Math.PI, 0.26)],
+  [pairSeat('bar5', [barX(5), -6.1], 'j1', barX(5), -6.85, Math.PI, 0.26), pairSeat('bar6', [barX(6), -6.1], 'j1', barX(6), -6.85, Math.PI, 0.26)],
+  [pairSeat('bar1', [barX(1), -6.1], 'j0', barX(1), -6.85, Math.PI, 0.26), pairSeat('bar2', [barX(2), -6.1], 'j0', barX(2), -6.85, Math.PI, 0.26)],
 ];
 // welcome lounge (right half): the facing sofas, used by Ivan & Phil after coffee
 chain('1:j9', node(1, 'loungeA', -4.3, -0.75), '1:j10');

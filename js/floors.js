@@ -15,7 +15,7 @@ import {
   chochin, floorLantern, stoneLantern, sakuraTree, pineTree, bamboo, bonsai, ikebana, zabuton, lowTable,
   spotBeam, lightPool, kanbanTex, noren, logoCanvasTex, tatamiFloor, shojiScreen, frostedMat, seasonMat, darumaShelf, japaneseSofa,
 } from './japan.js';
-import { CORE_X, X0, X1, XC, EXT } from './building.js';
+import { CORE_X, X0C as X0, X1, XCC as XC, EXT, EXT2 } from './building.js';   // content uses the 33.6 m layout (stretched in main.js)
 
 // ---- doors that people open / close (see js/staff.js). closed/open = leaf rotation.
 function addDoor(anim, id, leaf, closed, open) {
@@ -232,7 +232,7 @@ export function floor1(p, anim) {
   barG.userData.noShift = true;               // built in final (real) positions
   {
   const p = barG;
-  const backZ = -7.68, leftX = X0 + 0.3, bx1 = -6.0, lz1 = -2.5;
+  const backZ = -7.68, leftX = X0 + 0.3, bx1 = -13.6, lz1 = -2.5;   // the bar stays in the café part (it moves left as one piece)
   const walnut = '#6b4423', walnut2 = '#7a4e2a', iron = '#262426';
   // live-edge walnut tops: short segments with a gently wavy front edge
   for (let x = leftX; x < bx1 - 0.01; x += 0.5) {
@@ -273,19 +273,19 @@ export function floor1(p, anim) {
   // things on the bar
   const barTop = 1.05;
   laptop(p, -18.0, barTop, -7.4, 0);
-  laptop(p, -9.5, barTop, -7.4, 0);
-  for (const cx of [-16.0, -12.5, -8.2]) { cyl(p, 0.09, 0.012, C.white, cx, barTop, -7.35, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, cx, barTop + 0.012, -7.35, { seg: 10 }); }
+  laptop(p, -15.2, barTop, -7.4, 0);
+  for (const cx of [-16.6, -14.4]) { cyl(p, 0.09, 0.012, C.white, cx, barTop, -7.35, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, cx, barTop + 0.012, -7.35, { seg: 10 }); }
   for (const cz of [-5.2, -3.6]) { cyl(p, 0.09, 0.012, C.white, leftX + 0.25, barTop, cz, { seg: 14 }); cyl(p, 0.045, 0.07, C.white, leftX + 0.25, barTop + 0.012, cz, { seg: 10 }); }
-  cyl(p, 0.18, 0.06, '#e8e1d0', -14.2, barTop, -7.42, { seg: 16 });                      // fruit bowl
+  cyl(p, 0.18, 0.06, '#e8e1d0', -19.0, barTop, -7.42, { seg: 16 });                      // fruit bowl
   for (let i = 0; i < 4; i++) sphere(p, 0.055, ['#8a3b4a', '#c98a4b', '#8a3b4a', '#e2a356'][i], -14.28 + (i % 2) * 0.14, barTop + 0.08, -7.46 + Math.floor(i / 2) * 0.1);
-  for (const px of [-11.2, -6.6]) plant(p, px, -7.48, { s: 0.35, y: barTop });
+  plant(p, -13.95, -7.48, { s: 0.35, y: barTop });
   plant(p, leftX + 0.22, -7.45, { s: 0.35, y: barTop });                                  // corner
   // little standing card with the café logo (same logo as the sign)
   const love = logoCanvasTex(256, 128, (ctx, w, h, logo) => { ctx.fillStyle = '#1f1d1e'; ctx.fillRect(0, 0, w, h); if (logo) ctx.drawImage(logo, 8, 8, 112, 112); ctx.fillStyle = '#e9dcc4'; ctx.font = 'italic 44px Georgia, serif'; ctx.fillText('Joe ♥', 128, 78); });
-  box(p, 0.42, 0.22, 0.05, '#1f1d1e', -13.0, barTop, -7.5, { rx: -0.15 });
-  panel(p, 0.4, 0.2, love, -13.0, barTop + 0.11, -7.47, { rx: -0.15 });
+  box(p, 0.42, 0.22, 0.05, '#1f1d1e', -17.2, barTop, -7.5, { rx: -0.15 });
+  panel(p, 0.4, 0.2, love, -17.2, barTop + 0.11, -7.47, { rx: -0.15 });
   // paper lanterns hang from the balcony above the window bar
-  for (let i = 0; i < 6; i++) chochin(p, -19.6 + i * 2.6, -7.1, { top: H - 0.25, drop: 1.6 });
+  for (let i = 0; i < 3; i++) chochin(p, -19.6 + i * 2.6, -7.1, { top: H - 0.25, drop: 1.6 });
   for (const pz of [-4.6, -2.8]) chochin(p, leftX + 0.45, pz, { top: H - 0.25, drop: 1.6 });
   }
 
@@ -319,8 +319,8 @@ export function floor1(p, anim) {
   frontCanopy(p);
   const signs = grp(p);
   signs.userData.noShift = true;              // real positions
-  box(signs, 4.0, 1.05, 0.2, '#5c3d26', -11.0, 2.67 + sy, 7.98, { cast: false });
-  panel(signs, 3.9, 0.975, kanbanTex(), -11.0, 3.195 + sy, 8.09, { glow: 0.2 });
+  box(signs, 4.0, 1.05, 0.2, '#5c3d26', -17.4, 2.67 + sy, 7.98, { cast: false });       // kanban over the café counter
+  panel(signs, 3.9, 0.975, kanbanTex(), -17.4, 3.195 + sy, 8.09, { glow: 0.2 });
   box(signs, 4.0, 1.05, 0.2, '#2f3a2c', 2.0, 2.67 + sy, 7.98, { cast: false });
   panel(signs, 3.9, 0.975, receptionSignTex(), 2.0, 3.195 + sy, 8.09, { glow: 0.25 });
   counterRoof(p);
@@ -409,11 +409,13 @@ export function floor1(p, anim) {
 const CEIL1 = H1 - SLAB;
 const RED = '#c8352a', CEDAR = '#8a5a3c', BEAM = '#5a3b26';
 function realGroup(p) { const g = grp(p); g.userData.noShift = true; return g; }
+/** Group placed directly in the longer building's real positions (skips the stretch in main.js). */
+function fillGroup(p) { const g = grp(p); g.userData.noShift = true; g.userData.noStretch = true; return g; }
 
 /** Short tiled canopies over the two shop signs (kept short so the atrium stays open to the street). */
 function frontCanopy(p) {
   const g = realGroup(p);
-  for (const [cx0, w] of [[-11.0, 4.6], [2.0, 4.6]]) {
+  for (const [cx0, w] of [[-17.4, 4.6], [2.0, 4.6]]) {
     const cv = grp(g, cx0, 4.75, 8.0);
     box(cv, w, 0.08, 0.8, '#3a3d42', 0, 0, 0.35, { rx: 0.3, cast: false });
     for (let x = -w / 2 + 0.15; x < w / 2; x += 0.3) box(cv, 0.05, 0.05, 0.8, '#2c2e33', x, 0.06, 0.35, { rx: 0.3, cast: false });
@@ -572,9 +574,10 @@ function atrium(p, anim) {
   bamboo(g, -12.35, 5.95, { n: 5, h: 3.2 });
   bamboo(g, -7.35, 0.45, { n: 5, h: 2.8 });
   // koi (they swim: see anim.tickers)
+  const koiG = grp(p);                                                          // one moving group (it moves with the pond)
+  koiG.userData.dynamic = true; koiG.userData.noShift = true;
   const koi = ['#f08a3a', '#ffffff', '#e85d3d', '#f4f1ea', '#f1c84b', '#2b2a2c'].map((c, i) => {
-    const k = grp(p, cx, 0.15, cz);
-    k.userData.dynamic = true; k.userData.noShift = true;
+    const k = grp(koiG, cx, 0.15, cz);
     sphere(k, 0.16, c, 0, 0, 0, { s: [0.45, 0.25, 1], cast: false });
     sphere(k, 0.07, c, 0, 0, -0.19, { s: [1, 0.3, 0.8], cast: false });
     if (i % 2) sphere(k, 0.06, '#e85d3d', 0, 0.03, 0.04, { s: [1, 0.4, 1], cast: false });
@@ -621,6 +624,17 @@ function atrium(p, anim) {
   // ---- floor lanterns along the walkways round the pond
   for (const [x, z] of [[-12.0, 7.05], [-11.05, 6.9], [-8.65, 6.9], [-7.6, 7.05], [-13.0, 2.6], [-6.7, 2.6], [-1.2, 7.0]]) floorLantern(g, x, z);
 
+  // ---- the new space from the longer building: tea tables, lanterns, bamboo, roof beams with spotlights
+  const fg = fillGroup(p);
+  for (const gx of [-23.25, -9.35]) {
+    lowTable(fg, gx, -3.35, { w: 1.4, d: 0.8 });
+    lowTable(fg, gx, gx < -20 ? 2.9 : 1.25, { w: 1.4, d: 0.8, cushion: '#2f4a6a' });
+    for (const ox of [-1.5, 1.5]) floorLantern(fg, gx + ox, -3.35);
+    box(fg, 0.3, 0.35, 15.6, BEAM, gx, CEIL1 - 0.8, 0, { cast: false });
+    for (const bz of [-5.85, -2.0, 2.0, 5.85]) cyl(fg, 0.11, 0.06, glowMat('#fff0c8', 1.4), gx, CEIL1 - 0.88, bz, { seg: 10, cast: false });
+  }
+  bamboo(fg, -23.25, 5.6, { n: 6, h: 3.2 });
+  for (const sx2 of [-24.6, -21.9]) floorLantern(fg, sx2, 5.6);
   anim.tickers = anim.tickers || [];
   anim.tickers.push((dt, t) => {
     for (const q of koi) {
@@ -876,7 +890,7 @@ export function floor2(p, anim = {}) {
 
   // ================= DINING FOR 12 (front-right) =================
   const dx = 3.4, dz = 3.9, L = 6.4;
-  rug(p, dx, dz, L + 2.4, 3.6, '#efe7d6', '#c9a77a');
+  rug(p, dx, dz, L + 2.0, 3.6, '#efe7d6', '#c9a77a');
   rectTable(p, dx, dz, L, 1.4, { top: '#7a4e2a', leg: '#4a3020' });
   for (let i = 0; i < 5; i++) {
     const x = dx - L / 2 + (i + 0.5) * L / 5;
@@ -968,6 +982,22 @@ export function floor2(p, anim = {}) {
     plant(p, x1 - 0.5, -7.2, { tall: true });
   }
   plant(p, 8.8, 7.2, { tall: true });
+
+  // ---- the new space from the longer building (real x -14.3..-0.9): an indoor zen garden and a reading nook
+  const fg = fillGroup(p);
+  const zx0 = -10.0, zx1 = -5.2, zz0 = 2.3, zz1 = 4.8;
+  box(fg, zx1 - zx0 + 0.3, 0.14, zz1 - zz0 + 0.3, '#2e2b29', (zx0 + zx1) / 2, 0, (zz0 + zz1) / 2, { cast: false });
+  box(fg, zx1 - zx0, 0.15, zz1 - zz0, '#e7e2d6', (zx0 + zx1) / 2, 0, (zz0 + zz1) / 2, { cast: false });
+  for (let z = zz0 + 0.22; z < zz1; z += 0.26) box(fg, zx1 - zx0 - 0.2, 0.012, 0.03, '#cfc8b8', (zx0 + zx1) / 2, 0.15, z, { cast: false });
+  for (const [rx, rz, r] of [[-8.6, 3.4, 0.36], [-6.4, 3.8, 0.26]]) { sphere(fg, r + 0.06, '#7f9a5a', rx, 0.15, rz, { s: [1.2, 0.25, 1.1], cast: false }); sphere(fg, r, '#6f6a62', rx, 0.15 + r * 0.45, rz, { s: [1.1, 0.9, 0.9] }); }
+  bonsai(fg, -5.6, 0.15, 4.4, 1.6);
+  for (const [lx, lz] of [[-10.6, 2.0], [-4.6, 2.0], [-10.6, 5.1], [-4.6, 5.1]]) floorLantern(fg, lx, lz, { h: 0.6 });
+  bookshelf(fg, -9.2, BACK_IN + 0.2, 3.6, 2.6, 0);
+  bookshelf(fg, -5.2, BACK_IN + 0.2, 3.6, 2.6, 0);
+  lowTable(fg, -7.2, -5.6, { w: 1.4, d: 0.8, cushion: '#2f4a6a' });
+  floorLantern(fg, -11.2, -5.6, { h: 0.7 });
+  chochin(fg, -7.2, -5.6, { top: CEIL, drop: 1.8 });
+  chochin(fg, -7.6, 3.55, { top: CEIL, drop: 1.8 });
 }
 
 // ---------------------------------------------------------------- Floors 3 & 4 (office)
@@ -1146,7 +1176,20 @@ export function officeFloor(p, n, employees, anim) {
     pendant(nb, -3.8, 5.3, { drop: 1.0, shade: '#2f3a2c' });
     plant(nb, -8.0, 4.2, { tall: true });
     plant(nb, 0.3, 4.8, { tall: true });
-    if (n === 3) anim.darumaShelf = darumaShelf(nb, -10.4, BACK_IN + 0.05);       // Kenny's team status wall
+    if (n === 3) { anim.darumaShelf = darumaShelf(nb, -10.4, BACK_IN + 0.05); anim.darumaShelf.group.userData.dynamic = true; }   // Kenny's team status wall
+    // ---- the new space from the longer building (real x -22.2..-8.9): library wall + a quiet lounge at the front
+    const fg = fillGroup(p);
+    bookshelf(fg, -19.0, -7.6, 3.6, 2.6, 0);
+    bookshelf(fg, -15.2, -7.6, 3.6, 2.6, 0);
+    bookshelf(fg, -11.4, -7.6, 3.6, 2.6, 0);
+    rug(fg, -15.4, 4.2, 6.0, 3.4, '#d9cbb0', '#8a6a48');
+    japaneseSofa(fg, -15.4, 5.4, 3.6, Math.PI);
+    japaneseSofa(fg, -18.0, 3.6, 2.0, Math.PI / 2, { pillows: false });
+    lowTable(fg, -15.4, 3.5, { w: 1.6, d: 0.8, cushion: '#2f4a6a' });
+    bonsai(fg, -12.6, 0, 5.4, 2.2);
+    for (const lx of [-19.6, -11.6]) floorLantern(fg, lx, 5.6, { h: 0.7 });
+    chochin(fg, -15.4, 4.0, { top: CEIL, drop: 1.9 });
+    for (const lx of [-20.6, -10.2]) plant(fg, lx, -6.8, { tall: true });
   }
 }
 
@@ -1461,5 +1504,21 @@ export function floor5(p, anim) {
     for (let i = 0; i < 11; i++) flowerPlanter(p, -10.0 + i * 1.7, -7.35, i + 5, true);
     plant(p, 8.8, 2.5, { tall: true, s: 1.2 });                                        // the one the cleaners water
   }
+  // ---- the new space from the longer building (real x -21.6..-8.2): more garden
+  const fg = fillGroup(p);
+  for (let x = -21.0; x < -8.4; x += 1.7) { flowerPlanter(fg, x, 7.3, Math.abs(Math.round(x)), true); flowerPlanter(fg, x + 0.6, -7.35, Math.abs(Math.round(x)) + 3, true); }
+  for (let x = -21.2; x < -8.4; x += 0.95) cyl(fg, 0.36 + ((x * 7) % 3 + 3) % 3 * 0.04, 0.05, x % 2 > -1 ? '#9a958c' : '#7d786f', x, 0.0, -0.15 + Math.sin(x * 1.7) * 0.18, { seg: 9, cast: false });
+  for (const [tx, tz] of [[-17.5, 5.0], [-12.5, -5.0]]) {
+    sakuraTree(fg, tx, tz, 1.0);
+    spotBeam(fg, tx + 0.9, 0.05, tz + (tz > 0 ? -0.9 : 0.9), tx, 2.5, tz, { r0: 0.05, r1: 1.2, pool: false });
+  }
+  stoneLantern(fg, -14.6, 2.4);
+  stoneLantern(fg, -19.8, -2.8);
+  pineTree(fg, -12.0, 4.6, 0.85);
+  bamboo(fg, -20.4, -5.4, { n: 7 });
+  const bench = grp(fg, -15.0, 0, -5.4);
+  box(bench, 1.9, 0.42, 0.55, '#6b4a33', 0, 0, 0);
+  box(bench, 1.95, 0.05, 0.6, '#c8352a', 0, 0.42, 0);
+  for (const [lx, lz] of [[-20.0, 2.2], [-16.5, -2.2], [-13.2, 2.2], [-10.2, -2.2], [-18.6, 6.3], [-11.0, 6.3]]) floorLantern(fg, lx, lz, { h: 0.55 });
   void anim;
 }

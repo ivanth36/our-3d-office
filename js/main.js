@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { H, CEIL, floorY, floorH, box, cyl, sphere, mat, makeLabel, optimize, GLOW, WINDOWS } from './helpers.js';
-import { shell, liftCar, LIFT, X0, XC, EXT, SPLIT, KANJI } from './building.js';
+import { shell, liftCar, LIFT, X0, XC, EXT, EXT2, SPLIT, KANJI, shift2 } from './building.js';
 import { floor1, floor2, officeFloor, floor5, vendingMachine } from './floors.js';
 import { placeDarumas, stoneLantern } from './japan.js';
 import { createEnv, mtFuji, isFriday } from './env.js';
@@ -76,7 +76,7 @@ function surroundings() {
   const grass = new THREE.Mesh(new THREE.CircleGeometry(120, 40), mat('#a9c47f'));
   grass.rotation.x = -Math.PI / 2; grass.position.y = -0.32; grass.receiveShadow = true;
   g.add(grass);
-  box(g, 34 + EXT, 0.32, 22, '#e3d6c3', XC, -0.32, 0.5, { cast: false });      // plaza / sidewalk
+  box(g, 34 + EXT + EXT2, 0.32, 22, '#e3d6c3', XC, -0.32, 0.5, { cast: false });      // plaza / sidewalk
   box(g, 120, 0.05, 8, '#6f6a66', 0, -0.32, 16, { cast: false });       // street
   for (let x = -56; x < 60; x += 6) box(g, 2.5, 0.02, 0.25, '#f5f0e6', x, -0.27, 16, { cast: false });
   const tree = (x, z, s = 1) => {
@@ -85,8 +85,8 @@ function surroundings() {
     sphere(g, 1.1 * s, '#86b562', x + 0.7 * s, 3.3 * s, z + 0.3 * s);
   };
   [[-17, 4, 1.2], [-17, -6, 1.4], [17, 6, 1.1], [17, -5, 1.5], [-22, 12, 1], [23, 11, 1.2], [-6, -16, 1.6], [8, -15, 1.3], [-30, -8, 1.8], [30, -10, 1.6]]
-    .forEach(([x, z, s]) => tree(x < -12 ? x - EXT : x, z, s));   // keep the left-side trees clear of the longer building
-  for (const x of [-13.5 - EXT, 13.5]) {     // street lamps
+    .forEach(([x, z, s]) => tree(x < -12 ? x - EXT - EXT2 : x, z, s));   // keep the left-side trees clear of the longer building
+  for (const x of [-13.5 - EXT - EXT2, 13.5]) {     // street lamps
     cyl(g, 0.08, 4.2, '#3a3a3a', x, -0.3, 11.5, { seg: 6 });
     sphere(g, 0.25, mat('#ffe2a0', { emissive: '#ffd27a' }), x, 4.0, 11.5, { cast: false });
   }
@@ -149,6 +149,52 @@ function updateWalls() {
 }
 
 // ---------------------------------------------------------------- the building
+// The second 40% extension: floor content is built for the 33.6 m building, then everything left of
+// the floor's split moves left (shift2). Small pieces move whole; long ones (floors, beams, balconies,
+// rails) are stretched vertex by vertex so they still reach both ends.
+function stretchFloor(g, c, n) {
+  g.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), m = new THREE.Matrix4();
+  const bb = new THREE.Box3(), ctr = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3();
+  const moves = [], stretches = [];
+  const visit = (o) => {
+    if (o !== c && o.userData.noStretch) return;          // already placed in the longer building's real positions
+    if (o !== c && (o.userData.dynamic || o.isSprite || o.isPoints)) {
+      bb.setFromObject(o).getCenter(ctr);
+      ctr.applyMatrix4(inv);
+      const s = shift2(n, ctr.x);
+      if (s) moves.push([o, s]);
+      return;
+    }
+    if (o.isMesh && o !== c) {
+      if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      m.multiplyMatrices(inv, o.matrixWorld);
+      bb.copy(o.geometry.boundingBox).applyMatrix4(m);
+      if (bb.max.x - bb.min.x < 2.5 || shift2(n, bb.min.x) === shift2(n, bb.max.x)) {
+        const s = shift2(n, (bb.min.x + bb.max.x) / 2);
+        if (s) moves.push([o, s]);
+      } else stretches.push([o, m.clone()]);
+    }
+    o.children.forEach(visit);
+  };
+  visit(c);
+  for (const [o, s] of moves) {                 // move by s along the floor's x, whatever the parent's rotation
+    o.getWorldPosition(a); b.copy(a); b.x += s;
+    o.parent.worldToLocal(a); o.parent.worldToLocal(b);
+    o.position.add(b.sub(a));
+  }
+  for (const [o, mm] of stretches) {
+    const geo = o.geometry.clone();
+    geo.applyMatrix4(mm);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) pos.setX(i, pos.getX(i) + shift2(n, pos.getX(i)));
+    pos.needsUpdate = true;
+    geo.computeBoundingBox(); geo.computeBoundingSphere();
+    o.geometry = geo;
+    g.add(o);                                   // now in floor coordinates
+    o.position.set(0, 0, 0); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1);
+  }
+}
 const anim = { fxBoard: createFxBoard() };
 const floorGroups = [];
 const floorLabels = [];
@@ -173,6 +219,7 @@ for (const f of FLOORS) {
     _bb.setFromObject(o).getCenter(_bc);           // judge by where the piece actually is
     if (_bc.x < SPLIT[f.n]) o.position.x -= EXT;
   }
+  stretchFloor(g, c, f.n);
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
   const lbl = makeLabel(`${KANJI[f.n]} ${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
@@ -233,13 +280,13 @@ function fitDistance(w, h) {
 
 function preset(n) {
   if (n === 0) {
-    const d = fitDistance(40, TOTAL_H + 7) + 10;
+    const d = fitDistance(40 + EXT2, TOTAL_H + 7) + 10;
     return { target: BUILD_CENTER.clone(), pos: BUILD_CENTER.clone().addScaledVector(VIEW_DIR, d) };
   }
   // Floor 1 is a tall atrium: look in from the open street side, just under the roof beams
   const target = new THREE.Vector3(XC - 0.5, floorY(n) + (n === 1 ? 2.5 : 0.5), n === 1 ? -0.5 : 0.5);
   const dir = new THREE.Vector3(0.28, n === 1 ? 0.5 : 1.15, 1).normalize();
-  const d = fitDistance(35, 15) * 0.82 + (n === 1 ? 3 : 4);
+  const d = fitDistance(35 + EXT2, 15) * 0.82 + (n === 1 ? 3 : 4);
   return { target, pos: target.clone().addScaledVector(dir, d) };
 }
 

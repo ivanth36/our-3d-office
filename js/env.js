@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { GLOW, WINDOWS, NIGHT_MATS } from './helpers.js';
 import { SEASON_MATS } from './japan.js';
+import { shift2 } from './building.js';
 
 const params = new URLSearchParams(location.search);
 function sgt() {
@@ -113,7 +114,8 @@ export function createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY }) {
   for (const kind of ['blossom', 'momiji', 'petal']) for (const m of SEASON_MATS[kind]) m.color.set(PALETTE[kind][season][(m.userData.variant ?? 0) % PALETTE[kind][season].length]);
   fuji.userData.setSeason(season);
   // falling petals / leaves / snow around the trees (front of the building + roof garden)
-  const spots = [[6.2, 0.1, 10.1, 0], [8.3, roofY, 5.6, 0], [-3.1, roofY, 5.6, 0], [-9.5, roofY, -5.6, 0], [2.4, roofY, -4.3, 0]];
+  const spots = [[6.2, 0.1, 10.1, 0], [8.3, roofY, 5.6, 0], [-3.1, roofY, 5.6, 0], [-9.5, roofY, -5.6, 0], [2.4, roofY, -4.3, 0]]
+    .map(([x, y, z, k]) => [x + (y > 1 ? shift2(5, x) : 0), y, z, k]);   // roof trees left of the split moved with the longer building
   const fall = fallers(scene, spots);
   fall.setColors(FALL[season]);
 

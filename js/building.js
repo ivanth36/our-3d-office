@@ -10,12 +10,23 @@ import { C } from './furniture.js';
 // Each floor's furniture was designed for the old 24 m layout: anything left of
 // SPLIT[floor] moved left with the wall (by EXT), opening new space in the middle.
 export const EXT = 9.6;
-export const X1 = 12, X0 = -12 - EXT, W = X1 - X0, D = 16, Z0 = -8, Z1 = 8, XC = (X0 + X1) / 2;
+// Second extension (another 40%): the shell is 13.4 m longer again. Floor content is still laid out
+// for the 33.6 m building (X0C) and then stretched: everything left of a split moves left (see SHIFT2).
+export const EXT2 = 13.4;
+export const X1 = 12, X0C = -12 - EXT, X0 = X0C - EXT2, W = X1 - X0, D = 16, Z0 = -8, Z1 = 8, XC = (X0 + X1) / 2;
+export const XCC = (X0C + X1) / 2;
+/** Extra left shift for a (33.6 m layout) real x on floor f. Floor 1: café moves the whole way,
+ *  the stage half way, so café | stage | reception sit evenly along the longer atrium. */
+export function shift2(f, x) {
+  if (f === 1) return x < -13.2 ? -EXT2 : x < -6.0 ? -EXT2 / 2 : 0;
+  const split = { 2: -8.9, 3: -8.9, 4: -0.9, 5: -8.2 }[f];
+  return x < split ? -EXT2 : 0;
+}
 export const SPLIT = { 1: -4.0, 2: 1.0, 3: 1.0, 4: -1.5, 5: -1.0 };   // 2 = outsource office, 4 = Chill Home
 // Walking maps use the same rule, except Floor 1, which was re-laid out in real positions.
 const NAV_SPLIT = { ...SPLIT, 1: -Infinity };
 /** Walking-map x (old 24 m layout, real on Floor 1) -> real x on floor f. */
-export const sx = (f, x) => (x < -500 ? x + 1000 : x < NAV_SPLIT[f] ? x - EXT : x);
+export const sx = (f, x) => { const r = x < -500 ? x + 1000 : x < NAV_SPLIT[f] ? x - EXT : x; return r + shift2(f, r); };
 /** Mark a walking-map x as already real (never shifted), e.g. furniture that was moved later. */
 export const raw = (x) => x - 1000;
 export const CORE_X = 9.6;              // rooms are x < CORE_X

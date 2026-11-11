@@ -18,7 +18,9 @@ Context about the owner's setup to remember in every session:
 - **Japanese theme** (live on `main` since 11 Nov 2026; the old look is saved on branch `original-look`): 1F is a
   three-storey atrium tea house (floor heights: `floorY()` / `floorH()` in js/helpers.js), shared
   Japanese props in js/japan.js, seasons + day/night synced to Singapore time in js/env.js
-  (preview with `?season=spring&time=21&friday=1`). No sounds or music (removed at Ivan's request).
+  (preview with `?season=spring&time=21&friday=1`). The building is 47 m long (two 40% extensions):
+  floor content is laid out for the 33.6 m building and stretched by `stretchFloor()` in js/main.js using
+  `shift2()` in js/building.js; things placed in the new space use `fillGroup()` (real positions). No sounds or music (removed at Ivan's request).
 - **Floor panel refresh = on request only.** Ivan says "refresh the panel" and Claude updates
   `reports/latest.json` on `main` (no background updater, to save his usage allowance; the
   "Update office floor panel" scheduled task exists but is switched OFF because scheduled sessions
