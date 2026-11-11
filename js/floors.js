@@ -411,7 +411,7 @@ export function floor1(p, anim) {
 
 }
 
-// ---------------------------------------------------------------- Floor 2
+// ---------------------------------------------------------------- Chill Home (now on the 4th floor)
 // Back-left: living room · Front-left: glass music room · Back-right: kitchen
 // Front-right: dining for 12 · Middle: open space between living room & kitchen.
 const BACK_IN = -7.7, LEFT_IN = -11.7; // inner faces of the back / left walls
@@ -503,7 +503,7 @@ export function floor2(p, anim = {}) {
     const rx0 = X0 + 0.15, rx1 = -12.0;
     box(mg, rx1 - rx0 - 0.15, 0.03, mz1 - mz0, '#7d5a43', (rx0 + rx1) / 2 + 0.075, 0.02, (mz0 + mz1) / 2, { cast: false });
     glassWall(mg, rx1, mz0, rx1, mz1, CEIL, { gap: [3.35, 4.35] });          // right side, door in the middle
-    addDoor(anim, '2:music', glassDoor(mg, rx1, mz0 + 3.35, 1.0, CEIL, -Math.PI / 2), -Math.PI / 2, 0);
+    addDoor(anim, '4:music', glassDoor(mg, rx1, mz0 + 3.35, 1.0, CEIL, -Math.PI / 2), -Math.PI / 2, 0);
     glassWall(mg, rx0, mz1, rx1, mz1, CEIL);                                 // front (street side)
   }
   const cdCols = ['#d94f3d', '#3e6b9a', '#f1c84b', '#2b2a2c', '#7ab87a', '#e8e1d0', '#9b59b6', '#f08a5d'];
@@ -630,7 +630,7 @@ export function floor2(p, anim = {}) {
     rug(p, -16.4, -3.6, 4.6, 3.4, '#3a3f5c', '#7a5cff');
     glassWall(p, x0 - 0.15, z1, x1, z1, CEIL, { gap: [4.2, 5.2] });   // shared wall with the music room, door in the middle
     glassWall(p, x1, -7.85, x1, z1, CEIL);                              // right side (no outside door)
-    addDoor(anim, '2:game', glassDoor(p, -17.25, z1, 1.0, CEIL, 0), 0, -1.45);
+    addDoor(anim, '4:game', glassDoor(p, -17.25, z1, 1.0, CEIL, 0), 0, -1.45);
     const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#7a5cff'; ctx.font = 'bold 58px -apple-system, sans-serif'; ctx.fillText('🎮 Game Room', 40, 70); });
     panel(p, 1.9, 0.36, sign, -14.4, 3.1, z1 + 0.04, { transparent: true });         // seen from the music room
     panel(p, 1.9, 0.36, sign, -16.75, 3.1, z1 - 0.04, { transparent: true, ry: Math.PI });

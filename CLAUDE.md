@@ -4,13 +4,15 @@ Context about the owner's setup to remember in every session:
 
 - **Floor 3 (In-house Office)** is Ivan's **in-house office**: every employee there works for Ivan and
   does things for him (they run his scheduled tasks).
-- **Floor 4** is the **Outsource AI Team** office, kept for future use. Ivan may do business for
+- **Floor 2** is the **Outsource AI Team** office, kept for future use. Ivan may do business for
   other companies, with employees working for those clients. He may call himself the
   "outsource AI team" when talking about this floor.
 - Panel floors (`home` in `js/employees.js`): Floor 1 = Jennie (cashier), Lisa (barista), Rose (receptionist), Jisoo (usher), Lily, Robert;
-  Floor 2 = Ivan, Phil; Floor 3 = Kenny (manager), JungKook, XiaoMing, Sally, Aida, Mary; Floor 5 = Eugene.
+  Floor 4 = Ivan, Phil (Chill Home); Floor 3 = Kenny (manager), JungKook, XiaoMing, Sally, Aida, Mary; Floor 5 = Eugene.
 - Employees are linked to the owner's scheduled tasks by task name. The floor panel shows the
   latest message of each task from `reports/latest.json`.
+- **Floor order:** 1F Joe's Café · 2F Outsource AI Team · 3F In-house Office · 4F Chill Home · 5F Roof Garden.
+  (The Chill Home is built by `floor2()` in js/floors.js; walking-map ids in js/staff.js use the real floor number.)
 - Always merge finished work into `main` (GitHub Pages publishes from `main`).
 - **Floor panel refresh = on request only.** Ivan says "refresh the panel" and Claude updates
   `reports/latest.json` on `main` (no background updater, to save his usage allowance; the

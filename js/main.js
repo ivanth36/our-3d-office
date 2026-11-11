@@ -10,9 +10,9 @@ import { createPanel } from './panel.js';
 
 const FLOORS = [
   { n: 1, name: "Joe's Café", sub: 'Café · welcome lounge & reception' },
-  { n: 2, name: 'Chill Home', sub: 'Living room · game room · music room · kitchen' },
+  { n: 2, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 3, name: 'In-house Office', sub: 'My in-house AI team' },
-  { n: 4, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
+  { n: 4, name: 'Chill Home', sub: 'Living room · game room · music room · kitchen' },
   { n: 5, name: 'Roof Garden', sub: 'Glass gym · chill garden' },
 ];
 
@@ -151,7 +151,7 @@ for (const f of FLOORS) {
   const c = new THREE.Group();
   g.add(c);
   if (f.n === 1) floor1(c, anim);
-  else if (f.n === 2) floor2(c, anim);
+  else if (f.n === 4) floor2(c, anim);   // Chill Home (built by floor2(), now on the 4th floor)
   else if (f.n === 5) floor5(c, anim);
   else officeFloor(c, f.n, [], anim);
   c.updateMatrixWorld(true);

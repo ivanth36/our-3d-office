@@ -92,50 +92,50 @@ chain('1:loungeA', node(1, 'loungeStandI', -3.1, -0.8), node(1, 'loungeStandP', 
 link('1:loungeA', node(1, 'loungeB', -4.3, 0.75)); link('1:loungeB', '1:j10');   // where Phil plays with Joe
 const JOE_PLAY = [-3.55, 0.0];                       // Joe's play spot, between Ivan and Phil
 
-// ---- Floor 2: music room (glass lounge, front-left)
+// ---- Chill Home (4F): music room (glass lounge, front-left)
 // music room: its only outside door is in the middle of its right wall (real x -12)
-chain('2:coreFront', node(2, 'frontWalk', raw(-10.4), 6.8), node(2, 'musicOut', raw(-11.2), 3.85),
-  node(2, 'musicIn', raw(-12.8), 3.85), node(2, 'musicMid', -5.3, 4.0), node(2, 'lounge', -8.6, 3.95));
-link('2:musicMid', node(2, 'drumStand', -6.6, 5.0));
-link('2:musicMid', node(2, 'pianoStand', -5.25, 5.6));
-link('2:musicMid', node(2, 'composeStand', -4.6, 4.0));
+chain('4:coreFront', node(4, 'frontWalk', raw(-10.4), 6.8), node(4, 'musicOut', raw(-11.2), 3.85),
+  node(4, 'musicIn', raw(-12.8), 3.85), node(4, 'musicMid', -5.3, 4.0), node(4, 'lounge', -8.6, 3.95));
+link('4:musicMid', node(4, 'drumStand', -6.6, 5.0));
+link('4:musicMid', node(4, 'pianoStand', -5.25, 5.6));
+link('4:musicMid', node(4, 'composeStand', -4.6, 4.0));
 // game room: entered only through the music room, by the door in the middle of the shared glass wall
-chain('2:musicMid', node(2, 'musicW', raw(-16.75), 3.9), node(2, 'gameOutM', raw(-16.75), 1.0), node(2, 'gameIn', raw(-16.75), -0.9));
-chain('2:gameIn', node(2, 'pcStandP', raw(-19.0), -2.2), node(2, 'pcStandI', raw(-19.0), -5.4));
-chain('2:gameIn', node(2, 'consoleIn', raw(-14.45), -2.2), node(2, 'consoleStandP', raw(-14.45), -3.0), node(2, 'consoleStandI', raw(-14.45), -4.2));
-const LOUNGE_SEAT = { node: '2:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
-const DRUM_SEAT = { node: '2:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
-const PIANO_SEAT = { node: '2:pianoStand', x: -4.6, z: 5.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
-const COMPOSE_SEAT = { node: '2:composeStand', x: -4.6, z: 3.25, ry: Math.PI, y: 0, typing: true };   // music PC desk
-const PC_IVAN = { node: '2:pcStandI', x: raw(-19.9), z: -5.4, ry: -Math.PI / 2, y: 0, typing: true, act: 'pc' };
-const PC_PHIL = { node: '2:pcStandP', x: raw(-19.9), z: -2.2, ry: -Math.PI / 2, y: 0, typing: true, act: 'pc' };
-const CONSOLE_IVAN = { node: '2:consoleStandI', x: raw(-14.85), z: -4.2, ry: Math.PI / 2, y: 0.04, act: 'console' };
-const CONSOLE_PHIL = { node: '2:consoleStandP', x: raw(-14.85), z: -3.0, ry: Math.PI / 2, y: 0.04, act: 'console' };
+chain('4:musicMid', node(4, 'musicW', raw(-16.75), 3.9), node(4, 'gameOutM', raw(-16.75), 1.0), node(4, 'gameIn', raw(-16.75), -0.9));
+chain('4:gameIn', node(4, 'pcStandP', raw(-19.0), -2.2), node(4, 'pcStandI', raw(-19.0), -5.4));
+chain('4:gameIn', node(4, 'consoleIn', raw(-14.45), -2.2), node(4, 'consoleStandP', raw(-14.45), -3.0), node(4, 'consoleStandI', raw(-14.45), -4.2));
+const LOUNGE_SEAT = { node: '4:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
+const DRUM_SEAT = { node: '4:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
+const PIANO_SEAT = { node: '4:pianoStand', x: -4.6, z: 5.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
+const COMPOSE_SEAT = { node: '4:composeStand', x: -4.6, z: 3.25, ry: Math.PI, y: 0, typing: true };   // music PC desk
+const PC_IVAN = { node: '4:pcStandI', x: raw(-19.9), z: -5.4, ry: -Math.PI / 2, y: 0, typing: true, act: 'pc' };
+const PC_PHIL = { node: '4:pcStandP', x: raw(-19.9), z: -2.2, ry: -Math.PI / 2, y: 0, typing: true, act: 'pc' };
+const CONSOLE_IVAN = { node: '4:consoleStandI', x: raw(-14.85), z: -4.2, ry: Math.PI / 2, y: 0.04, act: 'console' };
+const CONSOLE_PHIL = { node: '4:consoleStandP', x: raw(-14.85), z: -3.0, ry: Math.PI / 2, y: 0.04, act: 'console' };
 
-// ---- Floor 2: open space, living room sofa, kitchen, dining table
-node(2, 'f2mid', 1.5, -0.2);                        // open space between living room & kitchen
-link('2:coreW', '2:f2mid');
+// ---- Chill Home (4F): open space, living room sofa, kitchen, dining table
+node(4, 'f2mid', 1.5, -0.2);                        // open space between living room & kitchen
+link('4:coreW', '4:f2mid');
 // living room (moved to the middle of the floor: real positions)
-chain('2:f2mid', node(2, 'livFront', raw(-3.2), -2.0), node(2, 'sofaStandA', raw(-5.3), -2.0), node(2, 'sofaStandB', raw(-7.3), -2.0));
+chain('4:f2mid', node(4, 'livFront', raw(-3.2), -2.0), node(4, 'sofaStandA', raw(-5.3), -2.0), node(4, 'sofaStandB', raw(-7.3), -2.0));
 // to the music room: up the side of the living room, then along the corridor between the game room and music room
-chain('2:livFront', node(2, 'livCorner', raw(-3.0), 1.2), node(2, 'westAisle', raw(-10.6), 1.6), '2:musicOut');
-chain('2:coreW', node(2, 'kIn', 8.2, -1.8), node(2, 'kLane', 8.1, -5.2));
-link('2:kLane', node(2, 'stove', 6.7, -6.6));
-link('2:kLane', node(2, 'islandBack', 5.6, -4.7));
-link('2:kLane', node(2, 'sink', 8.25, -6.1));
-link('2:stove', '2:islandBack');
-chain('2:kIn', node(2, 'dineE', 8.0, 1.8), node(2, 'dineStandP', 4.68, 2.2), node(2, 'dineStandI', 3.4, 2.2));
-link('2:f2mid', '2:dineStandI');
-const SOFA_TV_PHIL = { node: '2:sofaStandA', x: raw(-5.3), z: -1.2, ry: Math.PI, y: 0.04 };   // facing the TV
-const SOFA_TV_IVAN = { node: '2:sofaStandB', x: raw(-7.3), z: -1.2, ry: Math.PI, y: 0.04 };
-const DINE_IVAN = { node: '2:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
-const DINE_PHIL = { node: '2:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
+chain('4:livFront', node(4, 'livCorner', raw(-3.0), 1.2), node(4, 'westAisle', raw(-10.6), 1.6), '4:musicOut');
+chain('4:coreW', node(4, 'kIn', 8.2, -1.8), node(4, 'kLane', 8.1, -5.2));
+link('4:kLane', node(4, 'stove', 6.7, -6.6));
+link('4:kLane', node(4, 'islandBack', 5.6, -4.7));
+link('4:kLane', node(4, 'sink', 8.25, -6.1));
+link('4:stove', '4:islandBack');
+chain('4:kIn', node(4, 'dineE', 8.0, 1.8), node(4, 'dineStandP', 4.68, 2.2), node(4, 'dineStandI', 3.4, 2.2));
+link('4:f2mid', '4:dineStandI');
+const SOFA_TV_PHIL = { node: '4:sofaStandA', x: raw(-5.3), z: -1.2, ry: Math.PI, y: 0.04 };   // facing the TV
+const SOFA_TV_IVAN = { node: '4:sofaStandB', x: raw(-7.3), z: -1.2, ry: Math.PI, y: 0.04 };
+const DINE_IVAN = { node: '4:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
+const DINE_PHIL = { node: '4:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
 // café sofa corner for the owners
 const CAFE_SOFA_IVAN = { node: '1:loungeStandI', x: -3.1, z: -1.65, ry: 0, y: 0.04 };   // welcome-lounge sofa
 const CAFE_SOFA_PHIL = { node: '1:loungeStandP', x: -1.9, z: -1.65, ry: 0, y: 0.04 };
 
 // ---- Floors 3 & 4: aisle behind the shared desk + meeting room
-for (const f of [3, 4]) {
+for (const f of [2, 3]) {
   const aisle = [5, 6, 7, 8, 9].map((i) => node(f, `desk${i}`, deskSeat(i).x, -0.9));
   chain(...aisle, node(f, 'aisleE', 2.6, -0.9), `${f}:coreW`);
   chain(`${f}:aisleE`, node(f, 'meetDoorOut', 2.6, -1.8), node(f, 'meetDoorIn', 2.6, -3.0), node(f, 'meetA', 4.15, -3.0), node(f, 'meetB', 5.45, -3.0));
@@ -191,28 +191,28 @@ const TREAD = { stepX: -10.3, y: 0.23, eugeneZ: -4.8, ivanZ: -3.3 };
 // ---- cleaners' work spots on every floor (mop the floor, water a plant, garden on the roof)
 node(1, 'divW', -4.7, -3.0); link('1:divW', '1:j3'); link('1:divW', '1:j9');   // café / lounge divider planters
 node(1, 'recPlant', -1.4, 6.4); link('1:recPlant', '1:j17'); link('1:recPlant', '1:j18'); // plants by reception
-node(2, 'plantW', -0.1, 0.3); link('2:plantW', '2:f2mid');
-for (const f of [3, 4]) { node(f, 'plantNW', -10.6, -1.2); link(`${f}:plantNW`, `${f}:desk5`); }
+node(4, 'plantW', -0.1, 0.3); link('4:plantW', '4:f2mid');
+for (const f of [2, 3]) { node(f, 'plantNW', -10.6, -1.2); link(`${f}:plantNW`, `${f}:desk5`); }
 node(5, 'gardenF1', 5.8, 6.4); link('5:gardenF1', '5:rMid');           // front flower planters
 node(5, 'gardenF0', -1.0, 6.4); link('5:gardenF0', '5:smokeE');
 node(5, 'gardenB', 1.9, -6.6); link('5:gardenB', '5:rMid');            // back flower planters
 node(5, 'plantE', 8.0, 2.5); link('5:plantE', '5:rMid');
 const CLEAN_JOBS = {
   1: [{ n: '1:j1', k: 'mop' }, { n: '1:j4', k: 'mop' }, { n: '1:divW', k: 'water', face: [-5.4, -3.0] }, { n: '1:recPlant', k: 'water', face: [-0.6, 5.6] }],
-  2: [{ n: '2:f2mid', k: 'mop' }, { n: '2:dineE', k: 'mop' }, { n: '2:plantW', k: 'water', face: [-0.8, 0.9] }, { n: '2:coreFront', k: 'water', face: [8.8, 7.2] }],
+  4: [{ n: '4:f2mid', k: 'mop' }, { n: '4:dineE', k: 'mop' }, { n: '4:plantW', k: 'water', face: [-0.8, 0.9] }, { n: '4:coreFront', k: 'water', face: [8.8, 7.2] }],
   3: [{ n: '3:aisleE', k: 'mop' }, { n: '3:desk7', k: 'mop' }, { n: '3:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '3:plantNW', k: 'water', face: [-11.3, -1.5] }],
-  4: [{ n: '4:aisleE', k: 'mop' }, { n: '4:desk7', k: 'mop' }, { n: '4:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '4:plantNW', k: 'water', face: [-11.3, -1.5] }],
+  2: [{ n: '2:aisleE', k: 'mop' }, { n: '2:desk7', k: 'mop' }, { n: '2:coreFront', k: 'water', face: [8.9, 7.2] }, { n: '2:plantNW', k: 'water', face: [-11.3, -1.5] }],
   5: [{ n: '5:rMid', k: 'mop' }, { n: '5:gardenF1', k: 'garden', face: [5.8, 7.3] }, { n: '5:gardenF0', k: 'garden', face: [-1.0, 7.3] }, { n: '5:gardenB', k: 'garden', face: [1.9, -7.35] }, { n: '5:plantE', k: 'water', face: [8.8, 2.5] }],
 };
 
 // glass doors: walking between these node pairs goes through a door
 const DOOR_EDGES = {};
 const doorEdge = (a, b, id) => { DOOR_EDGES[`${a}|${b}`] = id; DOOR_EDGES[`${b}|${a}`] = id; };
-doorEdge('2:musicOut', '2:musicIn', '2:music');
-doorEdge('2:gameOutM', '2:gameIn', '2:game');
+doorEdge('4:musicOut', '4:musicIn', '4:music');
+doorEdge('4:gameOutM', '4:gameIn', '4:game');
 doorEdge('3:meetDoorOut', '3:meetDoorIn', '3:meet');
 doorEdge('3:mgrOut', '3:mgrIn', '3:mgr');
-doorEdge('4:meetDoorOut', '4:meetDoorIn', '4:meet');
+doorEdge('2:meetDoorOut', '2:meetDoorIn', '2:meet');
 doorEdge('5:gymOut', '5:gymIn', '5:gym');
 
 function route(from, to, via) {
@@ -790,7 +790,7 @@ async function xiaoming(a) {
     a.status = 'Tracking the SGD to CNY rate';
     await a.sleep(R(30, 45), meetingCalled);
     if (flags.teamMeeting) { await joinTeamMeeting(a, home); continue; }
-    a.status = 'Walking down to the Floor 2 music room';
+    a.status = 'Walking up to the Floor 4 music room';
     await a.goSit(LOUNGE_SEAT, 'stairs');
     a.status = 'Chilling in the music room';
     await a.sleep(R(12, 20));
@@ -805,7 +805,7 @@ async function xiaoming(a) {
     a.status = 'Playing the keyboard';
     await a.goSit(PIANO_SEAT);
     await a.sleep(R(8, 12));
-    a.status = 'Walking back up to Floor 3';
+    a.status = 'Walking back down to Floor 3';
     await a.goSit(home, 'stairs');
   }
 }
@@ -1030,40 +1030,40 @@ async function sally(a) {
     if (flags.teamMeeting && !flags.dinnerRequest) { await joinTeamMeeting(a, home); continue; }
     if (!flags.dinnerRequest) continue;
     flags.dinnerRequest = false; flags.dinnerDone = false;
-    a.status = 'Heading down to cook dinner for Ivan & Phil';
-    await a.goStand('2:stove', 'stairs');
+    a.status = 'Heading up to cook dinner for Ivan & Phil';
+    await a.goStand('4:stove', 'stairs');
     await a.turnTo(Math.PI);
     a.act = 'cook'; a.status = 'Cooking a healthy dinner';
     await a.sleep(R(12, 16));
     a.act = null;
-    await a.go('2:islandBack');
+    await a.go('4:islandBack');
     await a.turnTo(0);
     a.act = 'cook'; a.status = 'Plating up the food';
     await a.sleep(4);
     a.act = null;
     a.rig.tray.visible = true; a.carry = true;
     a.status = 'Serving dinner at the dining table';
-    await a.go('2:dineStandI');
+    await a.go('4:dineStandI');
     await a.face(3.4, 3.9);
     a.rig.tray.visible = false; a.carry = false;
     w.plates.visible = true;
     flags.dinnerReady = true;
     a.status = 'Waiting in the kitchen while they eat';
-    await a.go('2:islandBack');
+    await a.go('4:islandBack');
     await a.turnTo(Math.PI);
     await a.waitFor(() => flags.dinnerDone, 240);
     a.status = 'Clearing the table';
-    await a.go('2:dineStandI');
+    await a.go('4:dineStandI');
     await a.face(3.4, 3.9);
     w.plates.visible = false;
     a.rig.tray.visible = true; a.carry = true;
-    await a.goStand('2:sink');
+    await a.goStand('4:sink');
     await a.turnTo(Math.PI / 2);
     a.rig.tray.visible = false; a.carry = false;
     a.act = 'wash'; a.status = 'Washing the dishes';
     await a.sleep(R(8, 11));
     a.act = null;
-    a.status = 'Walking back up to Floor 3';
+    a.status = 'Walking back down to Floor 3';
     await a.goSit(home, 'stairs');
   }
 }
@@ -1220,7 +1220,7 @@ async function lisa(a) {
 const ROUTINES = { lisa, kenny, jungkook, eugene, aida, xiaoming, mary, sally, ivan, phil, jennie, lily: cleaner, robert: cleaner };
 const SPAWN = {                        // where the owners and cleaners start
   Lily: { stand: '1:j9', ry: Math.PI },
-  Robert: { stand: '4:aisleE', ry: 0 },
+  Robert: { stand: '2:aisleE', ry: 0 },
   Kenny: { seat: KENNY_SEAT },
   Ivan: { stand: '5:ivanMeet', ry: -2.1 },
   Phil: { seat: COMPOSE_SEAT },
@@ -1229,20 +1229,20 @@ const SPAWN = {                        // where the owners and cleaners start
 // ======================================================================== setup
 export function createStaff({ floors, lift, employees, doors = {}, joe = null }) {
   const world = { floors, lift, doors, puffs: createPuffs(), serve() {}, cafeQueue: 0, jennieAtTill: true, actors: [], joe };
-  // two plates of food on the Floor 2 dining table (shown when Ivan serves dinner)
+  // two plates of food on the 4F dining table (shown when Ivan serves dinner)
   world.plates = new THREE.Group();
   world.plates.userData.dynamic = true;
   for (const px of [3.4, 4.68]) {
     const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.02, 16), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6 }));
-    pl.position.set(sx(2, px), 0.83, 3.4);
+    pl.position.set(sx(4, px), 0.83, 3.4);
     const food = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), new THREE.MeshStandardMaterial({ color: '#e2a356', roughness: 0.9 }));
-    food.scale.set(1.3, 0.6, 1); food.position.set(sx(2, px), 0.87, 3.4);
+    food.scale.set(1.3, 0.6, 1); food.position.set(sx(4, px), 0.87, 3.4);
     const veg = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), new THREE.MeshStandardMaterial({ color: '#6aa84f', roughness: 0.9 }));
-    veg.position.set(sx(2, px) + 0.06, 0.87, 3.36);
+    veg.position.set(sx(4, px) + 0.06, 0.87, 3.36);
     world.plates.add(pl, food, veg);
   }
   world.plates.visible = false;
-  floors[1].add(world.plates);
+  floors[3].add(world.plates);   // dining table on the Chill Home floor (4F)
   const actors = [];
   world.actors = actors;
   for (const e of employees) {
@@ -1256,7 +1256,7 @@ export function createStaff({ floors, lift, employees, doors = {}, joe = null })
         a.heading = sp.ry ?? 0; a.g.rotation.y = a.heading;
       } else {
         a.at(sp.seat.node);
-        a.g.position.set(sx(2, sp.seat.x), sp.seat.y ?? 0, sp.seat.z);
+        a.g.position.set(sx(nodes.get(sp.seat.node).f, sp.seat.x), sp.seat.y ?? 0, sp.seat.z);
         a.heading = sp.seat.ry; a.g.rotation.y = sp.seat.ry;
         a.rig.setPose('sit');
         a.seat = sp.seat;

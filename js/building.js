@@ -11,7 +11,7 @@ import { C } from './furniture.js';
 // SPLIT[floor] moved left with the wall (by EXT), opening new space in the middle.
 export const EXT = 9.6;
 export const X1 = 12, X0 = -12 - EXT, W = X1 - X0, D = 16, Z0 = -8, Z1 = 8, XC = (X0 + X1) / 2;
-export const SPLIT = { 1: -4.0, 2: -1.5, 3: 1.0, 4: 1.0, 5: -1.0 };
+export const SPLIT = { 1: -4.0, 2: 1.0, 3: 1.0, 4: -1.5, 5: -1.0 };   // 2 = outsource office, 4 = Chill Home
 // Walking maps use the same rule, except Floor 1, which was re-laid out in real positions.
 const NAV_SPLIT = { ...SPLIT, 1: -Infinity };
 /** Walking-map x (old 24 m layout, real on Floor 1) -> real x on floor f. */

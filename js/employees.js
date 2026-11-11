@@ -1,5 +1,5 @@
 // ✏️ Your AI employees. Add or edit entries here to change who works in the office.
-//   floor: 3 or 4 = office floors (sit at the shared desk), 5 = roof (gym), 1 = café
+//   floor: 2 or 3 = office floors (sit at the shared desk), 4 = Chill Home, 5 = roof (gym), 1 = café
 //   seat:  office seat 0-4 = front side of the desk (back to the camera), 5-9 = back side (facing you)
 //   pos:   [x, z] for people who stand somewhere instead of sitting (e.g. the gym), ry = facing
 //   look:  hair, hairStyle ('short' | 'long' | 'bun'), shirt, pants, tie, outfit ('office' | 'sport'), glasses
@@ -11,7 +11,7 @@
 //   home:  the floor whose panel (the infogram on the right) lists this person
 //
 // Floor 3 = Ivan's internal office: everyone there works for Ivan.
-// Floor 4 = the "Outsource AI Team" office, for future client work for other companies.
+// Floor 2 = the "Outsource AI Team" office, for future client work for other companies.
 export const EMPLOYEES = [
   {
     name: 'JungKook', home: 3, role: 'Currency Analyst · KRW', floor: 3, seat: 5,
@@ -98,12 +98,12 @@ export const EMPLOYEES = [
   },
   // ---- the owners: no scheduled tasks, they just enjoy the house (routines in js/staff.js)
   {
-    name: 'Ivan', home: 2, role: 'Owner of the home office · gamer', floor: 5, owner: true,
+    name: 'Ivan', home: 4, role: 'Owner of the home office · gamer', floor: 5, owner: true,
     hair: '#1f1a17', outfit: 'casual', shirt: '#3b5b8a', pants: '#c2a878', collar: '#ffffff',
     tasks: [],
   },
   {
-    name: 'Phil', home: 2, role: 'Owner of the home office · gamer & music lover', floor: 2, owner: true,
+    name: 'Phil', home: 4, role: 'Owner of the home office · gamer & music lover', floor: 4, owner: true,
     hair: '#6b4a2b', outfit: 'casual', shirt: '#d9a441', pants: '#2f3a44', collar: '#2b2a2c', glasses: true,
     tasks: [],
   },
