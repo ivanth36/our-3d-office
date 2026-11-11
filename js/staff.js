@@ -96,7 +96,7 @@ const CAFE_PAIRS = [
 ];
 // welcome lounge (right half): the facing sofas, used by Ivan & Phil after coffee
 chain('1:j9', node(1, 'loungeA', -4.3, -0.75), '1:j10');
-chain('1:loungeA', node(1, 'loungeStandI', -3.1, -0.8), node(1, 'loungeStandP', -1.9, -0.8));
+chain('1:loungeA', node(1, 'loungeStandI', -3.1, -0.45), node(1, 'loungeStandP', -1.9, -0.45));
 link('1:loungeA', node(1, 'loungeB', -4.3, 0.75)); link('1:loungeB', '1:j10');   // where Phil plays with Joe
 const JOE_PLAY = [-3.55, 0.0];                       // Joe's play spot, between Ivan and Phil
 
@@ -154,8 +154,8 @@ const SOFA_TV_IVAN = { node: '4:sofaStandB', x: raw(-7.3), z: -1.2, ry: Math.PI,
 const DINE_IVAN = { node: '4:dineStandI', x: 3.4, z: 2.85, ry: 0, y: 0 };
 const DINE_PHIL = { node: '4:dineStandP', x: 4.68, z: 2.85, ry: 0, y: 0 };
 // café sofa corner for the owners
-const CAFE_SOFA_IVAN = { node: '1:loungeStandI', x: -3.1, z: -1.65, ry: 0, y: 0.04 };   // welcome-lounge sofa
-const CAFE_SOFA_PHIL = { node: '1:loungeStandP', x: -1.9, z: -1.65, ry: 0, y: 0.04 };
+const CAFE_SOFA_IVAN = { node: '1:loungeStandI', x: -3.1, z: -1.2, ry: 0, y: 0.04 };   // welcome-lounge sofa
+const CAFE_SOFA_PHIL = { node: '1:loungeStandP', x: -1.9, z: -1.2, ry: 0, y: 0.04 };
 
 // ---- Floors 3 & 4: aisle behind the shared desk + meeting room
 for (const f of [2, 3]) {

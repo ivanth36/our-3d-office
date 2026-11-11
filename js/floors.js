@@ -383,14 +383,14 @@ export function floor1(p, anim) {
   }
   // two sofas facing each other around a coffee table — centred on the same line as the tree sofa (z = 0)
   rug(lg, -2.5, 0.0, 4.6, 4.6, '#d9c7a0', '#5a3b26');                     // same size and colours as the tree-sofa rug
-  sofa(lg, -2.5, -1.7, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
-  sofa(lg, -2.5, 1.7, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  sofa(lg, -2.5, -1.25, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  sofa(lg, -2.5, 1.25, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
   rectTable(lg, -2.5, 0.0, 1.4, 0.7, { h: 0.4, top: C.woodLight });
   cyl(lg, 0.08, 0.2, C.white, -2.3, 0.47, 0.0, { seg: 10 });
   sphere(lg, 0.1, '#f28cb0', -2.3, 0.75, 0.0);
   box(lg, 0.5, 0.04, 0.35, '#e9e1cf', -2.9, 0.47, -0.05);                 // magazines
-  floorLantern(lg, -0.8, -2.0);
   floorLantern(lg, -0.8, 2.0);
+  floorLantern(lg, -4.2, 2.0);   // front corners, same as the matching sofa set next door
   // (the back wall is now the foot of the wooden staircase up to the balconies)
   plant(lg, 7.6, -7.2, { tall: true });
   // magazine rack + water dispenser
@@ -631,14 +631,15 @@ function atrium(p, anim) {
   for (const tz of [-3.35, 2.9]) roundTable(fg, -23.25, tz, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
   for (const ox of [-1.6, 1.6]) floorLantern(fg, -23.25 + ox, -3.35);
   // between the stage and reception: the same sofa setting as the welcome lounge
-  rug(fg, -9.35, 1.25, 4.4, 3.8, '#d9c7a0', '#5a3b26');
-  sofa(fg, -9.35, -0.05, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
-  sofa(fg, -9.35, 2.55, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
-  rectTable(fg, -9.35, 1.25, 1.4, 0.7, { h: 0.4, top: C.woodLight });
-  cyl(fg, 0.08, 0.2, C.white, -9.15, 0.47, 1.25, { seg: 10 });
-  sphere(fg, 0.1, '#f28cb0', -9.15, 0.75, 1.25);
-  box(fg, 0.5, 0.04, 0.35, '#e9e1cf', -9.75, 0.47, 1.2);
-  for (const ox of [-2.0, 2.0]) floorLantern(fg, -9.35 + ox, ox < 0 ? -0.1 : 2.6);
+  // (same size, colours and line as the welcome-lounge set: rug 4.6 m, sofas 1.25 m either side of z = 0)
+  rug(fg, -9.35, 0.0, 4.6, 4.6, '#d9c7a0', '#5a3b26');
+  sofa(fg, -9.35, -1.25, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  sofa(fg, -9.35, 1.25, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  rectTable(fg, -9.35, 0.0, 1.4, 0.7, { h: 0.4, top: C.woodLight });
+  cyl(fg, 0.08, 0.2, C.white, -9.15, 0.47, 0.0, { seg: 10 });
+  sphere(fg, 0.1, '#f28cb0', -9.15, 0.75, 0.0);
+  box(fg, 0.5, 0.04, 0.35, '#e9e1cf', -9.75, 0.47, -0.05);
+  for (const ox of [-1.7, 1.7]) floorLantern(fg, -9.35 + ox, 2.0);
   for (const gx of [-23.25, -9.35]) {
     box(fg, 0.3, 0.35, 15.6, BEAM, gx, CEIL1 - 0.8, 0, { cast: false });
     for (const bz of [-5.85, -2.0, 2.0, 5.85]) cyl(fg, 0.11, 0.06, glowMat('#fff0c8', 1.4), gx, CEIL1 - 0.88, bz, { seg: 10, cast: false });
