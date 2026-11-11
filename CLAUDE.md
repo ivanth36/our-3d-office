@@ -11,7 +11,9 @@ Context about the owner's setup to remember in every session:
   Floor 4 = Ivan, Phil (Chill Home); Floor 3 = Kenny (manager), JungKook, XiaoMing, Sally, Aida, Mary; Floor 5 = Eugene.
 - Employees are linked to the owner's scheduled tasks by task name. The floor panel shows the
   latest message of each task from `reports/latest.json`.
-- **Floor order:** 1F Joe's Café · 2F Outsource AI Team · 3F In-house Office · 4F Chill Home · 5F Japanese Garden (roof: glass gym + Japanese garden; Mt Fuji in the backdrop, `mtFuji()` in js/main.js).
+- **Floor order:** 1F Joe's Café · 2F Outsource AI Team · 3F In-house Office · 4F Chill Home · 5F Japanese Garden · 6F Private Onsen (half floor).
+  **Private (Ivan & Phil only, no staff routes):** 4F left of the shoji wall (x < -12.6: music/game rooms, living room, tatami room), the spiral
+  loft stair, the 5F bedroom (left end) and 6F (`PRIVATE`, `privateBedroom()`, `floor6()` in js/floors.js). Staff take breaks in the 4F pantry lounge.
   (The Chill Home is built by `floor2()` in js/floors.js; walking-map ids in js/staff.js use the real floor number.)
 - Always merge finished work into `main` (GitHub Pages publishes from `main`). When JS files change,
   bump the `?v=` version in index.html (import map + main script) so phones don't mix cached old files with new ones.

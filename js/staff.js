@@ -11,7 +11,7 @@ import { H, floorY, floorAt, box, cyl, grp, mat } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
 import { seat as deskSeat } from './floors.js';
-import { sx, raw, LANE_A, LANE_B } from './building.js';   // original-layout x -> real x on the longer floors
+import { sx, raw, real2, LANE_A, LANE_B } from './building.js';   // original-layout x -> real x on the longer floors
 
 const R = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -112,6 +112,9 @@ chain('4:musicMid', node(4, 'musicW', raw(-16.75), 3.9), node(4, 'gameOutM', raw
 chain('4:gameIn', node(4, 'pcStandP', raw(-19.0), -2.2), node(4, 'pcStandI', raw(-19.0), -5.4));
 chain('4:gameIn', node(4, 'consoleIn', raw(-14.45), -2.2), node(4, 'consoleStandP', raw(-14.45), -3.0), node(4, 'consoleStandI', raw(-14.45), -4.2));
 const LOUNGE_SEAT = { node: '4:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
+// 4F pantry lounge (the public side, by the kitchen): staff take their breaks here.
+// The music room, game room, living room, tatami room and the stair up are private (Ivan & Phil only).
+const PANTRY_SEAT = { node: '4:pantryStand', x: real2(-6.2), z: -3.05, ry: Math.PI, y: -0.08 };
 const DRUM_SEAT = { node: '4:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
 const PIANO_SEAT = { node: '4:pianoStand', x: -4.6, z: 5.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
 const COMPOSE_SEAT = { node: '4:composeStand', x: -4.6, z: 3.25, ry: Math.PI, y: 0, typing: true };   // music PC desk
@@ -123,6 +126,7 @@ const CONSOLE_PHIL = { node: '4:consoleStandP', x: raw(-14.85), z: -3.0, ry: Mat
 // ---- Chill Home (4F): open space, living room sofa, kitchen, dining table
 node(4, 'f2mid', 1.5, -0.2);                        // open space between living room & kitchen
 link('4:coreW', '4:f2mid');
+link('4:f2mid', node(4, 'pantryStand', real2(-6.2), -1.9));   // pantry lounge (see PANTRY_SEAT)
 // living room (moved to the middle of the floor: real positions)
 chain('4:f2mid', node(4, 'livFront', raw(-3.2), -2.0), node(4, 'sofaStandA', raw(-5.3), -2.0), node(4, 'sofaStandB', raw(-7.3), -2.0));
 // to the music room: up the side of the living room, then along the corridor between the game room and music room
@@ -805,21 +809,10 @@ async function xiaoming(a) {
     a.status = 'Tracking the SGD to CNY rate';
     await a.sleep(R(30, 45), meetingCalled);
     if (flags.teamMeeting) { await joinTeamMeeting(a, home); continue; }
-    a.status = 'Walking up to the Floor 4 music room';
-    await a.goSit(LOUNGE_SEAT, 'stairs');
-    a.status = 'Chilling in the music room';
-    await a.sleep(R(12, 20));
-    if (!flags.drumUser) {
-      flags.drumUser = 'XiaoMing';
-      a.status = 'Playing the drums';
-      await a.goSit(DRUM_SEAT);
-      await a.sleep(R(8, 12));
-      await a.stand();
-      flags.drumUser = null;
-    }
-    a.status = 'Playing the keyboard';
-    await a.goSit(PIANO_SEAT);
-    await a.sleep(R(8, 12));
+    a.status = 'Walking up to the Floor 4 pantry';
+    await a.goSit(PANTRY_SEAT, 'stairs');
+    a.status = 'Chilling on the pantry sofa';
+    await a.sleep(R(18, 30));
     a.status = 'Walking back down to Floor 3';
     await a.goSit(home, 'stairs');
   }

@@ -146,7 +146,7 @@ export function createPanel({ employees, floors }) {
     panel.innerHTML = `<div class="p-top"><div><b>${n}F · ${esc(f.name)}</b><br><small>${team.length ? `${team.length} on this floor · latest work` : ''}</small></div><button class="p-toggle" type="button" aria-label="Hide panel">▾</button></div>`;
     const row = document.createElement('div');
     row.className = 'p-row';
-    if (!team.length) row.innerHTML = `<div class="emp-empty">${n === 2 ? 'Outsource AI Team — no team members yet. This office is ready for future client work.' : 'Nobody works on this floor yet.'}</div>`;
+    if (!team.length) row.innerHTML = `<div class="emp-empty">${n === 2 ? 'Outsource AI Team — no team members yet. This office is ready for future client work.' : n === 6 ? 'Private: only Ivan and Phil come up here, by the spiral stair from their bedroom.' : 'Nobody works on this floor yet.'}</div>`;
     for (const e of team) row.append(column(e));
     panel.append(row);
     panel.querySelector('.p-toggle').addEventListener('click', () => panel.classList.toggle('mini'));

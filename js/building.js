@@ -19,14 +19,20 @@ export const XCC = (X0C + X1) / 2;
  *  the stage half way, so café | stage | reception sit evenly along the longer atrium. */
 export function shift2(f, x) {
   if (f === 1) return x < -13.2 ? -EXT2 : x < -6.0 ? -EXT2 / 2 : 0;
-  const split = { 2: -8.9, 3: -8.9, 4: -0.9, 5: -8.2 }[f];
+  const split = { 2: -8.9, 3: -8.9, 4: -0.9, 5: -Infinity }[f];   // roof: the gym stays put, Ivan & Phil's bedroom fills the new space
   return x < split ? -EXT2 : 0;
 }
 export const SPLIT = { 1: -4.0, 2: 1.0, 3: 1.0, 4: -1.5, 5: -1.0 };   // 2 = outsource office, 4 = Chill Home
 // Walking maps use the same rule, except Floor 1, which was re-laid out in real positions.
 const NAV_SPLIT = { ...SPLIT, 1: -Infinity };
 /** Walking-map x (old 24 m layout, real on Floor 1) -> real x on floor f. */
-export const sx = (f, x) => { const r = x < -500 ? x + 1000 : x < NAV_SPLIT[f] ? x - EXT : x; return r + shift2(f, r); };
+export const sx = (f, x) => {
+  if (x < -1500) return x + 2000;                 // real2(): already a real position in the 47 m building
+  const r = x < -500 ? x + 1000 : x < NAV_SPLIT[f] ? x - EXT : x;
+  return r + shift2(f, r);
+};
+/** Mark a walking-map x as a real position in the 47 m building (used for things in the new space). */
+export const real2 = (x) => x - 2000;
 /** Mark a walking-map x as already real (never shifted), e.g. furniture that was moved later. */
 export const raw = (x) => x - 1000;
 export const CORE_X = 9.6;              // rooms are x < CORE_X

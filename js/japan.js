@@ -369,3 +369,34 @@ export function placeDarumas(shelf, tasks, status = {}) {
   });
   return { update(status) { for (const [n, it] of items) it.set(status[n] ?? 'setup'); } };
 }
+
+// ---------------------------------------------------------------- spiral loft staircase
+/** Spiral stair around a cedar pole, from y0 up by `rise` (Ivan & Phil's private stair, 4F -> 5F -> 6F). */
+export function spiralStair(p, x, z, y0, rise, o = {}) {
+  const r = o.r ?? 1.15, steps = Math.round(rise / 0.2), turn = o.turn ?? 1.6, a0 = o.start ?? 0;
+  const g = grp(p, x, y0, z);
+  cyl(g, 0.11, rise + 0.9, '#8a5a3c', 0, 0, 0, { seg: 12 });
+  const glow = glowMat('#ffcf80', 0.5);
+  for (let k = 0; k < steps; k++) {
+    const a = a0 + (k / steps) * turn * Math.PI * 2, y = rise * (k + 1) / steps;
+    const t = grp(g, 0, y - 0.07, 0, a);
+    box(t, 0.36, 0.07, r, k % 2 ? '#c99a63' : '#bf8f58', 0, 0, r / 2, { cast: false });
+    if (k % 2 === 0) box(t, 0.03, 0.02, r - 0.2, glow, 0.17, -0.03, r / 2 + 0.05, { cast: false });
+    box(t, 0.04, 0.95, 0.04, '#3d2618', 0, 0.07, r - 0.04, { cast: false });                    // baluster
+    box(t, 0.36, 0.05, 0.06, '#3d2618', 0, 1.0, r - 0.04, { cast: false });                     // handrail piece
+  }
+  return g;
+}
+/** Square stair opening in a floor (dark well + wooden rail with an entry gap on the -x side). */
+export function stairWell(p, x, z, s = 2.7) {
+  box(p, s, 0.012, s, '#1b1410', x, 0.005, z, { cast: false });
+  const rail = (x1, z1, x2, z2) => {
+    const len = Math.hypot(x2 - x1, z2 - z1), ry = Math.atan2(x2 - x1, z2 - z1) - Math.PI / 2;
+    const g = grp(p, (x1 + x2) / 2, 0, (z1 + z2) / 2, ry);
+    for (let i = 0; i <= Math.round(len / 0.9); i++) box(g, 0.06, 1.0, 0.06, '#5a3b26', -len / 2 + len * i / Math.round(len / 0.9), 0, 0, { cast: false });
+    box(g, len, 0.06, 0.09, '#5a3b26', 0, 1.0, 0, { cast: false });
+  };
+  const h = s / 2;
+  rail(x - h, z - h, x + h, z - h); rail(x + h, z - h, x + h, z + h); rail(x - h, z + h, x + h, z + h);
+}
+

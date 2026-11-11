@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { H, CEIL, floorY, floorH, box, cyl, sphere, mat, makeLabel, optimize, GLOW, WINDOWS } from './helpers.js';
 import { shell, liftCar, LIFT, X0, XC, EXT, EXT2, SPLIT, KANJI, shift2 } from './building.js';
-import { floor1, floor2, officeFloor, floor5, vendingMachine } from './floors.js';
+import { floor1, floor2, officeFloor, floor5, floor6, vendingMachine } from './floors.js';
 import { placeDarumas, stoneLantern } from './japan.js';
 import { createEnv, mtFuji, isFriday } from './env.js';
 import { EMPLOYEES } from './employees.js';
@@ -14,8 +14,9 @@ const FLOORS = [
   { n: 1, name: "Joe's Café", sub: 'Atrium tea house · stage · welcome lounge' },
   { n: 2, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 3, name: 'In-house Office', sub: 'My in-house AI team' },
-  { n: 4, name: 'Chill Home', sub: 'Living room · tatami room · jazz kissa · omakase' },
-  { n: 5, name: 'Japanese Garden', sub: 'Dojo · roof garden · hinoki bath facing Fuji' },
+  { n: 4, name: 'Chill Home', sub: 'Private rooms · pantry lounge · kitchen · dining' },
+  { n: 5, name: 'Japanese Garden', short: 'Garden', sub: 'Dojo · roof garden · private bedroom' },
+  { n: 6, name: 'Private Onsen', short: 'Onsen', sub: 'Ivan & Phil only · bamboo · onsen facing Fuji' },
 ];
 
 // ---------------------------------------------------------------- renderer
@@ -62,7 +63,7 @@ sun.position.set(18, 40, 26);
 sun.target.position.set(XC, 16, 0);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -44, right: 44, top: 46, bottom: -44, near: 1, far: 140 });
+Object.assign(sun.shadow.camera, { left: -48, right: 48, top: 54, bottom: -48, near: 1, far: 160 });
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 0.03;
 scene.add(sun, sun.target);
@@ -203,7 +204,7 @@ for (const f of FLOORS) {
   g.position.y = floorY(f.n);
   g.name = `floor${f.n}`;
   scene.add(g);
-  const walls = shell(g, f.n);
+  const walls = f.n === 6 ? {} : shell(g, f.n);   // 6F: half a floor on top (no shell)
   // furniture goes in its own group: it was laid out for the original 24 m floor, so
   // everything left of SPLIT moves left with the wall (the building is now 40% longer)
   const c = new THREE.Group();
@@ -211,6 +212,7 @@ for (const f of FLOORS) {
   if (f.n === 1) floor1(c, anim);
   else if (f.n === 4) floor2(c, anim);   // Chill Home (built by floor2(), now on the 4th floor)
   else if (f.n === 5) floor5(c, anim);
+  else if (f.n === 6) floor6(c, anim);
   else officeFloor(c, f.n, [], anim);
   c.updateMatrixWorld(true);
   const _bb = new THREE.Box3(), _bc = new THREE.Vector3();
@@ -268,7 +270,7 @@ if (anim.darumaShelf) {
 }
 
 // ---------------------------------------------------------------- camera presets
-const TOTAL_H = floorY(5) + 3.5;
+const TOTAL_H = floorY(6) + 2.5;
 const BUILD_CENTER = new THREE.Vector3(XC, TOTAL_H * 0.5, 0);
 const VIEW_DIR = new THREE.Vector3(0.55, 0.5, 1).normalize();
 
@@ -284,9 +286,9 @@ function preset(n) {
     return { target: BUILD_CENTER.clone(), pos: BUILD_CENTER.clone().addScaledVector(VIEW_DIR, d) };
   }
   // Floor 1 is a tall atrium: look in from the open street side, just under the roof beams
-  const target = new THREE.Vector3(XC - 0.5, floorY(n) + (n === 1 ? 2.5 : 0.5), n === 1 ? -0.5 : 0.5);
+  const target = new THREE.Vector3(n === 6 ? -23.5 : XC - 0.5, floorY(n) + (n === 1 ? 2.5 : 0.5), n === 1 ? -0.5 : 0.5);   // 6F is half a floor (left end)
   const dir = new THREE.Vector3(0.28, n === 1 ? 0.5 : 1.15, 1).normalize();
-  const d = fitDistance(35 + EXT2, 15) * 0.82 + (n === 1 ? 3 : 4);
+  const d = fitDistance(n === 6 ? 26 : 35 + EXT2, 15) * 0.82 + (n === 1 ? 3 : 4);
   return { target, pos: target.clone().addScaledVector(dir, d) };
 }
 
@@ -299,7 +301,7 @@ function goTo(n, instant = false) {
   floorLabels.forEach((l, i) => { l.visible = n === 0 || i + 1 === n; });
   renderer.shadowMap.needsUpdate = true;
   // lift travels to the selected floor
-  lift.viewY = (n === 0 ? 0 : floorY(n)) + 0.02; // idle lift waits on the floor you're viewing
+  lift.viewY = (n === 0 ? 0 : floorY(Math.min(n, 5))) + 0.02;   // the lift stops at 5F // idle lift waits on the floor you're viewing
   const p = preset(n);
   if (instant) {
     camera.position.copy(p.pos); controls.target.copy(p.target); controls.update();
@@ -308,7 +310,7 @@ function goTo(n, instant = false) {
   }
   // UI
   document.querySelectorAll('#floors button').forEach((b) => b.classList.toggle('active', +b.dataset.floor === n));
-  const info = n === 0 ? { name: 'IP Man Home Office', sub: '5 floors · pick a floor below' } : FLOORS[n - 1];
+  const info = n === 0 ? { name: 'IP Man Home Office', sub: '6 floors · pick a floor below' } : FLOORS[n - 1];
   document.getElementById('floorTitle').textContent = n === 0 ? info.name : `${n}F · ${info.name}`;
   document.getElementById('floorSub').textContent = info.sub;
   hideCard();
@@ -318,7 +320,7 @@ function goTo(n, instant = false) {
 
 // ---------------------------------------------------------------- UI
 const nav = document.getElementById('floors');
-const btns = [{ n: 0, label: '🏢', small: 'All' }, ...[...FLOORS].reverse().map((f) => ({ n: f.n, label: `${f.n}`, small: f.name.split(' ')[0].replace("'s", '') }))];
+const btns = [{ n: 0, label: '🏢', small: 'All' }, ...[...FLOORS].reverse().map((f) => ({ n: f.n, label: `${f.n}`, small: f.short ?? f.name.split(' ')[0].replace("'s", '') }))];
 for (const b of btns) {
   const el = document.createElement('button');
   el.dataset.floor = b.n;
@@ -440,7 +442,7 @@ window.addEventListener('resize', onResize);
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
-  if (k >= '0' && k <= '5') goTo(+k);
+  if (k >= '0' && k <= '6') goTo(+k);
   else if (k === 'a') goTo(0);
   else if (k === 'escape') hideCard();
 });
