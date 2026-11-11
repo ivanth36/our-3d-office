@@ -24,7 +24,7 @@ export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };
 
 // Japanese look: dark timber outside (yakisugi-style posts and beams), each floor lined inside
 const WALL = '#4a3428', WALL_OUT = '#4a3428', TRIM = '#2a1f19', POST = '#2a1f19', SLAB_C = '#5a4030';
-const LINING = { 1: '#b8865a', 2: '#f1ece3', 3: '#f1ece3', 4: '#e8dcc6' };
+const LINING = { 1: '#b8865a', 2: '#b8865a', 3: '#b8865a', 4: '#b8865a' };   // same warm wood on every floor
 export const KANJI = ['', '一階', '二階', '三階', '四階', '五階'];
 // window glass: sky reflection by day, warm room light at night (see js/env.js)
 const winMat = () => { const m = mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }); WINDOWS.add(m); return m; };
@@ -90,30 +90,27 @@ function slab(p, n) {
   box(p, W + 0.1, 0.12, 0.12, TRIM, XC, -SLAB, Z1, { cast: false });
   // core floor finish
   if (n > 1) {
-    box(p, sw, 0.02, Z1 - STAIR.z1, '#d9c7aa', sx, 0, (STAIR.z1 + Z1) / 2, { cast: false });
-    box(p, sw, 0.02, STAIR.z0 - LIFT.z1, '#d9c7aa', sx, 0, (LIFT.z1 + STAIR.z0) / 2, { cast: false });
+    box(p, sw, 0.02, Z1 - STAIR.z1, '#c99a63', sx, 0, (STAIR.z1 + Z1) / 2, { cast: false });
+    box(p, sw, 0.02, STAIR.z0 - LIFT.z1, '#c99a63', sx, 0, (LIFT.z1 + STAIR.z0) / 2, { cast: false });
   } else {
-    box(p, sw, 0.02, Z1 - LIFT.z1, '#d9c7aa', sx, 0, (LIFT.z1 + Z1) / 2, { cast: false });
+    box(p, sw, 0.02, Z1 - LIFT.z1, '#c99a63', sx, 0, (LIFT.z1 + Z1) / 2, { cast: false });
   }
 }
 
-/** Stairs from this floor (y=0, front) up to the next floor (y=H, back). */
+/** Stairs from this floor (y=0, front) up to the next floor (y=H, back): same style as the
+ *  atrium stairs on Floor 1 (floating cedar treads, soft step lights, wooden rails). */
 function stairs(p) {
-  const steps = Math.round(H / 0.22), rise = H / steps, run = (STAIR.z1 - STAIR.z0) / steps;
-  const w = STAIR.x1 - STAIR.x0 - 0.3, cx = (STAIR.x0 + STAIR.x1) / 2 + 0.1;
-  for (let k = 0; k < steps; k++) {
-    const z = STAIR.z1 - run * (k + 0.5);
-    box(p, w, rise * (k + 1), run, k % 2 ? '#d8b88c' : '#cfae80', cx, 0, z, { cast: false });
-  }
-  // stringer + handrail on the open (room) side
-  const ang = Math.atan2(H, STAIR.z1 - STAIR.z0);
-  const len = Math.hypot(H, STAIR.z1 - STAIR.z0);
-  const rail = grp(p, STAIR.x0 + 0.08, H / 2 + 0.95, (STAIR.z0 + STAIR.z1) / 2);
-  box(rail, 0.06, 0.06, len, C.woodDark, 0, 0, 0, { rx: ang });
-  for (let k = 1; k < steps; k += 4) {
-    const z = STAIR.z1 - run * (k + 0.5);
-    box(p, 0.03, 0.95, 0.03, C.black, STAIR.x0 + 0.08, rise * (k + 1), z, { cast: false });
-  }
+  flight(p, (STAIR.x0 + STAIR.x1) / 2 + 0.05, 0, STAIR.z1, STAIR.z0, STAIR.x1 - STAIR.x0 - 0.35);
+}
+/** Wooden balustrade (matches the Floor 1 balconies). */
+function woodRail(p, x1, z1, x2, z2, h = 1.0) {
+  const len = Math.hypot(x2 - x1, z2 - z1), ry = Math.atan2(x2 - x1, z2 - z1) - Math.PI / 2;
+  const g = grp(p, (x1 + x2) / 2, 0, (z1 + z2) / 2, ry);
+  const n = Math.max(1, Math.round(len / 1.2));
+  for (let i = 0; i <= n; i++) box(g, 0.07, h, 0.07, '#5a3b26', -len / 2 + len * i / n, 0, 0, { cast: false });
+  box(g, len, 0.07, 0.1, '#5a3b26', 0, h, 0, { cast: false });
+  box(g, len, 0.04, 0.05, '#5a3b26', 0, h / 2, 0, { cast: false });
+  return g;
 }
 
 /** Floor 1 (the tall atrium): three flights in the core, switching back on two lanes,
@@ -238,15 +235,15 @@ export function shell(p, n) {
     // upper floors get a glass balustrade along the open front
     if (n > 1) glassRail(p, X0 + 0.5, Z1 - 0.15, X1 - 0.5, Z1 - 0.15);
     // rail around the stair hole (on this floor, from the flight below)
-    if (n > 1) glassRail(p, STAIR.x0 - 0.05, STAIR.z0 + 0.2, STAIR.x0 - 0.05, STAIR.z1);
+    if (n > 1) woodRail(p, STAIR.x0 - 0.05, STAIR.z0 + 0.2, STAIR.x0 - 0.05, STAIR.z1);
   } else {
     // roof parapet (glass railing all round)
     glassRail(p, X0 + 0.1, Z1 - 0.1, X1 - 0.1, Z1 - 0.1);
     glassRail(p, X0 + 0.1, Z0 + 0.1, LIFT.x0, Z0 + 0.1);
     glassRail(p, X0 + 0.1, Z0 + 0.1, X0 + 0.1, Z1 - 0.1);
     glassRail(p, X1 - 0.1, LIFT.z1, X1 - 0.1, Z1 - 0.1);
-    glassRail(p, STAIR.x0 - 0.05, STAIR.z0 + 0.2, STAIR.x0 - 0.05, STAIR.z1);
-    glassRail(p, STAIR.x0, STAIR.z1 + 0.05, X1 - 0.1, STAIR.z1 + 0.05);
+    woodRail(p, STAIR.x0 - 0.05, STAIR.z0 + 0.2, STAIR.x0 - 0.05, STAIR.z1);
+    woodRail(p, STAIR.x0, STAIR.z1 + 0.05, X1 - 0.1, STAIR.z1 + 0.05);
   }
   // bilingual floor sign by the stairs (seen from the landing)
   if (n < 5 || roof) {

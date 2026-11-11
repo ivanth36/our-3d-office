@@ -677,7 +677,7 @@ function keyboardOnStand(p, x, z, ry) {
 }
 
 export function floor2(p, anim = {}) {
-  floorSurface(p, RW, 16, RX, 0, plankTex('#d9ae7a', '#b8875a'), 3);
+  floorSurface(p, RW, 16, RX, 0, plankTex('#c99a63', '#a8784a'), 2.2);
 
   // ================= LIVING ROOM (middle-back, real x -11.7..-1, z -7.7..1) =================
   // Built in real positions (it was moved into the middle when the game room took its old spot).
@@ -984,8 +984,8 @@ export function seat(i) {
 
 export function officeFloor(p, n, employees, anim) {
   // minimal Kyoto / Muji style: pale oak floor, light wood, paper lanterns, linen
-  floorSurface(p, RW, 16, RX, 0, plankTex('#e6d3b3', '#d3bd97'), 2.4);
-  const accent = n === 3 ? '#b9c4a8' : '#b8c4cf', oak = '#c8a77a';
+  floorSurface(p, RW, 16, RX, 0, plankTex('#c99a63', '#a8784a'), 2.2);      // same cedar floor as Floor 1
+  const accent = n === 3 ? '#b9c4a8' : '#b8c4cf', oak = '#8a5a3c';   // wood tones matched to Floor 1
 
   // ---- big shared desk (like a bench system: one long top, centre spine + screens)
   const { x, z, L, W } = DESK;
@@ -996,8 +996,8 @@ export function officeFloor(p, n, employees, anim) {
     box(dg, 0.07, 0.74, 0.07, oak, lx, 0, W / 2 - 0.1);
     box(dg, 0.06, 0.06, W - 0.2, oak, lx, 0.1, 0);
   }
-  box(dg, L, 0.06, W, '#e8d2ad', 0, 0.74, 0);
-  box(dg, L - 0.4, 0.32, 0.4, '#d6c3a0', 0, 0.8, 0);                 // cable/storage spine
+  box(dg, L, 0.06, W, '#c99a63', 0, 0.74, 0);
+  box(dg, L - 0.4, 0.32, 0.4, '#a8784a', 0, 0.8, 0);                 // cable/storage spine
   for (let i = 0; i < 5; i++) box(dg, L / 5 - 0.15, 0.4, 0.04, accent, -L / 2 + (i + 0.5) * L / 5, 1.12, 0); // linen screens
   bonsai(dg, -L / 2 + 0.25, 0.8, 0, 1.3);                             // bonsai at both ends of the shared desk
   bonsai(dg, L / 2 - 0.25, 0.8, 0, 1.3);
@@ -1036,7 +1036,7 @@ export function officeFloor(p, n, employees, anim) {
   glassWall(p, rx1, -7.85, rx1, rz1, CEIL, shoji);
   const mcx = (rx0 + rx1) / 2, mcz = -5.0;
   // oval table: scale a cylinder
-  const oval = cyl(p, 1, 0.06, '#e3c99c', mcx, 0.74, mcz, { seg: 28 });
+  const oval = cyl(p, 1, 0.06, '#c99a63', mcx, 0.74, mcz, { seg: 28 });
   oval.scale.set(2.2, 0.06, 0.9);
   ikebana(p, mcx, 0.8, mcz);                                                          // ikebana in the middle of the table
   box(p, 0.5, 0.74, 0.5, oak, mcx - 1.2, 0, mcz);
@@ -1085,9 +1085,9 @@ export function officeFloor(p, n, employees, anim) {
     const ox0 = -8.6, ox1 = -0.3, oz1 = -3.4;
     box(nb, ox1 - ox0, 0.03, 8 + oz1, '#7a5a43', (ox0 + ox1) / 2, 0.02, (-8 + oz1) / 2, { cast: false });   // wood floor
     rug(nb, -4.4, -5.6, 4.2, 2.8, '#d9c7a8', '#7a5a43');
-    glassWall(nb, ox0, oz1, ox1, oz1, CEIL, { gap: [3.6, 4.6], frame: '#c8a77a' });   // front, door in the middle
-    glassWall(nb, ox0, -7.85, ox0, oz1, CEIL, { frame: '#c8a77a' });
-    glassWall(nb, ox1, -7.85, ox1, oz1, CEIL, { frame: '#c8a77a' });
+    glassWall(nb, ox0, oz1, ox1, oz1, CEIL, { gap: [3.6, 4.6], frame: '#8a5a3c' });   // front, door in the middle
+    glassWall(nb, ox0, -7.85, ox0, oz1, CEIL, { frame: '#8a5a3c' });
+    glassWall(nb, ox1, -7.85, ox1, oz1, CEIL, { frame: '#8a5a3c' });
     addDoor(anim, `${n}:mgr`, glassDoor(nb, ox0 + 3.6, oz1, 1.0, CEIL, 0), 0, -1.45);
     const mgrSign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2f3a2c'; ctx.font = 'bold 54px -apple-system, sans-serif'; ctx.fillText("Manager's Office", 30, 68); });
     panel(nb, 1.9, 0.36, mgrSign, -2.2, 3.1, oz1 + 0.04, { transparent: true });
@@ -1152,7 +1152,7 @@ export function officeFloor(p, n, employees, anim) {
 
 // ---------------------------------------------------------------- Floor 5 (roof)
 export function floor5(p, anim) {
-  floorSurface(p, RW, 16, RX, 0, plankTex('#c39a6b', '#9b7450'), 2);
+  floorSurface(p, RW, 16, RX, 0, plankTex('#c99a63', '#a8784a'), 2.2);
 
   // ---- big glass gym filling the whole left end of the roof (built in final positions)
   const gymG = grp(p);
@@ -1162,8 +1162,8 @@ export function floor5(p, anim) {
     const gx0 = X0 + 0.2, gx1 = -12.0, gz0 = -7.8, gz1 = 7.7, gh = 3.0, gcx = (gx0 + gx1) / 2;
     const rubber = '#6f757d', dark = '#2b2a2c';
     // the gym is now a dojo: polished wooden floor, tatami for stretching, timber frames, low wooden panels
-    box(p, gx1 - gx0, 0.04, gz1 - gz0, '#c9a66b', gcx, 0.02, (gz0 + gz1) / 2, { cast: false });
-    for (let x = gx0 + 0.6; x < gx1; x += 0.6) box(p, 0.015, 0.003, gz1 - gz0, '#b08d58', x, 0.06, (gz0 + gz1) / 2, { cast: false });   // floor boards
+    box(p, gx1 - gx0, 0.04, gz1 - gz0, '#c99a63', gcx, 0.02, (gz0 + gz1) / 2, { cast: false });
+    for (let x = gx0 + 0.6; x < gx1; x += 0.6) box(p, 0.015, 0.003, gz1 - gz0, '#a8784a', x, 0.06, (gz0 + gz1) / 2, { cast: false });   // floor boards
     tatamiFloor(p, -21.0, 3.3, -16.2, 6.7, 0.065);
     const wf = { frame: '#5a3b26' };
     glassWall(p, gx0, gz1, gx1, gz1, gh, wf);                                // front
