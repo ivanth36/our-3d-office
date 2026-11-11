@@ -128,12 +128,13 @@ function tvTex() {
 // ---------------------------------------------------------------- flower planter
 const FLOWER_COLS = ['#f28cb0', '#f1c84b', '#e85d3d', '#a98bd6', '#ffffff', '#f08a3a', '#e8508f', '#7fa8e0'];
 /** Wooden planter box with a green bush and colourful flowers on top. */
-function flowerPlanter(p, x, z, i = 0) {
-  box(p, 1.4, 0.5, 0.7, C.woodDark, x, 0, z);
-  sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, x, 0.75, z, { s: [1.4, 0.75, 0.8] });
+const AZALEA = ['#f28cb0', '#ffffff', '#e8508f', '#f7c6d4', '#d23a2e'];
+function flowerPlanter(p, x, z, i = 0, japanese = false) {
+  box(p, 1.4, japanese ? 0.35 : 0.5, 0.7, japanese ? '#2e2b29' : C.woodDark, x, 0, z);
+  sphere(p, 0.45, i % 2 ? C.leaf : C.leaf2, x, japanese ? 0.6 : 0.75, z, { s: japanese ? [1.4, 0.6, 0.8] : [1.4, 0.75, 0.8] });
   for (let k = 0; k < 9; k++) {
     const fx = x - 0.5 + (k % 5) * 0.25 + ((k * 37) % 7) * 0.01, fz = z - 0.15 + (k % 3) * 0.15;
-    const col = FLOWER_COLS[(i * 3 + k) % FLOWER_COLS.length];
+    const col = japanese ? AZALEA[(i + k) % AZALEA.length] : FLOWER_COLS[(i * 3 + k) % FLOWER_COLS.length];
     sphere(p, 0.07, col, fx, 0.98 + (k % 2) * 0.05, fz, { cast: false });
     sphere(p, 0.025, '#f6d64a', fx, 1.03 + (k % 2) * 0.05, fz, { cast: false });  // flower centre
   }
@@ -869,9 +870,6 @@ export function officeFloor(p, n, employees, anim) {
 // ---------------------------------------------------------------- Floor 5 (roof)
 export function floor5(p, anim) {
   floorSurface(p, RW, 16, RX, 0, plankTex('#c39a6b', '#9b7450'), 2);
-  // grass patches
-  box(p, 7.0, 0.05, 3.0, '#7fae5a', 4.5, 0.02, 6.0, { cast: false });
-  box(p, 3.5, 0.05, 4.5, '#7fae5a', -0.2, 0.02, -5.5, { cast: false });
 
   // ---- big glass gym filling the whole left end of the roof (built in final positions)
   const gymG = grp(p);
@@ -978,66 +976,144 @@ export function floor5(p, anim) {
     vendingMachine(vg, -11.55, -5.45, Math.PI / 2, { body: '#2f6fb0', trim: '#1f4f85', title: 'PROTEIN BARS', sub: 'refuel 🍫', cols: ['#8a5a33', '#e2a356', '#f2f2f2', '#c96f4a', '#f1c84b'] });
   }
 
-  // ---- chill area: lounge set, umbrella table, loungers, planters, string lights
-  rug(p, 2.2, 2.2, 5.0, 3.4, '#f0e6d2', '#c8935a');
-  sofa(p, 2.2, 0.9, 3.2, 0, { color: '#efe4cf', cushion: '#f8f1e3', pillow: '#7f9f6e' });
-  sofa(p, 0.0, 2.7, 2.2, Math.PI / 2, { color: '#efe4cf', cushion: '#f8f1e3', pillow: '#f1c84b' });
-  rectTable(p, 2.4, 2.4, 1.6, 0.9, { h: 0.4, top: C.wood });
-  cyl(p, 0.25, 0.12, '#3a3a3a', 2.4, 0.47, 2.4, { seg: 14 });               // fire bowl
-  sphere(p, 0.15, glowMat('#ffb347'), 2.4, 0.62, 2.4, { s: [1, 0.6, 1], cast: false });
-  chair(p, 4.6, 2.6, -Math.PI / 2, { color: C.wood, seat: '#efe4cf' });
-  // umbrella table
-  roundTable(p, 5.4, -4.6, { r: 0.6, vase: false, chairs: 4, start: Math.PI / 4, chair: { color: C.wood, seat: '#efe4cf' } });
-  cyl(p, 0.03, 2.4, C.woodDark, 5.4, 0.75, -4.6, { seg: 6 });
-  cyl(p, 1.6, 0.5, '#f4ede2', 5.4, 2.7, -4.6, { top: 0.02, bottom: 1, seg: 8, cast: true });
-  // sun loungers (in the garden, next to the gym)
-  const lgr = grp(p);
-  lgr.userData.noShift = true;
-  for (const lx of [-10.1, -9.2]) {
-    const l = grp(lgr, lx, 0, 5.9);
-    box(l, 0.7, 0.3, 1.8, C.wood, 0, 0, 0);
-    box(l, 0.66, 0.08, 1.2, C.white, 0, 0.3, 0.25);
-    box(l, 0.66, 0.08, 0.7, C.white, 0, 0.45, -0.6, { rx: -0.6 });
-  }
-  // planters along the front edge (whole longer roof)
-  const pg = grp(p);
-  pg.userData.noShift = true;
-  for (let i = 0; i < 11; i++) flowerPlanter(pg, -11.2 + i * 1.7, 7.3, i);
-  // and a new row along the back edge, from the vending machines to the lift
-  for (let i = 0; i < 11; i++) flowerPlanter(pg, -10.0 + i * 1.7, -7.35, i + 5);
-  // a flower bed by the sun loungers
-  for (let k = 0; k < 14; k++) sphere(pg, 0.09, FLOWER_COLS[k % FLOWER_COLS.length], -11.3 + (k % 7) * 0.22, 0.1, 4.0 + Math.floor(k / 7) * 0.3, { cast: false });
-  box(pg, 1.7, 0.06, 0.9, '#6b8f4a', -10.65, 0.02, 4.15, { cast: false });
-  for (const [px, pz] of [[8.8, -2.6], [8.8, 2.5], [-1.4, -7.3], [8.8, 5.0]]) plant(p, px, pz, { tall: true, s: 1.2 });
-  // string lights between four poles (spanning the longer garden)
-  const lg = grp(p);
-  lg.userData.noShift = true;
-  const poles = [[-1.4 - EXT, -0.4], [8.6, -0.4], [8.6, 6.4], [-1.4 - EXT, 6.4]];
-  for (const [px, pz] of poles) cyl(lg, 0.05, 3.0, C.black, px, 0, pz, { seg: 6 });
-  const bulb = glowMat('#ffd27a');
-  for (let k = 0; k < 4; k++) {
-    const [ax, az] = poles[k], [bx, bz] = poles[(k + 1) % 4];
-    const n = Math.round(Math.hypot(bx - ax, bz - az) / 0.7);
-    for (let i = 1; i < n; i++) {
-      const t = i / n, sag = Math.sin(t * Math.PI) * 0.45;
-      sphere(lg, 0.06, bulb, ax + (bx - ax) * t, 2.95 - sag, az + (bz - az) * t, { cast: false });
-    }
-  }
-  // ---- the new space (building is 40% longer): outdoor dining under a pergola
+  // ================= JAPANESE GARDEN (everything outside the gym; real positions) =================
+  // Walkways kept clear: lift/stairs -> gym (z about -1.3..1.0 across the roof), the smoke-break
+  // spot by the pond (z ~6), and the cleaners' spots by the front and back planters.
+  const jg = grp(p);
+  jg.userData.noShift = true;
   {
-    const nb = grp(p);
-    nb.userData.noShift = true;
-    box(nb, 6.0, 0.05, 3.6, '#7fae5a', -6.0, 0.02, -4.4, { cast: false });   // lawn
-    rectTable(nb, -6.0, 3.5, 4.0, 1.2, { top: C.wood });
-    for (let i = 0; i < 4; i++) {
-      chair(nb, -7.5 + i * 1.0, 2.55, 0, { color: C.wood, seat: '#efe4cf' });
-      chair(nb, -7.5 + i * 1.0, 4.45, Math.PI, { color: C.wood, seat: '#efe4cf' });
+    const p = jg;
+    const vermilion = '#c8352a', charcoal = '#2e2b29', stone = '#9a958c', stoneD = '#7d786f';
+    const sakuraPink = ['#f7c6d4', '#f4b3c5', '#fad6e0', '#f0a8bd'];
+    // -- the approach: stepping-stone path from the lift to the gym
+    for (let x = 8.4; x > -10.6; x -= 0.95) cyl(p, 0.36 + ((x * 7) % 3) * 0.04, 0.05, x % 2 > 0 ? stone : stoneD, x, 0.0, -0.15 + Math.sin(x * 1.7) * 0.18, { seg: 9, cast: false });
+    // -- torii gate where you arrive from the lift and stairs
+    const torii = grp(p, 6.3, 0, -0.1);
+    for (const tz of [-1.8, 1.6]) {
+      cyl(torii, 0.16, 3.2, vermilion, 0, 0, tz, { top: 0.85, bottom: 1, seg: 12 });
+      cyl(torii, 0.22, 0.35, charcoal, 0, 0, tz, { seg: 12 });                       // black feet
     }
-    for (const [px, pz] of [[-8.6, 1.9], [-3.4, 1.9], [-8.6, 5.1], [-3.4, 5.1]]) box(nb, 0.12, 2.8, 0.12, C.woodDark, px, 0, pz);
-    for (const pz of [1.9, 5.1]) box(nb, 5.4, 0.14, 0.14, C.woodDark, -6.0, 2.8, pz);
-    for (let i = 0; i < 7; i++) box(nb, 0.1, 0.1, 3.5, C.wood, -8.6 + i * 0.87, 2.94, 3.5);
-    plant(nb, -9.4, 1.4, { tall: true });
-    plant(nb, -2.6, 1.4, { tall: true });
+    box(torii, 0.34, 0.22, 4.4, vermilion, 0, 2.55, -0.1);                            // nuki (lower beam)
+    box(torii, 0.42, 0.24, 5.0, vermilion, 0, 3.2, -0.1);                             // kasagi (top beam)
+    box(torii, 0.46, 0.12, 5.4, charcoal, 0, 3.44, -0.1);                             // black cap
+    for (const tz of [-2.55, 2.35]) box(torii, 0.46, 0.14, 0.4, charcoal, 0, 3.5, tz, { rx: tz > 0 ? 0.25 : -0.25 }); // upturned ends
+    box(torii, 0.12, 0.6, 0.5, charcoal, 0, 2.62, -0.1);                              // name plaque
+    // -- stone lanterns (toro)
+    const toro = (x, z, sc = 1) => {
+      const t = grp(p, x, 0, z); t.scale.setScalar(sc);
+      cyl(t, 0.32, 0.12, stoneD, 0, 0, 0, { seg: 6 });
+      cyl(t, 0.09, 0.6, stone, 0, 0.12, 0, { seg: 8 });
+      box(t, 0.4, 0.08, 0.4, stoneD, 0, 0.72, 0);
+      box(t, 0.3, 0.26, 0.3, '#b5afa5', 0, 0.8, 0);
+      box(t, 0.18, 0.12, 0.32, glowMat('#ffd27a'), 0, 0.86, 0, { cast: false });       // glowing window
+      cyl(t, 0.36, 0.22, stoneD, 0, 1.06, 0, { top: 0.25, bottom: 1, seg: 6 });       // roof
+      sphere(t, 0.07, stone, 0, 1.33, 0);
+    };
+    toro(5.6, -2.9); toro(5.4, 2.4); toro(-2.2, 2.0, 0.9); toro(3.9, 4.6, 0.9); toro(-7.6, -3.3); toro(-4.0, 6.2, 0.9);
+    // -- koi pond with a red arched bridge
+    const pond = grp(p, 0.8, 0, 3.6);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.12, 32), mat('#7d786f'));
+    rim.scale.set(2.75, 1, 1.45); rim.position.y = 0.06; rim.receiveShadow = true; pond.add(rim);
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.02, 32), mat('#3f7f8f', { roughness: 0.15, metalness: 0.1 }));
+    water.scale.set(2.55, 1, 1.28); water.position.y = 0.12; pond.add(water);
+    for (let i = 0; i < 12; i++) {                                                     // rocks around the edge
+      const a = i / 12 * Math.PI * 2;
+      sphere(pond, 0.16 + (i % 3) * 0.05, i % 2 ? stone : stoneD, Math.cos(a) * 2.75, 0.12, Math.sin(a) * 1.45, { s: [1.2, 0.7, 1] });
+    }
+    [['#f08a3a', 0.6, 0.3], ['#ffffff', -0.9, -0.4], ['#e85d3d', 1.4, -0.5], ['#f4f1ea', -1.6, 0.4], ['#f1c84b', 0.1, 0.6]].forEach(([c, kx, kz], i) => {
+      const k = grp(pond, kx, 0.14, kz, i * 1.3);                                      // koi
+      sphere(k, 0.14, c, 0, 0, 0, { s: [0.45, 0.25, 1], cast: false });
+      sphere(k, 0.06, c, 0, 0, -0.17, { s: [1, 0.3, 0.8], cast: false });
+    });
+    for (const [lx, lz] of [[-1.3, 0.7], [1.9, 0.2], [-0.2, -0.8]]) cyl(pond, 0.22, 0.01, '#5f9a4c', lx, 0.135, lz, { seg: 10, cast: false });   // lily pads
+    sphere(pond, 0.06, '#f7c6d4', -1.3, 0.17, 0.7, { cast: false });
+    const br = grp(pond, 0, 0, 0);                                                     // arched bridge across the pond
+    for (let i = 0; i <= 10; i++) {
+      const t = i / 10, z = -1.75 + t * 3.5, y = 0.12 + Math.sin(t * Math.PI) * 0.55;
+      box(br, 1.1, 0.07, 0.38, '#a8442e', 0, y, z, { rx: Math.cos(t * Math.PI) * -0.45 });
+      if (i % 2 === 0) for (const bx of [-0.55, 0.55]) box(br, 0.07, 0.6, 0.07, vermilion, bx, y, z);
+    }
+    for (const bx of [-0.55, 0.55]) for (let i = 0; i < 10; i++) {
+      const t = (i + 0.5) / 10, z = -1.75 + t * 3.5, y = 0.12 + Math.sin(t * Math.PI) * 0.55 + 0.6;
+      box(br, 0.07, 0.07, 0.4, vermilion, bx, y, z, { rx: Math.cos(t * Math.PI) * -0.45 });
+    }
+    // -- zen rock garden (raked gravel, three rocks, moss)
+    const zx0 = -7.0, zx1 = 0.0, zz0 = -6.9, zz1 = -3.7;
+    box(p, zx1 - zx0 + 0.3, 0.12, zz1 - zz0 + 0.3, charcoal, (zx0 + zx1) / 2, 0, (zz0 + zz1) / 2, { cast: false });   // timber edge
+    box(p, zx1 - zx0, 0.13, zz1 - zz0, '#e7e2d6', (zx0 + zx1) / 2, 0, (zz0 + zz1) / 2, { cast: false });
+    for (let z = zz0 + 0.25; z < zz1; z += 0.28) box(p, zx1 - zx0 - 0.2, 0.012, 0.03, '#cfc8b8', (zx0 + zx1) / 2, 0.13, z, { cast: false }); // raked lines
+    for (const [rx, rz, r] of [[-5.3, -5.5, 0.55], [-2.4, -4.6, 0.4], [-1.0, -6.0, 0.32]]) {
+      for (let ring = 1; ring <= 3; ring++) {                                          // raked rings round each rock
+        const ringM = new THREE.Mesh(new THREE.TorusGeometry(r + ring * 0.22, 0.015, 4, 28), mat('#cfc8b8'));
+        ringM.rotation.x = Math.PI / 2; ringM.position.set(rx, 0.135, rz); p.add(ringM);
+      }
+      sphere(p, r + 0.06, '#7f9a5a', rx, 0.13, rz, { s: [1.2, 0.25, 1.1], cast: false });                     // moss
+      sphere(p, r, '#6f6a62', rx, 0.13 + r * 0.45, rz, { s: [1.1, 0.9, 0.9] });
+    }
+    // -- tea pavilion (azumaya) with tatami, low table and cushions
+    const tp = grp(p, -6.0, 0, 3.6);
+    box(tp, 3.6, 0.35, 3.6, '#6b4a33', 0, 0, 0);                                      // raised floor
+    box(tp, 3.3, 0.04, 3.3, '#d9cf9c', 0, 0.35, 0);                                   // tatami
+    for (let i = 0; i < 3; i++) box(tp, 0.03, 0.045, 3.3, '#a89a62', -0.55 + i * 0.55, 0.35, 0);
+    for (const [px, pz] of [[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]]) box(tp, 0.16, 2.6, 0.16, '#4a3020', px, 0.35, pz);
+    cyl(tp, 3.0, 0.9, charcoal, 0, 2.95, 0, { top: 0.12, bottom: 1, seg: 4, ry: Math.PI / 4 });   // pyramid roof
+    box(tp, 4.3, 0.08, 4.3, charcoal, 0, 2.9, 0);                                     // wide eaves
+    sphere(tp, 0.12, '#c9a24a', 0, 3.9, 0, { metalness: 0.6, roughness: 0.3 });     // roof finial
+    box(tp, 1.3, 0.28, 0.8, '#3d2b1f', 0, 0.39, 0);                                   // low table
+    cyl(tp, 0.07, 0.1, '#f4ede2', -0.3, 0.67, 0, { seg: 10 });                         // tea cups + pot
+    cyl(tp, 0.07, 0.1, '#f4ede2', 0.3, 0.67, 0, { seg: 10 });
+    sphere(tp, 0.12, '#5c6b4a', 0, 0.75, -0.15, { s: [1, 0.8, 1] });
+    for (const [cx, cz] of [[-0.95, 0], [0.95, 0], [0, -0.75], [0, 0.75]]) box(tp, 0.55, 0.08, 0.55, '#a8442e', cx, 0.39, cz);    // zabuton cushions
+    const chochinTP = mat('#f4ede2', { emissive: '#ffcf80', emissiveIntensity: 0.5 });
+    for (const [lx, lz] of [[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]]) cyl(tp, 0.14, 0.32, chochinTP, lx, 2.45, lz, { seg: 12, cast: false });
+    // -- nodate: red parasol over a low red bench
+    const nd = grp(p, 5.6, 0, -5.0);
+    box(nd, 1.9, 0.42, 0.55, '#6b4a33', 0, 0, 0);
+    box(nd, 1.95, 0.05, 0.6, vermilion, 0, 0.42, 0);                                  // red felt (mōsen)
+    cyl(nd, 0.03, 2.6, '#6b4a33', 0, 0, -0.45, { seg: 6 });
+    cyl(nd, 1.5, 0.45, vermilion, 0, 2.4, -0.45, { top: 0.03, bottom: 1, seg: 16 });
+    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; box(nd, 0.02, 0.02, 1.5, '#e8d6b8', Math.sin(a) * 0.75, 2.62, -0.45 + Math.cos(a) * 0.75, { ry: a }); }
+    // -- trees: sakura (cherry blossom), sculpted pines, bamboo
+    const sakura = (x, z, sc = 1) => {
+      const t = grp(p, x, 0, z); t.scale.setScalar(sc);
+      cyl(t, 0.45, 0.4, charcoal, 0, 0, 0, { seg: 10 });
+      cyl(t, 0.12, 1.8, '#5a3b2b', 0, 0.4, 0, { top: 0.6, seg: 7, rz: 0.12 });
+      for (const [bx, by, bz, r] of [[0, 2.5, 0, 0.85], [0.7, 2.2, 0.3, 0.6], [-0.7, 2.25, -0.2, 0.62], [0.2, 2.9, -0.5, 0.55], [-0.3, 2.85, 0.55, 0.55]]) sphere(t, r, sakuraPink[Math.floor(Math.abs(bx * 10 + bz * 7)) % 4], bx, by, bz, { s: [1.15, 0.8, 1.15] });
+      for (let i = 0; i < 6; i++) sphere(t, 0.05, '#f7c6d4', Math.sin(i * 2.1) * 0.9, 0.02, Math.cos(i * 2.1) * 0.8, { s: [1, 0.2, 1], cast: false }); // fallen petals
+    };
+    sakura(8.3, 5.6); sakura(-3.1, 5.6, 0.9); sakura(-9.5, -5.6); sakura(3.0, -5.9, 0.85);
+    const pine = (x, z, sc = 1) => {
+      const t = grp(p, x, 0, z); t.scale.setScalar(sc);
+      cyl(t, 0.4, 0.35, charcoal, 0, 0, 0, { seg: 10 });
+      cyl(t, 0.1, 1.6, '#4a3020', 0, 0.35, 0, { top: 0.6, seg: 6, rz: -0.25 });
+      for (const [bx, by, bz, r] of [[0.45, 1.95, 0, 0.6], [-0.35, 1.5, 0.2, 0.5], [0.1, 2.35, -0.1, 0.42], [-0.6, 2.0, -0.3, 0.38]]) sphere(t, r, '#3f6b3a', bx, by, bz, { s: [1.5, 0.45, 1.2] });   // flat cloud-pruned pads
+    };
+    pine(-10.3, 5.6); pine(-0.8, -3.0, 0.8); pine(-8.6, -2.3, 0.75);
+    const bamboo = (x, z) => {
+      for (let i = 0; i < 9; i++) {
+        const bx = x + Math.sin(i * 2.4) * 0.35, bz = z + Math.cos(i * 2.4) * 0.35, h = 2.6 + (i % 3) * 0.5;
+        cyl(p, 0.035, h, '#7f9f45', bx, 0, bz, { seg: 6 });
+        sphere(p, 0.22, '#6aa84f', bx, h, bz, { s: [1, 1.6, 1] });
+      }
+    };
+    bamboo(8.6, -6.6); bamboo(-10.9, 3.2);
+    // -- paper lanterns (chochin) on lines across the garden, replacing the string lights
+    const poles = [[-11.0, -0.4], [8.6, -0.4], [8.6, 6.4], [-11.0, 6.4]];
+    for (const [px, pz] of poles) cyl(p, 0.06, 3.0, '#4a3020', px, 0, pz, { seg: 6 });
+    const redL = mat('#d23a2e', { emissive: '#ff6a3a', emissiveIntensity: 0.55 }), whiteL = mat('#f4ede2', { emissive: '#ffcf80', emissiveIntensity: 0.6 });
+    for (let k = 0; k < 4; k++) {
+      const [ax, az] = poles[k], [bx, bz] = poles[(k + 1) % 4];
+      const n = Math.round(Math.hypot(bx - ax, bz - az) / 1.5);
+      for (let i = 1; i < n; i++) {
+        const t = i / n, sag = Math.sin(t * Math.PI) * 0.4, lx = ax + (bx - ax) * t, lz = az + (bz - az) * t;
+        cyl(p, 0.012, 0.2, '#2b2a2c', lx, 2.75 - sag, lz, { seg: 4, cast: false });
+        cyl(p, 0.13, 0.3, i % 2 ? redL : whiteL, lx, 2.45 - sag, lz, { top: 0.85, bottom: 0.85, seg: 12, cast: false });
+      }
+    }
+    // -- planters along the front and back edges: low beds with clipped shrubs and azaleas
+    for (let i = 0; i < 11; i++) flowerPlanter(p, -11.2 + i * 1.7, 7.3, i, true);
+    for (let i = 0; i < 11; i++) flowerPlanter(p, -10.0 + i * 1.7, -7.35, i + 5, true);
+    plant(p, 8.8, 2.5, { tall: true, s: 1.2 });                                        // the one the cleaners water
   }
   void anim;
 }

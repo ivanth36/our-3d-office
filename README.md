@@ -11,7 +11,7 @@ Plain HTML + JavaScript: no build step. Three.js is included in `lib/`, so the s
 | 2F Outsource AI Team | Same layout as 3F, kept for future client work |
 | 3F In-house Office | Big shared desk with AI employees (JungKook, XiaoMing, Sally, Aida, Mary), live FX board (1 SGD → KRW / CNY, hourly — tap it to refresh), glass meeting room |
 | 4F Chill Home | Big living room (wall-mounted TV, 2 long sofas, armchair, rug), glass music room at the front-left (CDs, hi-fi, lounge chair, drum kit, keyboard, music desk + computer), large kitchen with island, dining table for 12 |
-| 5F Roof Garden | Eugene the wellness coach in the glass gym (treadmill, barbell, yoga), drinks vending machine outside (treadmills, weights, bench, yoga mats), lounge, umbrella table, loungers, string lights |
+| 5F Japanese Garden | Eugene the wellness coach in the glass gym (treadmills, weights, bench, yoga mats) with vending machines; outside, a Japanese roof garden: red torii gate, stepping stones, koi pond with a red arched bridge, zen rock garden, stone lanterns, sakura trees, cloud-pruned pines, bamboo, a tea pavilion, a red parasol bench and paper lanterns. Mt Fuji stands far away behind the building |
 
 **Walls:** the left, right and back walls fade to see-through when you rotate the camera to look from that side.
 

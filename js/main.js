@@ -13,7 +13,7 @@ const FLOORS = [
   { n: 2, name: 'Outsource AI Team', sub: 'Office for client work (future)' },
   { n: 3, name: 'In-house Office', sub: 'My in-house AI team' },
   { n: 4, name: 'Chill Home', sub: 'Living room · game room · music room · kitchen' },
-  { n: 5, name: 'Roof Garden', sub: 'Glass gym · chill garden' },
+  { n: 5, name: 'Japanese Garden', sub: 'Glass gym · Japanese roof garden' },
 ];
 
 // ---------------------------------------------------------------- renderer
@@ -40,7 +40,7 @@ const scene = new THREE.Scene();
 }
 scene.fog = new THREE.Fog('#f3dcc0', 90, 220);
 
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.3, 400);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.3, 700);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
@@ -89,6 +89,32 @@ function surroundings() {
   }
   optimize(g);
   scene.add(g);
+  scene.add(mtFuji());
+}
+
+// Mt Fuji, far away behind the building: a concave cone with a jagged snow cap, hazy blue
+// at the foot. It ignores the fog so it stays visible on the horizon.
+function mtFuji() {
+  const H = 56, R = 150, pts = [];
+  for (let i = 0; i <= 24; i++) {
+    const t = i / 24;                                   // 0 = foot, 1 = crater rim
+    pts.push(new THREE.Vector2(R * Math.pow(1 - t, 1.9) + 9, H * t));
+  }
+  pts.push(new THREE.Vector2(0, H - 1.5));               // shallow crater
+  const geo = new THREE.LatheGeometry(pts, 96);
+  const pos = geo.attributes.position, col = [], c = new THREE.Color();
+  const rock = new THREE.Color('#5d6f93'), haze = new THREE.Color('#a9b6cf'), snow = new THREE.Color('#f7f9fc');
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(z, x);
+    const line = H * 0.68 + Math.sin(a * 9) * 4 + Math.sin(a * 23 + 1) * 2.5;   // jagged snow line
+    if (y > line) c.copy(snow);
+    else c.copy(haze).lerp(rock, Math.min(1, y / (H * 0.45)));
+    col.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, fog: false }));
+  m.position.set(-105, -38, -295);   // foot sunk below the horizon so the peak sits in view
+  return m;
 }
 surroundings();
 
