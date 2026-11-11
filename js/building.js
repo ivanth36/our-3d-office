@@ -42,7 +42,7 @@ export const LIFT = { x0: 9.6, x1: 12, z0: -8, z1: -5.6 };
 // Japanese look: dark timber outside (yakisugi-style posts and beams), each floor lined inside
 const WALL = '#4a3428', WALL_OUT = '#4a3428', TRIM = '#2a1f19', POST = '#2a1f19', SLAB_C = '#5a4030';
 const LINING = { 1: '#b8865a', 2: '#b8865a', 3: '#b8865a', 4: '#b8865a' };   // same warm wood on every floor
-export const KANJI = ['', '一階', '二階', '三階', '四階', '五階'];
+export const KANJI = ['', '一階', '二階', '三階', '四階', '五階', '六階'];
 // window glass: sky reflection by day, warm room light at night (see js/env.js)
 const winMat = () => { const m = mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35, roughness: 0.2 }); WINDOWS.add(m); return m; };
 

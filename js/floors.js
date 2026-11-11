@@ -723,7 +723,6 @@ export function floor2(p, anim = {}) {
   box(p, 1.6, 0.1, 0.12, '#2b2a2c', tvx, 0.4, BACK_IN + 0.3);
   bonsai(p, tvx - 2.2, 0.4, BACK_IN + 0.25, 1.3);
   // bookshelves flanking the TV
-  bookshelf(p, -2.2, BACK_IN + 0.2, 2.0, 2.4, 0);
   shojiScreen(p, -1.0, BACK_IN + 0.1, -1.0, -2.7);                                  // shoji on the kitchen side
   floorLantern(p, -2.0, -5.4, { h: 0.7 });
   floorLantern(p, -2.0, -0.6, { h: 0.7 });
@@ -816,7 +815,7 @@ export function floor2(p, anim = {}) {
   const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#c99a3a'; ctx.font = 'bold 50px "Hiragino Mincho ProN", -apple-system, sans-serif'; ctx.fillText('♪ ジャズ喫茶 Jazz Kissa', 10, 66); });
   panel(p, 1.9, 0.36, sign, -9.0, 3.1, mz0 + 0.04, { transparent: true });           // on the shared glass wall
 
-  // ================= KITCHEN (back-right, x 2.5..9.3, z -7.7..-0.8) =================
+  // ================= KITCHEN (U shape, back-right, x 0..9.3, z -7.7..-0.8) =================
   const kx0 = 2.5, kx1 = 9.3, cab = '#5a3b28', cabLight = '#6b4a33', quartz = '#e8cfa0', steel = '#c9ccd0';   // dark wood + hinoki
   // tall units: double fridge + oven tower + pantry
   box(p, 1.3, 2.3, 0.75, steel, kx0 + 0.65, 0, BACK_IN + 0.38, { metalness: 0.5, roughness: 0.35 });
@@ -858,34 +857,58 @@ export function floor2(p, anim = {}) {
   box(p, 0.7, 0.05, 2.65, quartz, kx1 - 0.33, 0.88, BACK_IN + 0.65 + 1.3);
   box(p, 0.5, 0.03, 0.6, '#d0d4d8', kx1 - 0.33, 0.92, BACK_IN + 1.6, { metalness: 0.6 });    // second sink
   box(p, 0.05, 0.35, 0.05, steel, kx1 - 0.08, 0.93, BACK_IN + 1.6, { metalness: 0.6 });
-  // big island with waterfall ends, sink, stools
-  const ix = 5.6, iz = -3.4;
-  box(p, 4.0, 0.9, 1.5, cab, ix, 0, iz);
-  box(p, 4.2, 0.07, 1.65, quartz, ix, 0.9, iz);
-  box(p, 0.08, 0.9, 1.65, quartz, ix - 2.07, 0, iz);
-  box(p, 0.08, 0.9, 1.65, quartz, ix + 2.07, 0, iz);
+  // U shape: the back run continues left of the fridge, then a left arm with the coffee & tea station
+  box(p, 2.5, 0.88, 0.65, cab, 1.25, 0, BACK_IN + 0.33);
+  box(p, 2.55, 0.05, 0.7, quartz, 1.25, 0.88, BACK_IN + 0.35);
+  box(p, 2.5, 0.7, 0.02, '#e9f1ee', 1.25, 0.93, BACK_IN + 0.01, { cast: false });
+  box(p, 2.5, 0.8, 0.38, cabLight, 1.25, 1.8, BACK_IN + 0.19);
+  for (let x = 0.3; x < 2.5; x += 0.6) box(p, 0.25, 0.02, 0.02, '#c9a77a', x, 0.75, BACK_IN + 0.67);
+  const az0 = BACK_IN + 0.65, az1 = -4.2, amz = (az0 + az1) / 2;
+  box(p, 0.65, 0.88, az1 - az0, cab, 0.33, 0, amz);
+  box(p, 0.72, 0.05, az1 - az0 + 0.05, quartz, 0.33, 0.88, amz);
+  for (let z = az0 + 0.3; z < az1; z += 0.6) box(p, 0.02, 0.02, 0.25, '#c9a77a', 0.67, 0.75, z);
+  const T = 0.93;
+  const cm = grp(p, 0.3, T, -6.2, Math.PI / 2);                                         // espresso machine (faces +x)
+  box(cm, 0.6, 0.42, 0.42, '#c9ccd0', 0, 0, 0, { metalness: 0.6, roughness: 0.3 });
+  box(cm, 0.6, 0.06, 0.42, '#2b2a2c', 0, 0.42, 0);
+  for (const gx of [-0.15, 0.15]) { cyl(cm, 0.04, 0.08, '#2b2a2c', gx, 0.14, 0.24, { seg: 8 }); cyl(cm, 0.04, 0.07, '#f4efe4', gx, 0.0, 0.26, { seg: 8 }); }
+  cyl(p, 0.09, 0.32, '#2b2a2c', 0.3, T, -5.65, { seg: 10 });                             // grinder
+  cyl(p, 0.11, 0.2, '#5a3b26', 0.3, T + 0.32, -5.65, { top: 1, bottom: 0.6, seg: 10 });
+  cyl(p, 0.1, 0.22, steel, 0.3, T, -5.2, { seg: 12, metalness: 0.5 });                 // kettle
+  cyl(p, 0.15, 0.42, '#c9ccd0', 0.3, T, -4.7, { seg: 14, metalness: 0.5 });            // hot water urn
+  for (let i = 0; i < 4; i++) cyl(p, 0.05, 0.1, ['#5f7a3a', '#2b2a2c', '#c9a77a', '#a8442e'][i], 0.12 + (i % 2) * 0.16, T, -6.75 + Math.floor(i / 2) * 0.16, { seg: 10 });   // tea tins
+  for (let i = 0; i < 6; i++) cyl(p, 0.04, 0.09, ['#f4efe4', '#5f7a3a', '#2f4a6a'][i % 3], 0.2 + (i % 2) * 0.12, 1.55 + Math.floor(i / 2) * 0.0, -4.45 - Math.floor(i / 2) * 0.13, { seg: 8 });
+  box(p, 0.3, 0.04, 1.0, '#8a5a3c', 0.18, 1.5, -4.7);                                   // mug shelf
+  cyl(p, 0.2, 0.07, '#e9dcc4', 1.3, T, BACK_IN + 0.35, { seg: 14 });                     // fruit bowl
+  for (let i = 0; i < 4; i++) sphere(p, 0.07, ['#f08a3a', '#e85d3d', '#f1c84b', '#8fb35a'][i], 1.22 + (i % 2) * 0.14, T + 0.12, BACK_IN + 0.3 + Math.floor(i / 2) * 0.12);
+  box(p, 0.35, 0.2, 0.22, '#e8c48a', 2.0, T, BACK_IN + 0.3);                             // toaster
+  // big island with waterfall ends, sink, stools (longer, to match the U)
+  const ix = 5.0, iz = -3.4, IW = 5.8;
+  box(p, IW, 0.9, 1.5, cab, ix, 0, iz);
+  box(p, IW + 0.2, 0.07, 1.65, quartz, ix, 0.9, iz);
+  box(p, 0.08, 0.9, 1.65, quartz, ix - IW / 2 - 0.07, 0, iz);
+  box(p, 0.08, 0.9, 1.65, quartz, ix + IW / 2 + 0.07, 0, iz);
   box(p, 0.7, 0.03, 0.45, '#d0d4d8', ix - 0.9, 0.95, iz - 0.2, { metalness: 0.6 });
   cyl(p, 0.025, 0.4, steel, ix - 0.9, 0.95, iz - 0.5, { seg: 8, metalness: 0.6 });
   cyl(p, 0.28, 0.08, C.white, ix + 0.8, 0.97, iz, { seg: 16 });                        // fruit bowl
   for (let i = 0; i < 4; i++) sphere(p, 0.08, ['#e85d3d', '#f1c84b', '#7ab87a', '#e85d3d'][i], ix + 0.65 + i * 0.1, 1.09, iz + (i % 2) * 0.08);
   // omakase: glass neta case on the counter, sushi on wooden geta plates in front of each seat
-  box(p, 3.0, 0.28, 0.4, glassMat(), ix, 0.97, iz - 0.25, { cast: false });
-  box(p, 2.96, 0.02, 0.36, '#dfe8ea', ix, 0.97, iz - 0.25, { cast: false });
-  for (let i = 0; i < 8; i++) sphere(p, 0.06, ['#e8604a', '#f4f1ea', '#f08a3a', '#e85d3d'][i % 4], ix - 1.3 + i * 0.37, 1.03, iz - 0.25, { s: [1.6, 0.6, 1] });
-  for (let i = 0; i < 4; i++) {
-    const sxx = ix - 1.5 + i * 1.0;
+  box(p, 4.4, 0.28, 0.4, glassMat(), ix, 0.97, iz - 0.25, { cast: false });
+  box(p, 4.36, 0.02, 0.36, '#dfe8ea', ix, 0.97, iz - 0.25, { cast: false });
+  for (let i = 0; i < 11; i++) sphere(p, 0.06, ['#e8604a', '#f4f1ea', '#f08a3a', '#e85d3d'][i % 4], ix - 2.0 + i * 0.4, 1.03, iz - 0.25, { s: [1.6, 0.6, 1] });
+  for (let i = 0; i < 5; i++) {
+    const sxx = ix - 2.0 + i * 1.0;
     box(p, 0.4, 0.04, 0.2, '#c99a63', sxx, 0.97, iz + 0.45);
     for (let k = 0; k < 3; k++) { box(p, 0.08, 0.04, 0.05, '#f4f1ea', sxx - 0.1 + k * 0.1, 1.01, iz + 0.45); box(p, 0.08, 0.02, 0.05, ['#e8604a', '#f08a3a', '#e85d3d'][k], sxx - 0.1 + k * 0.1, 1.05, iz + 0.45, { cast: false }); }
     cyl(p, 0.03, 0.06, '#2b2a2c', sxx + 0.25, 0.97, iz + 0.5, { seg: 8 });       // soy dish
   }
-  for (let i = 0; i < 4; i++) stool(p, ix - 1.5 + i * 1.0, iz + 1.15, { color: '#7a3b3b', leg: '#2a1f19' });
-  for (let i = 0; i < 3; i++) chochin(p, ix - 1.4 + i * 1.4, iz, { top: CEIL, drop: 1.7 });
+  for (let i = 0; i < 5; i++) stool(p, ix - 2.0 + i * 1.0, iz + 1.15, { color: '#7a3b3b', leg: '#2a1f19' });
+  for (let i = 0; i < 4; i++) chochin(p, ix - 2.1 + i * 1.4, iz, { top: CEIL, drop: 1.7 });
   noren(p, ix, 2.55, BACK_IN + 0.75, 2.2, 0.6, { text: 'おまかせ Omakase', color: '#f4efe4' }).children.forEach(() => {});
-  rug(p, ix, iz + 1.0, 5.4, 1.2, '#cdbb8f', '#5a3b26');
+  rug(p, ix, iz + 1.0, 6.8, 1.2, '#cdbb8f', '#5a3b26');
 
   // ================= OPEN SPACE between living room & kitchen =================
-  plant(p, 0.7, BACK_IN + 0.4, { tall: true, s: 1.2 });
-  frame(p, 0.7, 1.6, BACK_IN + 0.02, 1.4, 1.0, 0, '#97b88f');
+
 
   // ================= DINING FOR 12 (front-right) =================
   const dx = 3.4, dz = 3.9, L = 6.4;
@@ -981,47 +1004,35 @@ export function floor2(p, anim = {}) {
   }
   plant(p, 8.8, 7.2, { tall: true });
 
-  // ---- the new space from the longer building (real x -14.3..-0.9): an indoor zen garden and a reading nook
   const fg = fillGroup(p);
-  const zx0 = -10.0, zx1 = -5.2, zz0 = 2.3, zz1 = 4.8;
-  box(fg, zx1 - zx0 + 0.3, 0.14, zz1 - zz0 + 0.3, '#2e2b29', (zx0 + zx1) / 2, 0, (zz0 + zz1) / 2, { cast: false });
-  box(fg, zx1 - zx0, 0.15, zz1 - zz0, '#e7e2d6', (zx0 + zx1) / 2, 0, (zz0 + zz1) / 2, { cast: false });
-  for (let z = zz0 + 0.22; z < zz1; z += 0.26) box(fg, zx1 - zx0 - 0.2, 0.012, 0.03, '#cfc8b8', (zx0 + zx1) / 2, 0.15, z, { cast: false });
-  for (const [rx, rz, r] of [[-8.6, 3.4, 0.36], [-6.4, 3.8, 0.26]]) { sphere(fg, r + 0.06, '#7f9a5a', rx, 0.15, rz, { s: [1.2, 0.25, 1.1], cast: false }); sphere(fg, r, '#6f6a62', rx, 0.15 + r * 0.45, rz, { s: [1.1, 0.9, 0.9] }); }
-  bonsai(fg, -5.6, 0.15, 4.4, 1.6);
-  for (const [lx, lz] of [[-10.6, 2.0], [-4.6, 2.0], [-10.6, 5.1], [-4.6, 5.1]]) floorLantern(fg, lx, lz, { h: 0.6 });
-  chochin(fg, -7.6, 3.55, { top: CEIL, drop: 1.8 });
-
   // ---- pantry lounge for everyone (next to the kitchen and dining): two long sofas facing each other
   japaneseSofa(fg, -7.0, -7.0, 6.0, 0, { pillow: '#a8442e' });                       // along the back windows
   japaneseSofa(fg, -7.0, -3.0, 6.0, Math.PI, { pillow: '#a8442e' });                 // facing it (XiaoMing chills here)
   japaneseSofa(fg, -11.3, -5.0, 2.4, Math.PI / 2, { pillows: false });               // the end, by the shoji wall
-  for (const tx of [-8.6, -5.4]) {
-    const t = grp(fg, tx, 0, -5.0);
+  // the same set again on the street side of the room
+  japaneseSofa(fg, -7.0, 7.0, 6.0, Math.PI, { pillow: '#2f4a6a' });
+  japaneseSofa(fg, -7.0, 3.0, 6.0, 0, { pillow: '#2f4a6a' });
+  japaneseSofa(fg, -11.3, 5.0, 2.4, Math.PI / 2, { pillows: false });
+  floorLantern(fg, -3.3, 7.1, { h: 0.7 });
+  floorLantern(fg, -11.6, 7.1, { h: 0.7 });
+  for (const [tx, tz] of [[-8.6, -5.0], [-5.4, -5.0], [-8.6, 5.0], [-5.4, 5.0]]) {
+    const t = grp(fg, tx, 0, tz);
     box(t, 1.6, 0.06, 0.8, '#c99a63', 0, 0.34, 0);
     for (const [lx, lz] of [[-0.7, -0.32], [0.7, -0.32], [-0.7, 0.32], [0.7, 0.32]]) box(t, 0.07, 0.34, 0.07, '#8a5a3c', lx, 0, lz);
     cyl(t, 0.18, 0.06, '#e9dcc4', -0.4, 0.4, 0, { seg: 14 });                       // snacks
     for (let i = 0; i < 3; i++) sphere(t, 0.05, ['#f08a3a', '#f7c6d4', '#8fb35a'][i], -0.45 + i * 0.06, 0.48, 0.02);
     for (const cx2 of [0.2, 0.45]) cyl(t, 0.04, 0.07, '#f4efe4', cx2, 0.4, 0.1, { seg: 8 });
-    chochin(fg, tx, -5.0, { top: CEIL, drop: 1.9 });
+    chochin(fg, tx, tz, { top: CEIL, drop: 1.9 });
   }
   floorLantern(fg, -3.3, -7.1, { h: 0.7 });
   floorLantern(fg, -11.6, -7.1, { h: 0.7 });
-  // pantry counter: hot water, tea, cups, fruit
-  const pc = grp(fg, -1.9, 0, -7.25);
-  box(pc, 2.4, 0.9, 0.6, '#5a3b28', 0, 0, 0);
-  box(pc, 2.5, 0.05, 0.65, '#e8cfa0', 0, 0.9, 0);
-  cyl(pc, 0.16, 0.42, '#c9ccd0', -0.8, 0.95, 0, { seg: 14, metalness: 0.5 });          // hot water urn
-  for (let i = 0; i < 4; i++) cyl(pc, 0.05, 0.1, ['#5f7a3a', '#2b2a2c', '#c9a77a', '#a8442e'][i], -0.3 + i * 0.16, 0.95, 0.1, { seg: 10 });
-  cyl(pc, 0.22, 0.07, '#e9dcc4', 0.7, 0.95, 0, { seg: 14 });
-  for (let i = 0; i < 4; i++) sphere(pc, 0.07, ['#f08a3a', '#e85d3d', '#f1c84b', '#8fb35a'][i], 0.62 + (i % 2) * 0.14, 1.07, -0.06 + Math.floor(i / 2) * 0.12);
   const ps = canvasTex(256, 64, (ctx) => { ctx.fillStyle = '#2a1f19'; ctx.fillRect(0, 0, 256, 64); ctx.fillStyle = '#f3e3c3'; ctx.font = 'bold 30px "Hiragino Mincho ProN", sans-serif'; ctx.fillText('休憩室  Pantry', 22, 42); });
   panel(fg, 1.3, 0.32, ps, -1.9, 2.4, BACK_IN + 0.05);
 
   // ---- Ivan & Phil's private side: a shoji wall with sliding doors, and the spiral loft stair up to the bedroom
   shojiScreen(fg, PRIVATE.x1, BACK_IN + 0.05, PRIVATE.x1, -2.6);
-  shojiScreen(fg, PRIVATE.x1, -0.2, PRIVATE.x1, 5.6);
-  for (const [za, zb] of [[-2.6, -0.2], [5.6, 7.7]]) {                               // the sliding doors stand open
+  shojiScreen(fg, PRIVATE.x1, -0.2, PRIVATE.x1, 7.75);
+  for (const [za, zb] of [[-2.6, -0.2]]) {                               // the sliding doors stand open
     box(fg, 0.12, 0.08, zb - za, '#5a3b26', PRIVATE.x1, 2.1, (za + zb) / 2, { cast: false });
     box(fg, 0.1, 2.1, 0.08, '#5a3b26', PRIVATE.x1, 0, za, { cast: false });
   }
@@ -1232,7 +1243,7 @@ export function floor5(p, anim) {
   gymG.userData.noShift = true;
   {
     const p = gymG;
-    const gx0 = X0 + 0.2, gx1 = -12.0, gz0 = -7.8, gz1 = 7.7, gh = 3.0, gcx = (gx0 + gx1) / 2;
+    const gx0 = X0 + 0.2, gx1 = -12.0, gz0 = -7.8, gz1 = 7.7, gh = H - SLAB, gcx = (gx0 + gx1) / 2;   // glass right up to the 6F floor
     const rubber = '#6f757d', dark = '#2b2a2c';
     // the gym is now a dojo: polished wooden floor, tatami for stretching, timber frames, low wooden panels
     box(p, gx1 - gx0, 0.04, gz1 - gz0, '#c99a63', gcx, 0.02, (gz0 + gz1) / 2, { cast: false });
@@ -1246,8 +1257,6 @@ export function floor5(p, anim) {
     box(p, gx1 - gx0, 0.55, 0.06, '#8a5f3c', gcx, 0, gz0 + 0.04);            // koshi-ita: low wooden panels
     // the 6F onsen deck sits on top now: timber panels close the gap between the glass and its floor
     const top6 = H - SLAB;
-    for (const zz of [gz0, gz1]) box(p, gx1 - gx0 + 0.1, top6 - gh, 0.12, '#6b4a33', gcx, gh, zz, { cast: false });
-    box(p, 0.12, top6 - gh, gz1 - gz0, '#6b4a33', gx1, gh, (gz0 + gz1) / 2, { cast: false });
     box(p, 0.2, top6, gz1 - gz0 + 0.2, '#4a3428', gx0 - 0.1, 0, (gz0 + gz1) / 2);      // solid wall: the bedroom is behind it
     for (const [px, pz] of [[gx1, gz0], [gx1, gz1]]) box(p, 0.3, top6, 0.3, '#2a1f19', px, 0, pz);
     box(p, 0.06, 0.55, gz1 - gz0, '#8a5f3c', gx0 + 0.04, 0, (gz0 + gz1) / 2);
@@ -1263,10 +1272,10 @@ export function floor5(p, anim) {
     // night lights: square paper lanterns hanging from the pergola, warm glow strips along the beams, andons in the corners
     const shade = registerGlow(mat('#fbf0d8', { emissive: '#ffd99a', emissiveIntensity: 0.35 }), 4.5);
     for (const lx of [-19.6, -16.6, -13.6]) for (const lz of [-5.0, -0.6, 4.6]) {
-      cyl(p, 0.008, 0.55, '#2b2a2c', lx, gh - 0.55, lz, { seg: 4, cast: false });
-      box(p, 0.4, 0.5, 0.4, shade, lx, gh - 1.05, lz, { cast: false });
-      box(p, 0.44, 0.05, 0.44, '#3d2618', lx, gh - 0.57, lz, { cast: false });
-      box(p, 0.44, 0.05, 0.44, '#3d2618', lx, gh - 1.08, lz, { cast: false });
+      cyl(p, 0.008, gh - 3.05, '#2b2a2c', lx, 3.05, lz, { seg: 4, cast: false });
+      box(p, 0.4, 0.5, 0.4, shade, lx, 2.55, lz, { cast: false });
+      box(p, 0.44, 0.05, 0.44, '#3d2618', lx, 3.03, lz, { cast: false });
+      box(p, 0.44, 0.05, 0.44, '#3d2618', lx, 2.52, lz, { cast: false });
       lightPool(p, lx, 0.05, lz, 1.2, { opacity: 0.14 });
     }
     for (const lz of [gz0 + 0.3, gz1 - 0.3]) box(p, gx1 - gx0 - 0.4, 0.04, 0.04, glowMat('#ffcf80', 0.4), gcx, gh - 0.06, lz, { cast: false });
@@ -1328,8 +1337,8 @@ export function floor5(p, anim) {
       cyl(p, 0.05, 0.08, '#2b2a2c', -12.45, 0.2, kz, { rx: Math.PI / 2, seg: 8 });
     }
     // punching bag hanging from the pergola
-    cyl(p, 0.015, 0.6, C.black, -15.8, gh - 0.6, 3.0, { seg: 4 });
-    cyl(p, 0.2, 1.0, '#7a3b3b', -15.8, gh - 1.6, 3.0, { seg: 14 });
+    cyl(p, 0.015, gh - 2.6, C.black, -15.8, 2.6, 3.0, { seg: 4 });
+    cyl(p, 0.2, 1.0, '#7a3b3b', -15.8, 1.6, 3.0, { seg: 14 });
     // yoga & stretching: 5 mats, balls, foam rollers, blocks
     sphere(p, 0.3, '#5f7a3a', -20.6, 0.35, 2.9);
     for (let i = 0; i < 3; i++) cyl(p, 0.07, 0.45, ['#4fb0e0', '#e85d3d', '#2b2a2c'][i], -16.4, 0.07, 6.6 + i * 0.2, { rz: Math.PI / 2, seg: 10 });

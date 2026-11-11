@@ -102,7 +102,9 @@ const JOE_PLAY = [-3.55, 0.0];                       // Joe's play spot, between
 
 // ---- Chill Home (4F): music room (glass lounge, front-left)
 // music room: its only outside door is in the middle of its right wall (real x -12)
-chain('4:coreFront', node(4, 'frontWalk', raw(-10.4), 6.8), node(4, 'musicOut', raw(-11.2), 3.85),
+// (the old front walk to the music room is closed: the pantry's front sofas and the shoji wall are there now;
+//  Ivan & Phil reach the music room through the living room)
+chain(node(4, 'frontWalk', raw(-10.4), 6.8), node(4, 'musicOut', raw(-11.2), 3.85),
   node(4, 'musicIn', raw(-12.8), 3.85), node(4, 'musicMid', -5.3, 4.0), node(4, 'lounge', -8.6, 3.95));
 link('4:musicMid', node(4, 'drumStand', -6.6, 5.0));
 link('4:musicMid', node(4, 'pianoStand', -5.25, 5.6));
