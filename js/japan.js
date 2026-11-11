@@ -388,7 +388,7 @@ export function spiralStair(p, x, z, y0, rise, o = {}) {
   return g;
 }
 /** Square stair opening in a floor (dark well + wooden rail with an entry gap on the -x side). */
-export function stairWell(p, x, z, s = 2.7) {
+export function stairWell(p, x, z, s = 2.7, open = '-x') {   // open: the side you step on / off
   box(p, s, 0.012, s, '#1b1410', x, 0.005, z, { cast: false });
   const rail = (x1, z1, x2, z2) => {
     const len = Math.hypot(x2 - x1, z2 - z1), ry = Math.atan2(x2 - x1, z2 - z1) - Math.PI / 2;
@@ -397,6 +397,7 @@ export function stairWell(p, x, z, s = 2.7) {
     box(g, len, 0.06, 0.09, '#5a3b26', 0, 1.0, 0, { cast: false });
   };
   const h = s / 2;
-  rail(x - h, z - h, x + h, z - h); rail(x + h, z - h, x + h, z + h); rail(x - h, z + h, x + h, z + h);
+  const sides = { '-z': [x - h, z - h, x + h, z - h], '+x': [x + h, z - h, x + h, z + h], '+z': [x - h, z + h, x + h, z + h], '-x': [x - h, z - h, x - h, z + h] };
+  for (const k in sides) if (k !== open) rail(...sides[k]);
 }
 

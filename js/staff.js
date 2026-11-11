@@ -118,7 +118,7 @@ const LOUNGE_SEAT = { node: '4:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
 // The music room, game room, living room, tatami room and the stair up are private (Ivan & Phil only).
 // Ivan & Phil's private suite: stair foot in the game room; bedroom tea and onsen spots (5F / 6F, reached by
 // the spiral stair, not by the walking map, so nobody else can get there)
-link('4:gameIn', node(4, 'spiralFoot', real2(PRIVATE.stairX - 1.7), PRIVATE.stairZ));
+link('4:musicOut', node(4, 'spiralFoot', real2(PRIVATE.stairX), PRIVATE.stairZ - 1.9));   // just outside the music-room door
 const OX = PRIVATE.onsen.x;
 const BED_TEA = { Ivan: { node: node(5, 'bedI', real2(-28.6), 0.0), x: real2(-28.6), z: 0.82, ry: 0, y: -0.27 },
   Phil: { node: node(5, 'bedP', real2(-27.2), 2.38), x: real2(-28.6), z: 2.38, ry: Math.PI, y: -0.27 } };
@@ -897,7 +897,7 @@ const own = { phase: 'gym', philAt: null, joePlay: false, tripGo: false, onsenDo
 /** The private trip both owners make in the 'onsen' phase (Ivan leads, Phil follows a few steps behind). */
 async function privateTrip(a, lead) {
   const me = a.e.name, other = lead ? 'Phil' : 'Ivan';
-  const exitX = real2(PRIVATE.stairX - 1.9), exitZ = PRIVATE.stairZ;
+  const exitX = real2(PRIVATE.stairX), exitZ = PRIVATE.stairZ - 1.9;
   a.status = `Going up to the bedroom with ${other}`;
   await a.goStand('4:spiralFoot');
   if (lead) { own.tripGo = true; } else { await a.waitFor(() => own.tripGo, 60); await a.sleep(3); }
@@ -934,7 +934,7 @@ async function privateTrip(a, lead) {
   await a.spiral(5, false);
   await a.spiral(4, false);
   a.node = '4:spiralFoot';
-  a.g.position.set(sx(4, real2(PRIVATE.stairX - 1.7)), 0, PRIVATE.stairZ);
+  a.g.position.set(sx(4, real2(PRIVATE.stairX)), 0, PRIVATE.stairZ - 1.9);
 }
 const philThere = (where) => () => own.philAt === where;
 

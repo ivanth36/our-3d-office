@@ -741,7 +741,7 @@ export function floor2(p, anim = {}) {
   for (let i = 0; i < 3; i++) chochin(p, tvx - 1.6 + i * 1.6, -3.3, { top: CEIL, drop: 1.6 });
 
   // ---- washitsu (tatami room) in front of the living room: raised tatami, shoji, kotatsu, tansu
-  const wx0 = -10.0, wx1 = -2.4, wz0 = 2.3, wz1 = 6.0, wcx = (wx0 + wx1) / 2, wcz = (wz0 + wz1) / 2;
+  const wx0 = -9.6, wx1 = -2.4, wz0 = 2.3, wz1 = 6.0, wcx = (wx0 + wx1) / 2, wcz = (wz0 + wz1) / 2;
   box(p, wx1 - wx0, 0.16, wz1 - wz0, '#6b4a33', wcx, 0, wcz);                       // raised floor
   box(p, wx1 - wx0 + 0.04, 0.04, 0.08, '#3d2618', wcx, 0.13, wz1, { cast: false });  // front edge (kamachi)
   tatamiFloor(p, wx0 + 0.05, wz0 + 0.05, wx1 - 0.05, wz1 - 0.05, 0.165);
@@ -1007,6 +1007,7 @@ export function floor2(p, anim = {}) {
     // comfy seating facing the TV: a sofa and two bean bags
     sofa(p, -15.0, -3.6, 2.4, Math.PI / 2, { color: '#3a3f5c', cushion: '#4a5070', pillow: '#7a5cff' });
     sphere(p, 0.42, '#e8384f', -14.0, 0.32, -1.6, { s: [1, 0.7, 1] });
+    sphere(p, 0.42, '#3b82f6', -14.0, 0.32, -5.6, { s: [1, 0.7, 1] });
     rectTable(p, -13.9, -3.6, 0.6, 1.1, { h: 0.38, top: '#2b2a2c' });
     for (const pz of [-5.4, -2.2]) pendant(p, x0 + 1.0, pz, { drop: 1.2, shade: '#2b2a2c' });
     plant(p, x1 - 0.5, -7.2, { tall: true });
@@ -1047,7 +1048,7 @@ export function floor2(p, anim = {}) {
   }
   const pv = canvasTex(256, 64, (ctx) => { ctx.fillStyle = '#2a1f19'; ctx.fillRect(0, 0, 256, 64); ctx.fillStyle = '#f3e3c3'; ctx.font = 'bold 28px "Hiragino Mincho ProN", sans-serif'; ctx.fillText('私室  Private', 40, 42); });
   panel(fg, 1.1, 0.28, pv, PRIVATE.x1 + 0.07, 2.4, 3.0, { ry: Math.PI / 2 });
-  spiralStair(fg, PRIVATE.stairX, PRIVATE.stairZ, 0, H, { start: PRIVATE.flights[4].a0, turn: PRIVATE.flights[4].turn });   // in the game room's back corner
+  spiralStair(fg, PRIVATE.stairX, PRIVATE.stairZ, 0, H, { start: PRIVATE.flights[4].a0, turn: PRIVATE.flights[4].turn, r: PRIVATE.r });   // front, next to the music-room door
 }
 
 // ---------------------------------------------------------------- Floors 3 & 4 (office)
@@ -1517,54 +1518,65 @@ export const PRIVATE = {
   x1: -12.6, bedX0: XNEW + 0.2, bedX1: -21.6,
   // spiral loft stair: back corner of the 4F game room, up through the bedroom to 6F. Each flight starts and
   // ends facing -x (a = 1.5π), where you step on / off. Walking path: Actor.spiral() in js/staff.js.
-  stairX: -28.2, stairZ: -6.6, flights: { 4: { a0: 1.5 * Math.PI, turn: 2.0 }, 5: { a0: 5.5 * Math.PI, turn: 2.0 } },
+  stairX: -24.35, stairZ: 6.7, r: 0.95, flights: { 4: { a0: Math.PI, turn: 2.0 }, 5: { a0: 5 * Math.PI, turn: 2.0 } },   // front, between the music room and the tatami room
   onsen: { x: -18.0, z: -3.4 },
 };
 
 function privateBedroom(p) {
   const g = fillGroup(p);
   const { bedX0: x0, bedX1: x1, stairX, stairZ } = PRIVATE, z0 = -7.8, z1 = 7.75, wh = H - SLAB, cx = (x0 + x1) / 2;
-  // room: tatami floor on a cedar base, timber walls (back, left), shoji to the street, solid wall to the dojo
+  // these walls fade like the building's own walls when you look from the left or the back (main.js)
+  const wallL = grp(g), wallB = grp(g);
+  wallL.userData.dynamic = true; wallL.userData.wallSide = 'left';
+  wallB.userData.dynamic = true; wallB.userData.wallSide = 'back';
+  // room: tatami on a cedar base; floor-to-ceiling glass on the Mt Fuji side (back) and to the street,
+  // timber wall on the left, solid wall to the dojo (built with the dojo)
   box(g, x1 - x0, 0.06, z1 - z0, '#8a5f3c', cx, 0, (z0 + z1) / 2, { cast: false });
   tatamiFloor(g, x0 + 0.2, z0 + 0.2, x1 - 0.2, z1 - 1.4, 0.065);
-  box(g, x1 - x0 - 0.2, 0.02, 1.15, '#c99a63', cx, 0.06, z1 - 0.7, { cast: false });                 // engawa strip by the shoji
-  box(g, x1 - x0, wh, 0.2, '#4a3428', cx, 0, z0 - 0.05);
-  box(g, 0.2, wh, z1 - z0, '#4a3428', x0 - 0.05, 0, (z0 + z1) / 2);
-  box(g, x1 - x0, wh, 0.01, '#b8865a', cx, 0, z0 + 0.06, { cast: false });                           // warm wood lining
-  box(g, 0.01, wh, z1 - z0, '#b8865a', x0 + 0.06, 0, (z0 + z1) / 2, { cast: false });
-  for (const wx of [-31.5, -26.5]) box(g, 2.2, 1.6, 0.04, mat('#bfe0ee', { emissive: '#9fc8de', emissiveIntensity: 0.35 }), wx, 1.2, z0 + 0.08, { cast: false });   // windows
+  box(g, x1 - x0 - 0.2, 0.02, 1.15, '#c99a63', cx, 0.06, z1 - 0.7, { cast: false });                 // engawa strip by the street glass
+  glassWall(wallB, x0, z0 - 0.05, x1, z0 - 0.05, wh, { frame: '#5a3b26' });                       // full-height window facing Mt Fuji
+  box(wallL, 0.2, wh, z1 - z0, '#4a3428', x0 - 0.05, 0, (z0 + z1) / 2);
+  box(wallL, 0.01, wh, z1 - z0, '#b8865a', x0 + 0.06, 0, (z0 + z1) / 2, { cast: false });
   glassWall(g, x0, z1 - 0.05, x1, z1 - 0.05, wh, { frame: '#5a3b26' });                         // street side: glass, so you can see in
   box(g, x1 - x0, 0.25, 0.14, '#3d2618', cx, wh - 0.25, z1 - 0.05, { cast: false });
-  // futon bed on a low hinoki platform, against the back wall
-  const bed = grp(g, -24.8, 0.06, -5.6);
-  box(bed, 2.8, 0.22, 2.6, '#c99a63', 0, 0, 0);
-  box(bed, 2.6, 0.14, 2.3, '#f4efe4', 0, 0.22, 0.05);                                               // shikibuton
-  box(bed, 2.5, 0.08, 1.6, '#2f4a6a', 0, 0.36, 0.4);                                                // kakebuton (indigo quilt)
-  for (const px of [-0.6, 0.6]) box(bed, 0.75, 0.12, 0.4, '#e9dcc4', px, 0.36, -0.85);              // two pillows
-  box(bed, 3.0, 0.9, 0.12, '#8a5f3c', 0, 0.0, -1.35);                                               // headboard
-  for (const sx of [-2.0, 2.0]) floorLantern(g, -24.8 + sx, -6.4, { h: 0.6, y: 0.06 });           // andon lamps each side
+  // low modern platform bed, foot towards the Fuji window, a small shoji screen behind the headboard
+  const bx = -28.3, bz = -4.4;
+  const bed = grp(g, bx, 0.065, bz);
+  box(bed, 2.3, 0.16, 2.4, '#3d2618', 0, 0.02, 0);                                                  // dark oak platform (floats on a recessed base)
+  box(bed, 2.0, 0.04, 2.1, '#2a1f19', 0, 0, 0, { cast: false });
+  box(bed, 2.1, 0.2, 2.15, '#f4efe4', 0, 0.18, 0);                                                  // mattress
+  box(bed, 2.12, 0.05, 1.5, '#2f4a6a', 0, 0.38, -0.3);                                              // indigo duvet (towards the window)
+  box(bed, 2.14, 0.06, 0.25, '#e3d6bf', 0, 0.38, -1.0);                                             // throw at the foot
+  for (const px of [-0.5, 0.5]) box(bed, 0.8, 0.12, 0.4, '#e9dcc4', px, 0.38, 0.8);               // pillows at the head (street side)
+  box(bed, 2.3, 0.55, 0.08, '#3d2618', 0, 0.02, 1.24);                                              // low headboard
+  for (const sx of [-1.55, 1.55]) {                                                                 // floating side tables + andon lamps
+    box(bed, 0.5, 0.05, 0.45, '#3d2618', sx, 0.38, 0.9);
+    floorLantern(bed, sx, 0.9, { h: 0.45, y: 0.43, pool: false });
+  }
+  const sj = grp(g, 0, 0.065, 0);
+  shojiScreen(sj, bx - 1.5, bz + 1.6, bx + 1.5, bz + 1.6, 1.6);                                     // small shoji behind the bed
   // tokonoma alcove with a scroll and ikebana, on the left wall
-  box(g, 0.9, 0.18, 2.4, '#5a3b26', x0 + 0.5, 0.06, -0.5);
+  box(g, 0.9, 0.18, 2.4, '#5a3b26', x0 + 0.5, 0.06, 1.5);
   const scroll = canvasTex(128, 384, (ctx, w, h) => { ctx.fillStyle = '#f4ecd8'; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#6b4a33'; ctx.fillRect(0, 0, w, 16); ctx.fillRect(0, h - 16, w, 16); ctx.fillStyle = '#1b1b1e'; ctx.font = 'bold 80px "Hiragino Mincho ProN", serif'; ctx.textAlign = 'center'; ctx.fillText('夢', w / 2, 150); ctx.fillText('安', w / 2, 270); });
-  panel(g, 0.55, 1.6, scroll, x0 + 0.1, 1.45, -0.5, { ry: Math.PI / 2 });
-  ikebana(g, x0 + 0.5, 0.24, 0.2);
+  panel(wallL, 0.55, 1.6, scroll, x0 + 0.1, 1.45, 1.5, { ry: Math.PI / 2 });
+  ikebana(g, x0 + 0.5, 0.24, 2.2);
   // low table with tea for two, tansu chest, kimono stand, lanterns
   lowTable(g, -28.6, 1.6, { w: 1.4, d: 0.8, cushion: '#a8442e', y: 0.065 });
-  const ta = grp(g, x0 + 0.4, 0.06, 4.6, Math.PI / 2);
+  const ta = grp(g, x0 + 0.4, 0.06, 5.2, Math.PI / 2);
   box(ta, 1.8, 1.1, 0.5, '#6b4a33', 0, 0, 0);
   for (let r = 0; r < 3; r++) for (let c = 0; c < 2; c++) { box(ta, 0.82, 0.3, 0.02, '#7d5a40', -0.44 + c * 0.88, 0.1 + r * 0.33, 0.26, { cast: false }); box(ta, 0.12, 0.03, 0.03, '#2b2a2c', -0.44 + c * 0.88, 0.25 + r * 0.33, 0.28, { cast: false }); }
-  const ik = grp(g, -23.4, 0.06, 4.2);                                                             // ikō (kimono stand) with a yukata
+  bonsai(g, x0 + 0.4, 1.17, 5.6, 1.4);
+  const ik = grp(g, -23.6, 0.06, -1.6, -Math.PI / 2);                                             // ikō (kimono stand) with a yukata
   for (const px of [-0.7, 0.7]) box(ik, 0.07, 1.7, 0.07, '#3d2618', px, 0, 0);
   box(ik, 1.6, 0.07, 0.07, '#3d2618', 0, 1.65, 0);
   box(ik, 1.3, 1.2, 0.03, '#2f3f6a', 0, 0.45, 0.02);
   box(ik, 0.25, 1.2, 0.035, '#c8a24a', 0, 0.45, 0.025);
-  bonsai(g, -33.6, 1.17, 4.6, 1.4);
-  for (const [lx, lz] of [[-28.6, -2.2], [-28.6, 3.6], [-24.0, 0.0]]) chochin(g, lx, lz, { top: wh, drop: 2.2 });
+  for (const [lx, lz] of [[-28.6, -1.0], [-28.6, 3.4], [-31.8, -4.4]]) chochin(g, lx, lz, { top: wh, drop: 2.2 });
   // the spiral loft stair passes through (4F -> here -> 6F)
-  stairWell(g, stairX, stairZ, 2.8);
-  spiralStair(g, stairX, stairZ, 0, H, { start: PRIVATE.flights[5].a0, turn: PRIVATE.flights[5].turn });
+  stairWell(g, stairX, stairZ, 2.3, '-z');
+  spiralStair(g, stairX, stairZ, 0, H, { start: PRIVATE.flights[5].a0, turn: PRIVATE.flights[5].turn, r: PRIVATE.r });
   const sign = canvasTex(256, 64, (ctx) => { ctx.fillStyle = '#2a1f19'; ctx.fillRect(0, 0, 256, 64); ctx.fillStyle = '#f3e3c3'; ctx.font = 'bold 30px "Hiragino Mincho ProN", sans-serif'; ctx.fillText('寝室  Bedroom', 26, 42); });
-  panel(g, 1.2, 0.3, sign, -31.6, 2.6, z0 + 0.08);
+  panel(wallL, 1.2, 0.3, sign, x0 + 0.08, 2.9, -4.4, { ry: Math.PI / 2 });
 }
 
 /** 6F: half-size top floor over the bedroom and dojo. Bamboo all round, big rock onsen facing Mt Fuji. */
@@ -1585,7 +1597,7 @@ export function floor6(p, anim) {
   const rl = grp(g, cx, 0, z0);
   for (let u = -(x1 - x0) / 2; u <= (x1 - x0) / 2; u += 1.2) box(rl, 0.08, 1.0, 0.08, '#5a3b26', u, 0, 0, { cast: false });
   box(rl, x1 - x0, 0.08, 0.12, '#5a3b26', 0, 1.0, 0, { cast: false });
-  for (const [bx, bz] of [[-33.6, 6.6], [-30.0, 6.8], [-26.0, 6.7], [-22.0, 6.8], [-18.0, 6.7], [-14.0, 6.6], [-13.0, 2.6], [-34.0, 2.5], [-34.0, -2.5], [-33.6, -6.6]]) bamboo(g, bx, bz, { n: 7, h: 3.2 });
+  for (const [bx, bz] of [[-33.6, 6.6], [-30.0, 6.8], [-27.2, 6.7], [-21.4, 6.8], [-18.0, 6.7], [-14.0, 6.6], [-13.0, 2.6], [-34.0, 2.5], [-34.0, -2.5], [-33.6, -6.6]]) bamboo(g, bx, bz, { n: 7, h: 3.2 });
   // ---- the onsen: big rock-edged pool, the hot water pouring out from a pipe hidden in the rock pile
   const ox = PRIVATE.onsen.x, oz = PRIVATE.onsen.z, rx = 4.0, rz = 2.4, wy = 0.57;   // right end of the deck, facing Fuji
   const ell = (r, h, color, y) => { const m = cyl(g, 1, h, color, ox, y, oz, { seg: 40, cast: false }); m.scale.set(rx * r, h, rz * r); return m; };
@@ -1634,9 +1646,9 @@ export function floor6(p, anim) {
   box(bench, 2.2, 0.42, 0.6, '#c99a63', 0, 0, 0);
   for (const [lx, lz] of [[ox - rx - 1.0, oz + 2.4], [ox + rx + 1.0, oz + 1.2], [-20.0, 3.4], [-15.0, 4.5], [-31.0, 4.5], [-26.0, -2.0]]) floorLantern(g, lx, lz, { h: 0.6 });
   // where the spiral stair comes up from the bedroom
-  stairWell(g, PRIVATE.stairX, PRIVATE.stairZ, 2.8);
+  stairWell(g, PRIVATE.stairX, PRIVATE.stairZ, 2.3, '-z');
   const sign = canvasTex(256, 64, (ctx) => { ctx.fillStyle = '#2a1f19'; ctx.fillRect(0, 0, 256, 64); ctx.fillStyle = '#f3e3c3'; ctx.font = 'bold 30px "Hiragino Mincho ProN", sans-serif'; ctx.fillText('♨ 温泉  Onsen', 30, 42); });
-  const sp = grp(g, PRIVATE.stairX - 2.3, 0, PRIVATE.stairZ + 1.6);
+  const sp = grp(g, PRIVATE.stairX - 1.7, 0, PRIVATE.stairZ - 2.3);
   box(sp, 0.08, 1.5, 0.08, '#5a3b26', 0, 0, 0);
   panel(sp, 1.2, 0.3, sign, 0, 1.6, 0.05);                                                         // signpost by the stair
 }

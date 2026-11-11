@@ -13,7 +13,7 @@ Context about the owner's setup to remember in every session:
   latest message of each task from `reports/latest.json`.
 - **Floor order:** 1F Joe's Café · 2F Outsource AI Team · 3F In-house Office · 4F Chill Home · 5F Japanese Garden · 6F Private Onsen (half floor).
   **Private (Ivan & Phil only, no staff routes):** 4F left of the shoji wall (x < -12.6: music/game rooms, living room, tatami room), the spiral
-  loft stair (game-room corner), the 5F bedroom (left end) and 6F (`PRIVATE`, `privateBedroom()`, `floor6()` in js/floors.js). Staff take breaks in the 4F pantry lounge.
+  loft stair (front, by the music-room door), the 5F bedroom (left end) and 6F (`PRIVATE`, `privateBedroom()`, `floor6()` in js/floors.js). Staff take breaks in the 4F pantry lounge.
   Ivan & Phil's last daily phase ('onsen' in js/staff.js, `privateTrip()` + `Actor.spiral()`): bedroom tea, then the 6F onsen.
   (The Chill Home is built by `floor2()` in js/floors.js; walking-map ids in js/staff.js use the real floor number.)
 - Always merge finished work into `main` (GitHub Pages publishes from `main`). When JS files change,

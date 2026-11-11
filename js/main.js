@@ -222,8 +222,11 @@ for (const f of FLOORS) {
     if (_bc.x < SPLIT[f.n]) o.position.x -= EXT;
   }
   stretchFloor(g, c, f.n);
+  const extraWalls = [];                                    // e.g. the 5F bedroom walls fade too
+  c.traverse((o) => { if (o.userData.wallSide && o !== c) extraWalls.push(o); });
   optimize(g);
   for (const side in walls) addWall(side, walls[side]);
+  for (const o of extraWalls) addWall(o.userData.wallSide, o);
   const lbl = makeLabel(`${KANJI[f.n]} ${f.n}F  ${f.name}`, { height: 0.75, px: 60 });
   lbl.position.set(X0 - 0.6, floorY(f.n) + Math.min(floorH(f.n), H) - 0.8, 8.6);
   lbl.center.set(0, 0.5);
