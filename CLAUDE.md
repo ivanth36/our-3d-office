@@ -16,6 +16,8 @@ Context about the owner's setup to remember in every session:
   loft stair (front, by the music-room door), the 5F bedroom (left end) and 6F (`PRIVATE`, `privateBedroom()`, `floor6()` in js/floors.js). Staff take breaks in the 4F pantry lounge.
   Ivan & Phil's last daily phase ('onsen' in js/staff.js, `privateTrip()` + `Actor.spiral()`): bedroom tea, then the 6F onsen.
   (The Chill Home is built by `floor2()` in js/floors.js; walking-map ids in js/staff.js use the real floor number.)
+- **Symmetry matters to Ivan (OCD):** place furniture, plants and lanterns symmetrically and evenly spaced
+  (mirror sets about a centre line, lanterns exactly half way between tables, rows on a grid).
 - Always merge finished work into `main` (GitHub Pages publishes from `main`). When JS files change,
   bump the `?v=` version in index.html (import map + main script) so phones don't mix cached old files with new ones.
 - **Japanese theme** (live on `main` since 11 Nov 2026; the old look is saved on branch `original-look`): 1F is a

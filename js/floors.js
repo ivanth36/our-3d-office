@@ -37,6 +37,8 @@ function addDoor(anim, id, leaf, closed, open) {
 }
 
 const RW = CORE_X - X0, RX = (CORE_X + X0) / 2; // room floor width / centre x
+// 1F café tables (real positions; js/staff.js seats people at the first two)
+export const CAFE_ROW = [-24.83, -21.53, -18.23, -14.93], CAFE_FRONT_Z = 3.1;   // front row: under the first two columns
 const BACK_IN = -7.7, LEFT_IN = -11.7; // inner faces of the back / left walls
 
 // ---------------------------------------------------------------- signs
@@ -336,11 +338,6 @@ export function floor1(p, anim) {
   // ================= LEFT HALF: café tables + divider (real positions) =================
   const cafeG = grp(p);
   cafeG.userData.noShift = true;
-  [[-11.9, -3.4], [-8.8, -3.4]].forEach(([x, z]) => {
-    roundTable(cafeG, x, z, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
-    floorLantern(cafeG, x - 1.15, z - 0.4);
-  });
-  roundTable(cafeG, -16.6, -3.3, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });   // café table
   // low planter divider between the café and the lounge (gaps to walk through)
   [[-3.4, 2.4], [1.1, 3.0], [5.6, 2.0]].forEach(([cz, len], i) => {
     box(cafeG, 0.5, 0.5, len, '#2e2b29', -5.4, 0, cz);                         // bamboo planters
@@ -386,7 +383,7 @@ export function floor1(p, anim) {
   sofa(lg, -2.5, -1.25, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
   sofa(lg, -2.5, 1.25, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
   rectTable(lg, -2.5, 0.0, 1.4, 0.7, { h: 0.4, top: C.woodLight });
-  cyl(lg, 0.08, 0.2, C.white, -2.3, 0.47, 0.0, { seg: 10 });
+  cyl(lg, 0.08, 0.2, C.white, -2.3, 0.47, 0.0, { seg: 10 });   // (the matching set next door mirrors these)
   sphere(lg, 0.1, '#f28cb0', -2.3, 0.75, 0.0);
   box(lg, 0.5, 0.04, 0.35, '#e9e1cf', -2.9, 0.47, -0.05);                 // magazines
   floorLantern(lg, -0.8, 2.0);
@@ -623,29 +620,33 @@ function atrium(p, anim) {
   spotBeam(g, 4.5, CEIL1 - 1.0, 2.0, 4.7, 5.6, 0, { r1: 2.0, pool: false });
   for (const [ux, uz] of [[3.0, 1.8], [6.4, 1.8], [4.7, -2.0]]) spotBeam(g, ux, 0.45, uz, 4.7, 5.2, 0, { r0: 0.06, r1: 1.5, pool: false, opacity: 0.07 });   // uplights from the sofa ring
   // ---- floor lanterns along the walkways round the pond
-  for (const [x, z] of [[-12.0, 7.05], [-11.05, 6.9], [-8.65, 6.9], [-7.6, 7.05], [-13.0, 2.6], [-6.7, 2.6], [-1.2, 7.0]]) floorLantern(g, x, z);
+  for (const [x, z] of [[-12.0, 7.05], [-11.05, 6.9], [-8.65, 6.9], [-7.6, 7.05], [-13.0, 2.6], [-6.7, 2.6]]) floorLantern(g, x, z);
 
   // ---- the new space from the longer building: tea tables, lanterns, bamboo, roof beams with spotlights
   const fg = fillGroup(p);
-  // café side: normal café tables and chairs
-  for (const tz of [-3.35, 2.9]) roundTable(fg, -23.25, tz, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
-  for (const ox of [-1.6, 1.6]) floorLantern(fg, -23.25 + ox, -3.35);
+  // café tables on an even grid (real positions): a back row of four, evenly spaced, and two in front of the
+  // counter, all with their chairs set the same way; floor lanterns exactly half way between neighbouring tables
+  const cafeTable = (x, z) => roundTable(fg, x, z, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
+  CAFE_ROW.forEach((x) => cafeTable(x, -3.4));
+  for (let i = 1; i < CAFE_ROW.length; i++) floorLantern(fg, (CAFE_ROW[i - 1] + CAFE_ROW[i]) / 2, -3.4);
+  cafeTable(CAFE_ROW[0], CAFE_FRONT_Z); cafeTable(CAFE_ROW[1], CAFE_FRONT_Z);
+  floorLantern(fg, (CAFE_ROW[0] + CAFE_ROW[1]) / 2, CAFE_FRONT_Z);
   // between the stage and reception: the same sofa setting as the welcome lounge
   // (same size, colours and line as the welcome-lounge set: rug 4.6 m, sofas 1.25 m either side of z = 0)
-  rug(fg, -9.35, 0.0, 4.6, 4.6, '#d9c7a0', '#5a3b26');
-  sofa(fg, -9.35, -1.25, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
-  sofa(fg, -9.35, 1.25, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
-  rectTable(fg, -9.35, 0.0, 1.4, 0.7, { h: 0.4, top: C.woodLight });
-  cyl(fg, 0.08, 0.2, C.white, -9.15, 0.47, 0.0, { seg: 10 });
-  sphere(fg, 0.1, '#f28cb0', -9.15, 0.75, 0.0);
-  box(fg, 0.5, 0.04, 0.35, '#e9e1cf', -9.75, 0.47, -0.05);
-  for (const ox of [-1.7, 1.7]) floorLantern(fg, -9.35 + ox, 2.0);
+  // it mirrors the welcome-lounge set (centre x -2.5) exactly about the bamboo divider (x -5.4)
+  const LX = 2 * -5.4 - -2.5;
+  rug(fg, LX, 0.0, 4.6, 4.6, '#d9c7a0', '#5a3b26');
+  sofa(fg, LX, -1.25, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  sofa(fg, LX, 1.25, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  rectTable(fg, LX, 0.0, 1.4, 0.7, { h: 0.4, top: C.woodLight });
+  cyl(fg, 0.08, 0.2, C.white, LX - 0.2, 0.47, 0.0, { seg: 10 });
+  sphere(fg, 0.1, '#f28cb0', LX - 0.2, 0.75, 0.0);
+  box(fg, 0.5, 0.04, 0.35, '#e9e1cf', LX + 0.4, 0.47, -0.05);
+  for (const ox of [-1.7, 1.7]) floorLantern(fg, LX + ox, 2.0);
   for (const gx of [-23.25, -9.35]) {
     box(fg, 0.3, 0.35, 15.6, BEAM, gx, CEIL1 - 0.8, 0, { cast: false });
     for (const bz of [-5.85, -2.0, 2.0, 5.85]) cyl(fg, 0.11, 0.06, glowMat('#fff0c8', 1.4), gx, CEIL1 - 0.88, bz, { seg: 10, cast: false });
   }
-  bamboo(fg, -23.25, 5.6, { n: 6, h: 3.2 });
-  for (const sx2 of [-24.6, -21.9]) floorLantern(fg, sx2, 5.6);
   anim.tickers = anim.tickers || [];
   anim.tickers.push((dt, t) => {
     for (const q of koi) {
