@@ -13,8 +13,9 @@ Context about the owner's setup to remember in every session:
   latest message of each task from `reports/latest.json`.
 - **Floor order:** 1F Joe's Café · 2F Outsource AI Team · 3F In-house Office · 4F Chill Home · 5F Japanese Garden (roof: glass gym + Japanese garden; Mt Fuji in the backdrop, `mtFuji()` in js/main.js).
   (The Chill Home is built by `floor2()` in js/floors.js; walking-map ids in js/staff.js use the real floor number.)
-- Always merge finished work into `main` (GitHub Pages publishes from `main`).
-- **Japanese theme** (branch `japanese-theme`, backup of the old look on `original-look`): 1F is a
+- Always merge finished work into `main` (GitHub Pages publishes from `main`). When JS files change,
+  bump the `?v=` version in index.html (import map + main script) so phones don't mix cached old files with new ones.
+- **Japanese theme** (live on `main` since 11 Nov 2026; the old look is saved on branch `original-look`): 1F is a
   three-storey atrium tea house (floor heights: `floorY()` / `floorH()` in js/helpers.js), shared
   Japanese props in js/japan.js, seasons + day/night synced to Singapore time in js/env.js
   (preview with `?season=spring&time=21&friday=1`). No sounds or music (removed at Ivan's request).
