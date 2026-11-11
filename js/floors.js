@@ -594,7 +594,7 @@ function atrium(p, anim) {
   const hana = employee(g, cx, 2.45, 0, { name: 'Hana', outfit: 'yukata', shirt: '#2f3f6a', pants: '#2f3f6a', obi: RED, pattern: '#f7c6d4', hair: '#1a1210', hairStyle: 'bun', pose: 'sit', tasks: [] });
   hana.group.position.y = SH - 0.28;
   hana.tag.visible = false;
-  Object.assign(hana.group.userData.info, { title: 'Hana 🎶', text: "Shamisen player on the tea-house stage.\nTurn the sound on (🔊) to hear her." });
+  Object.assign(hana.group.userData.info, { title: 'Hana 🎶', text: 'Shamisen player on the tea-house stage.' });
   delete hana.group.userData.info.employee;
   const sham = grp(hana.body, 0.04, 0.12, 0.24, 0, 0);
   box(sham, 0.2, 0.2, 0.08, '#f4ead6', 0, -0.1, 0, { rz: 0.15 });                  // drum body

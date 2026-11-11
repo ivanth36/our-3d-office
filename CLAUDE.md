@@ -17,7 +17,7 @@ Context about the owner's setup to remember in every session:
 - **Japanese theme** (branch `japanese-theme`, backup of the old look on `original-look`): 1F is a
   three-storey atrium tea house (floor heights: `floorY()` / `floorH()` in js/helpers.js), shared
   Japanese props in js/japan.js, seasons + day/night synced to Singapore time in js/env.js
-  (preview with `?season=spring&time=21&friday=1`), Web Audio sounds + mute button in js/audio.js.
+  (preview with `?season=spring&time=21&friday=1`), Web Audio ambient sounds (no music, by request) + mute button in js/audio.js.
 - **Floor panel refresh = on request only.** Ivan says "refresh the panel" and Claude updates
   `reports/latest.json` on `main` (no background updater, to save his usage allowance; the
   "Update office floor panel" scheduled task exists but is switched OFF because scheduled sessions
