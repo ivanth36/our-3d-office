@@ -2,7 +2,7 @@
 // daruma, cushions… Everything glowing uses emissive materials (no real lights) so it runs
 // smoothly on iPhone; js/env.js brightens them at night.
 import * as THREE from 'three';
-import { box, cyl, sphere, grp, mat, glowMat, registerGlow, canvasTex, panel, roundRect } from './helpers.js';
+import { box, cyl, sphere, grp, mat, glowMat, registerGlow, canvasTex, panel, roundRect, nightMat } from './helpers.js';
 
 // ---------------------------------------------------------------- seasonal materials
 // Tree canopies / fallen petals share these materials; js/env.js recolours them by season
@@ -101,6 +101,34 @@ export function noren(p, x, y, z, w = 2.4, h = 1.25, o = {}) {
   return g;
 }
 
+// ---------------------------------------------------------------- night lighting (no real lights)
+/** Soft pool of light on the ground (night only). */
+export function lightPool(p, x, y, z, r = 0.7, o = {}) {
+  const m = new THREE.Mesh(new THREE.CircleGeometry(r, 24), nightMat(o.color ?? '#ffd590', o.opacity ?? 0.22));
+  m.rotation.x = -Math.PI / 2; m.position.set(x, y + 0.025, z);
+  p.add(m);
+  return m;
+}
+const _up = new THREE.Vector3(0, 1, 0);
+/** Spotlight beam: a faint cone of light from (x,y,z) to (tx,ty,tz), with a lamp and a pool where it lands (night only). */
+export function spotBeam(p, x, y, z, tx, ty, tz, o = {}) {
+  const dir = new THREE.Vector3(tx - x, ty - y, tz - z), len = dir.length();
+  const geo = new THREE.CylinderGeometry(o.r0 ?? 0.08, o.r1 ?? 1.0, len, 20, 1, true);
+  geo.translate(0, len / 2, 0);
+  const cone = new THREE.Mesh(geo, nightMat(o.color ?? '#fff0cc', o.opacity ?? 0.09));
+  cone.position.set(x, y, z);
+  cone.quaternion.setFromUnitVectors(_up, dir.normalize());
+  p.add(cone);
+  // the lamp itself: a small dark can with a glowing face
+  const lamp = grp(p, x, y, z);
+  const can = cyl(lamp, 0.09, 0.16, '#2b2a2c', 0, -0.08, 0, { seg: 10, cast: false });
+  const face = cyl(lamp, 0.075, 0.01, glowMat('#fff3d0', 0.8), 0, 0.08, 0, { seg: 10, cast: false });
+  lamp.quaternion.setFromUnitVectors(_up, dir);
+  void can; void face;
+  if (o.pool !== false) lightPool(p, tx, o.poolY ?? ty, tz, o.poolR ?? (o.r1 ?? 1.0) * 0.9, { opacity: 0.16 });
+  return cone;
+}
+
 // ---------------------------------------------------------------- lanterns
 /** Hanging paper lantern (chōchin). top = ceiling height, drop = cord length. */
 export function chochin(p, x, z, o = {}) {
@@ -120,6 +148,7 @@ export function floorLantern(p, x, z, o = {}) {
   cyl(p, 0.17, 0.05, '#2b1d14', x, y, z, { seg: 12 });
   cyl(p, 0.14, h, glowMat('#fbecc8', 0.85), x, y + 0.05, z, { seg: 14, cast: false });
   for (const fy of [0.05, h + 0.02]) cyl(p, 0.15, 0.04, '#2b1d14', x, y + fy, z, { seg: 12, cast: false });
+  if (o.pool !== false) lightPool(p, x, y, z, 0.75);
 }
 /** Stone lantern (tōrō). */
 export function stoneLantern(p, x, z, sc = 1, y = 0) {
@@ -133,6 +162,7 @@ export function stoneLantern(p, x, z, sc = 1, y = 0) {
   box(t, 0.32, 0.12, 0.18, glowMat('#ffd27a'), 0, 0.86, 0, { cast: false });
   cyl(t, 0.36, 0.22, stoneD, 0, 1.06, 0, { top: 0.25, bottom: 1, seg: 6 });
   sphere(t, 0.07, stone, 0, 1.33, 0);
+  lightPool(t, 0, 0, 0, 0.9, { opacity: 0.18 });
   return t;
 }
 

@@ -2,7 +2,7 @@
 // Rooms live in x -12..9.6, z -8..8 (front/street = +Z).
 import * as THREE from 'three';
 import {
-  CEIL, H, H1, SLAB, registerGlow, optimize, box, cyl, sphere, grp, mat, glowMat, glassMat, canvasTex, panel, roundRect,
+  CEIL, H, H1, SLAB, registerGlow, nightMat, optimize, box, cyl, sphere, grp, mat, glowMat, glassMat, canvasTex, panel, roundRect,
   plankTex, carpetTex, tileTex, floorSurface, faceTo,
 } from './helpers.js';
 import {
@@ -13,7 +13,7 @@ import { roamingJoe } from './joe.js';
 import { employee } from './characters.js';
 import {
   chochin, floorLantern, stoneLantern, sakuraTree, pineTree, bamboo, bonsai, ikebana, zabuton, lowTable,
-  kanbanTex, noren, logoCanvasTex, tatamiFloor, shojiScreen, frostedMat, seasonMat, darumaShelf, japaneseSofa,
+  spotBeam, lightPool, kanbanTex, noren, logoCanvasTex, tatamiFloor, shojiScreen, frostedMat, seasonMat, darumaShelf, japaneseSofa,
 } from './japan.js';
 import { CORE_X, X0, X1, XC, EXT } from './building.js';
 
@@ -161,6 +161,8 @@ export function floor1(p, anim) {
   box(cnt, 0.85, 0.06, 3.6, top, -5.35, CH, 3.95);
   // green kick panel accents
   box(cnt, 5.62, 0.25, 0.72, '#2a1f19', -7.8, 0, 6.0);
+  box(cnt, 5.7, 0.04, 0.04, glowMat('#ffd27a', 0.5), -7.8, CH - 0.07, 6.44, { cast: false });   // light strip under the counter lip
+  box(cnt, 0.04, 0.04, 3.5, glowMat('#ffd27a', 0.5), -4.98, CH - 0.07, 3.95, { cast: false });
   box(cnt, 0.72, 0.25, 3.4, '#2a1f19', -5.35, 0, 3.95);
   for (let i = 0; i < 9; i++) box(cnt, 0.05, CH - 0.3, 0.02, '#3a2618', -10.3 + i * 0.6, 0.25, 6.36, { cast: false }); // slatted front
 
@@ -433,7 +435,11 @@ function counterRoof(p) {
     for (let x = -(x1 - x0) / 2; x < (x1 - x0) / 2 + 0.2; x += 0.3) box(rp, 0.05, 0.05, len, '#2c2e33', x, 0.06, 0, { rx: sd * ang, cast: false });
   }
   box(g, x1 - x0 + 0.5, 0.12, 0.16, '#2c2e33', (x0 + x1) / 2, ridgeY, zr);
-  for (const lx of [-19.6, -15.3]) chochin(g, lx, zf + 0.05, { top: eaveY, drop: 0.12 });
+  for (const lx of [-19.9, -18.5, -16.3, -14.9]) chochin(g, lx, zf + 0.05, { top: eaveY, drop: 0.12 });
+  for (const lx of [-19.0, -17.4, -15.8]) chochin(g, lx, 3.9, { top: ridgeY - 0.1, drop: 0.35, r: 0.15 });   // under the roof, over the counter
+  box(g, x1 - x0 - 0.3, 0.03, zf - zb - 0.3, registerGlow(mat('#fff1d0', { emissive: '#ffd99a', emissiveIntensity: 0.25 }), 5), (x0 + x1) / 2, eaveY + 0.02, zr, { cast: false });   // glowing soffit
+  for (const lx of [-19.3, -17.4, -15.5]) spotBeam(g, lx, eaveY - 0.08, 6.6, lx, 1.11, 6.0, { r0: 0.05, r1: 0.5, opacity: 0.08, poolR: 0.55 });   // downlights on the counter
+  lightPool(g, (x0 + x1) / 2, 0, 7.4, 2.2, { opacity: 0.2 });                       // warm light spilling onto the floor in front
   noren(g, (x0 + x1) / 2, eaveY - 0.05, zf + 0.1, 2.8, 0.55, { text: '抹茶 · Matcha' });
 }
 
@@ -453,6 +459,8 @@ function entrance(p, signs) {
   stoneLantern(g, -5.9, 9.0, 1.1);
   stoneLantern(g, 0.7, 9.0, 1.1);
   sakuraTree(g, 6.2, 10.1, 1.35);
+  spotBeam(g, 5.0, 0.05, 11.2, 6.2, 3.4, 10.1, { r0: 0.06, r1: 1.6, pool: false });
+  spotBeam(g, 7.4, 0.05, 9.2, 6.2, 3.4, 10.1, { r0: 0.06, r1: 1.6, pool: false });
   // red tea benches with a big parasol where the bistro tables used to be
   for (const bx of [-11.5, -8.5]) {
     const b = grp(signs, bx, 0, 9.6);
@@ -604,6 +612,12 @@ function atrium(p, anim) {
   const bachi = grp(hana.shoulders[1], 0, -0.4, 0.08);
   box(bachi, 0.12, 0.02, 0.09, '#e6d3a0', 0, 0, 0.04);                              // plectrum
   hana.shoulders[0].rotation.set(-1.0, 0, 0.6);
+  // ---- night spotlights: two beams crossing on Hana, and two on the big maple by the reception
+  spotBeam(g, -7.15, CEIL1 - 1.0, 2.0, cx, SH + 0.4, 2.45, { r1: 0.75, poolY: SH, poolR: 1.0, opacity: 0.1 });
+  spotBeam(g, -12.55, CEIL1 - 1.0, 2.0, cx, SH + 0.4, 2.45, { r1: 0.75, pool: false, opacity: 0.1 });
+  spotBeam(g, 4.5, CEIL1 - 1.0, -2.0, 4.7, 5.6, 0, { r1: 2.0, pool: false });
+  spotBeam(g, 4.5, CEIL1 - 1.0, 2.0, 4.7, 5.6, 0, { r1: 2.0, pool: false });
+  for (const [ux, uz] of [[3.0, 1.8], [6.4, 1.8], [4.7, -2.0]]) spotBeam(g, ux, 0.45, uz, 4.7, 5.2, 0, { r0: 0.06, r1: 1.5, pool: false, opacity: 0.07 });   // uplights from the sofa ring
   // ---- floor lanterns along the walkways round the pond
   for (const [x, z] of [[-12.0, 7.05], [-11.05, 6.9], [-8.65, 6.9], [-7.6, 7.05], [-13.0, 2.6], [-6.7, 2.6], [-1.2, 7.0]]) floorLantern(g, x, z);
 
@@ -1167,6 +1181,17 @@ export function floor5(p, anim) {
     for (const sx of [-0.4, 0.4]) cyl(p, 0.04, 0.2, '#5f7a3a', -19.6 + sx, 2.61, gz0 + 0.24, { seg: 8 });
     addDoor(anim, '5:gym', glassDoor(p, gx1, -1.6, 1.2, gh, -Math.PI / 2), -Math.PI / 2, 0);
     for (let i = 0; i <= 10; i++) box(p, 0.1, 0.14, gz1 - gz0, '#5a3b26', gx0 + i * (gx1 - gx0) / 10, gh, (gz0 + gz1) / 2, { cast: false }); // timber pergola
+    // night lights: square paper lanterns hanging from the pergola, warm glow strips along the beams, andons in the corners
+    const shade = registerGlow(mat('#fbf0d8', { emissive: '#ffd99a', emissiveIntensity: 0.35 }), 4.5);
+    for (const lx of [-19.6, -16.6, -13.6]) for (const lz of [-5.0, -0.6, 4.6]) {
+      cyl(p, 0.008, 0.55, '#2b2a2c', lx, gh - 0.55, lz, { seg: 4, cast: false });
+      box(p, 0.4, 0.5, 0.4, shade, lx, gh - 1.05, lz, { cast: false });
+      box(p, 0.44, 0.05, 0.44, '#3d2618', lx, gh - 0.57, lz, { cast: false });
+      box(p, 0.44, 0.05, 0.44, '#3d2618', lx, gh - 1.08, lz, { cast: false });
+      lightPool(p, lx, 0.05, lz, 1.2, { opacity: 0.14 });
+    }
+    for (const lz of [gz0 + 0.3, gz1 - 0.3]) box(p, gx1 - gx0 - 0.4, 0.04, 0.04, glowMat('#ffcf80', 0.4), gcx, gh - 0.06, lz, { cast: false });
+    for (const [lx, lz] of [[-21.0, 7.2], [-21.0, -7.3], [-12.5, 3.2]]) floorLantern(p, lx, lz, { h: 0.7, y: 0.04 });
     const sign = canvasTex(512, 96, (ctx) => { ctx.fillStyle = '#2a1f19'; ctx.fillRect(0, 0, 512, 96); ctx.fillStyle = '#f3e3c3'; ctx.font = 'bold 58px "Hiragino Mincho ProN", -apple-system, sans-serif'; ctx.fillText('道場 DOJO', 120, 70); });
     panel(p, 1.6, 0.3, sign, gx1 + 0.03, 2.6, -1.0, { ry: Math.PI / 2, transparent: true });
 
@@ -1372,6 +1397,12 @@ export function floor5(p, anim) {
     for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; box(nd, 0.02, 0.02, 1.5, '#e8d6b8', Math.sin(a) * 0.75, 2.62, -0.45 + Math.cos(a) * 0.75, { ry: a }); }
     // -- trees: sakura (cherry blossom), sculpted pines, bamboo
     sakuraTree(p, 8.3, 5.6); sakuraTree(p, -3.1, 5.6, 0.9); sakuraTree(p, -9.5, -5.6); sakuraTree(p, 2.4, -4.3, 0.8);
+    // night: uplights on the sakura trees, and paper floor lanterns all round the garden
+    for (const [tx, tz, sc, ox, oz] of [[8.3, 5.6, 1, -1.0, -0.8], [-3.1, 5.6, 0.9, 1.0, -0.9], [-9.5, -5.6, 1, 1.0, 0.9], [2.4, -4.3, 0.8, 0.9, 0.8]]) {
+      spotBeam(p, tx + ox, 0.05, tz + oz, tx, 2.5 * sc, tz, { r0: 0.05, r1: 1.2 * sc, pool: false });
+      spotBeam(p, tx - ox * 0.9, 0.05, tz + oz * 0.6, tx, 2.5 * sc, tz, { r0: 0.05, r1: 1.1 * sc, pool: false, opacity: 0.07 });
+    }
+    for (const [lx, lz] of [[5.5, 1.9], [2.2, 2.0], [-1.0, 2.2], [-8.4, 1.6], [5.0, -2.2], [1.0, -2.3], [-9.9, -2.0], [3.2, -5.0], [5.9, -6.5], [-3.6, 6.5], [6.9, 4.2], [-5.0, -2.4]]) floorLantern(p, lx, lz, { h: 0.55 });
     // -- hinoki hot-spring tub at the back, facing Mt Fuji (steam rises: see anim.tickers)
     const tub = grp(p, 4.4, 0, -5.6);
     box(tub, 1.9, 0.12, 1.4, '#7d786f', 0, 0, 0);                                     // stone base

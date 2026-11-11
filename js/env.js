@@ -5,7 +5,7 @@
 //   vending machines glow brighter after dark (glowing materials, no extra real-time lights).
 // Preview overrides in the address bar: ?season=spring|summer|autumn|winter  ?time=21.5  ?friday=1
 import * as THREE from 'three';
-import { GLOW, WINDOWS } from './helpers.js';
+import { GLOW, WINDOWS, NIGHT_MATS } from './helpers.js';
 import { SEASON_MATS } from './japan.js';
 
 const params = new URLSearchParams(location.search);
@@ -169,6 +169,9 @@ export function createEnv({ scene, renderer, hemi, sun, fill, fuji, roofY }) {
     moon.visible = night > 0.5; stars.visible = night > 0.5; stars.material.opacity = night;
     // glowing things: lanterns, signs, vending machines, windows
     for (const [m, g2] of GLOW) m.emissiveIntensity = g2.base * (1 + (g2.night - 1) * night);
+    // spotlight beams + pools of light, and the spotlit tree canopies
+    for (const [m, op] of NIGHT_MATS) { m.visible = night > 0.3; m.opacity = op * night; }
+    for (const kind of ['blossom', 'momiji']) for (const m of SEASON_MATS[kind]) { m.emissive.copy(m.color); m.emissiveIntensity = 0.32 * night; }
     for (const m of WINDOWS) {
       m.color.copy(winDay).lerp(winNight, night * 0.85);
       m.emissive.copy(winDayE).lerp(winNightE, night);

@@ -51,6 +51,20 @@ export function mat(color, o = {}) {
   return m;
 }
 export const glassMat = () => mat('#cfeaf2', { transparent: true, opacity: 0.22, roughness: 0.1 });
+// ---------- night-only light effects (spotlight beams, pools of light): shown after dark by js/env.js
+export const NIGHT_MATS = new Map();   // material -> base opacity
+const nightCache = new Map();
+export function nightMat(color = '#ffe2a8', opacity = 0.2) {
+  const k = color + opacity;
+  let m = nightCache.get(k);
+  if (!m) {
+    m = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2 });
+    m.visible = false;
+    NIGHT_MATS.set(m, opacity);
+    nightCache.set(k, m);
+  }
+  return m;
+}
 export const glowMat = (c = '#ffd98a', k = 1.2) => registerGlow(mat(c, { emissive: c, emissiveIntensity: k }));
 
 function toMat(c, o) { return (typeof c === 'string') ? mat(c, o) : c; }
