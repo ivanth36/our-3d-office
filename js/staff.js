@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { H, floorY, floorAt, box, cyl, grp, mat } from './helpers.js';
 import { employee } from './characters.js';
 import { NODES as JOE_NODES, EDGES as JOE_EDGES } from './joe.js';
-import { seat as deskSeat } from './floors.js';
+import { seat as deskSeat, PRIVATE } from './floors.js';
 import { sx, raw, real2, LANE_A, LANE_B } from './building.js';   // original-layout x -> real x on the longer floors
 
 const R = (a, b) => a + Math.random() * (b - a);
@@ -114,6 +114,14 @@ chain('4:gameIn', node(4, 'consoleIn', raw(-14.45), -2.2), node(4, 'consoleStand
 const LOUNGE_SEAT = { node: '4:lounge', x: -9.3, z: 4.6, ry: Math.PI, y: 0 };
 // 4F pantry lounge (the public side, by the kitchen): staff take their breaks here.
 // The music room, game room, living room, tatami room and the stair up are private (Ivan & Phil only).
+// Ivan & Phil's private suite: stair foot in the game room; bedroom tea and onsen spots (5F / 6F, reached by
+// the spiral stair, not by the walking map, so nobody else can get there)
+link('4:gameIn', node(4, 'spiralFoot', real2(PRIVATE.stairX - 1.7), PRIVATE.stairZ));
+const OX = PRIVATE.onsen.x;
+const BED_TEA = { Ivan: { node: node(5, 'bedI', real2(-28.6), 0.0), x: real2(-28.6), z: 0.82, ry: 0, y: -0.27 },
+  Phil: { node: node(5, 'bedP', real2(-27.2), 2.38), x: real2(-28.6), z: 2.38, ry: Math.PI, y: -0.27 } };
+const ONSEN = { Ivan: { node: node(6, 'onsenI', real2(OX - 1.0), 0.9), x: real2(OX - 1.0), z: -3.0, ry: Math.PI, y: -0.38 },
+  Phil: { node: node(6, 'onsenP', real2(OX + 0.4), 0.9), x: real2(OX + 0.4), z: -3.0, ry: Math.PI, y: -0.38 } };
 const PANTRY_SEAT = { node: '4:pantryStand', x: real2(-6.2), z: -3.05, ry: Math.PI, y: -0.08 };
 const DRUM_SEAT = { node: '4:drumStand', x: -6.6, z: 5.8, ry: 0, y: 0.05, act: 'drum' };
 const PIANO_SEAT = { node: '4:pianoStand', x: -4.6, z: 5.6, ry: Math.PI / 2, y: 0, typing: true, act: 'piano' };
@@ -355,11 +363,22 @@ class Actor {
       return false;
     });
   }
+  /** Ivan & Phil's spiral loft stair (4F -> 5F bedroom -> 6F onsen), one flight up or down. */
+  spiral(lower, up) {
+    const { stairX: x, stairZ: z, flights } = PRIVATE, f = flights[lower];
+    const a1 = f.a0 + f.turn * Math.PI * 2, n = 48, r = 0.62, out = 1.9;
+    const pts = [[x + Math.sin(f.a0) * out, 0, z + Math.cos(f.a0) * out]];
+    for (let i = 0; i <= n; i++) { const a = f.a0 + (a1 - f.a0) * i / n; pts.push([x + Math.sin(a) * r, H * i / n, z + Math.cos(a) * r]); }
+    pts.push([x + Math.sin(a1) * out, H, z + Math.cos(a1) * out]);
+    return this.walkPath(lower, up, pts);
+  }
   /** Walk the stairs between floor `lower` and `lower+1` (up or down) along STAIR_PATH. */
   climb(lower, up) {
+    return this.walkPath(lower, up, stairPath(lower), true);
+  }
+  walkPath(lower, up, pts, core = false) {
     this.toFloor(lower);
     this.anim = 'walk';
-    const pts = stairPath(lower);
     if (!up) pts.reverse();
     const lens = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1], q[2] - pts[i][2]));
     let seg = 0, s = 0;
@@ -371,7 +390,9 @@ class Actor {
         this.anim = 'idle';
         const f = up ? lower + 1 : lower;
         this.toFloor(f);
-        this.g.position.set(LX, 0, up ? STAIR_TOP_Z : STAIR_BOTTOM_Z);
+        const e = pts[pts.length - 1];
+        if (core) this.g.position.set(LX, 0, up ? STAIR_TOP_Z : STAIR_BOTTOM_Z);
+        else this.g.position.set(e[0], 0, e[2]);
         return true;
       }
       const A = pts[seg], B = pts[seg + 1], k = s / lens[seg];
@@ -868,7 +889,51 @@ async function mary(a) {
 //   'dinner'  dinner together at the dining table (Sally cooks, serves and clears up)
 //   'coffee'  coffee together: down to Joe's Café, then the welcome-lounge sofas
 //   'console' console gaming together on the game-room sofa
-const own = { phase: 'gym', philAt: null, joePlay: false };
+//   'onsen'   up the spiral stair together: tea in their bedroom (5F), then a soak in the 6F onsen facing Fuji
+const own = { phase: 'gym', philAt: null, joePlay: false, tripGo: false, onsenDone: false };
+
+/** The private trip both owners make in the 'onsen' phase (Ivan leads, Phil follows a few steps behind). */
+async function privateTrip(a, lead) {
+  const me = a.e.name, other = lead ? 'Phil' : 'Ivan';
+  const exitX = real2(PRIVATE.stairX - 1.9), exitZ = PRIVATE.stairZ;
+  a.status = `Going up to the bedroom with ${other}`;
+  await a.goStand('4:spiralFoot');
+  if (lead) { own.tripGo = true; } else { await a.waitFor(() => own.tripGo, 60); await a.sleep(3); }
+  a.status = 'Climbing the spiral stair to the bedroom';
+  await a.spiral(4, true);
+  await a.sit(BED_TEA[me]);
+  own.philAt = lead ? own.philAt : 'bed';
+  a.status = `Tea in the bedroom with ${other} 🍵`;
+  a.talking = true;
+  if (lead) await a.waitFor(() => own.philAt === 'bed', 60);
+  await a.sleep(R(12, 16));
+  a.talking = false;
+  await a.stand();
+  a.status = `Up to the onsen with ${other} ♨️`;
+  await a.moveTo(exitX, exitZ);
+  if (!lead) await a.sleep(2);
+  await a.spiral(5, true);
+  await a.moveTo(real2(-23.5), 0.9);
+  await a.sit(ONSEN[me]);
+  own.philAt = lead ? own.philAt : 'onsen';
+  a.status = `Soaking in the onsen with ${other}, facing Mt Fuji ♨️`;
+  a.talking = true;
+  if (lead) {
+    await a.waitFor(() => own.philAt === 'onsen', 60);
+    await a.sleep(R(20, 26));
+    own.onsenDone = true;
+  } else await a.waitFor(() => own.onsenDone, 120);
+  a.talking = false;
+  await a.stand();
+  a.status = 'Heading back down the spiral stair';
+  if (!lead) await a.sleep(3);
+  await a.moveTo(real2(-23.5), 0.9);
+  await a.moveTo(exitX, exitZ);
+  await a.spiral(5, false);
+  await a.spiral(4, false);
+  a.node = '4:spiralFoot';
+  a.g.position.set(sx(4, real2(PRIVATE.stairX - 1.7)), 0, PRIVATE.stairZ);
+}
 const philThere = (where) => () => own.philAt === where;
 
 async function ivan(a) {
@@ -964,6 +1029,11 @@ async function ivan(a) {
     a.talking = true;
     await a.sleep(R(20, 28));
     a.talking = false;
+
+    // 6. up to their bedroom for tea, then the private onsen on 6F
+    own.tripGo = false; own.onsenDone = false;
+    own.phase = 'onsen';
+    await privateTrip(a, true);
   }
 }
 
@@ -989,6 +1059,11 @@ async function phil(a) {
       a.status = 'Composing a new song on the music PC';
       await a.goSit(COMPOSE_SEAT);
       await a.sleep(R(14, 20), changed);
+      continue;
+    }
+    if (ph === 'onsen') {
+      await privateTrip(a, false);
+      await a.waitFor(changed, 120);
       continue;
     }
     if (ph === 'pc') {
