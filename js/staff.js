@@ -100,7 +100,26 @@ const CAFE_PAIRS = [
 chain('1:j9', node(1, 'loungeA', -4.3, -0.75), '1:j10');
 chain('1:loungeA', node(1, 'loungeStandI', -3.1, -0.45), node(1, 'loungeStandP', -1.9, -0.45));
 link('1:loungeA', node(1, 'loungeB', -4.3, 0.75)); link('1:loungeB', '1:j10');   // where Phil plays with Joe
-const JOE_PLAY = [-3.55, 0.0];                       // Joe's play spot, between Ivan and Phil
+const JOE_PLAY = [-3.55, 0.0];
+// the wooden platform left of Hana's stage: stair foot, stair, and two spots to watch her from (real positions)
+link('1:j14', node(1, 'platFoot', real2(-20.15), 6.4));
+const PLAT = { x: real2(-20.15), foot: 5.85, top: 4.25, y: 0.92, spots: { Aida: [real2(-19.1), 1.9], Mary: [real2(-19.1), 3.1] } };
+async function watchHana(a) {
+  const [wx, wz] = PLAT.spots[a.e.name];
+  a.status = 'Going up to watch Hana play the shamisen';
+  await a.goStand('1:platFoot');
+  await a.walk3([[PLAT.x, 0, 6.4], [PLAT.x, 0, PLAT.foot], [PLAT.x, PLAT.y, PLAT.top], [PLAT.x, PLAT.y, 3.7], [wx, PLAT.y, wz]]);
+  a.blob.visible = false;
+  await a.turnTo(Math.PI / 2);                       // face Hana (+x)
+  a.status = 'Watching Hana play the shamisen 🎶';
+}
+async function leaveHana(a) {
+  const [wx, wz] = PLAT.spots[a.e.name];
+  a.status = 'Walking back down from the stage';
+  await a.walk3([[wx, PLAT.y, wz], [PLAT.x, PLAT.y, 3.7], [PLAT.x, PLAT.y, PLAT.top], [PLAT.x, 0, PLAT.foot], [PLAT.x, 0, 6.4]]);
+  a.blob.visible = true;
+  a.node = '1:platFoot';
+}                       // Joe's play spot, between Ivan and Phil
 
 // ---- Chill Home (4F): music room (glass lounge, front-left)
 // music room: its only outside door is in the middle of its right wall (real x -12)
@@ -366,6 +385,21 @@ class Actor {
       this.heading += d * Math.min(1, dt * 9);
       this.g.rotation.y = this.heading;
       if (Math.abs(d) < 0.8) { const s = Math.min(dist, speed * dt); p.x += dx / dist * s; p.z += dz / dist * s; }
+      return false;
+    });
+  }
+  /** Walk through 3D points on the current floor (x, y, z), e.g. up the stage-platform stairs. */
+  walk3(pts) {
+    this.anim = 'walk';
+    const lens = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1], q[2] - pts[i][2]));
+    let seg = 0, s = 0;
+    return this._task((dt) => {
+      s += dt * 0.9;
+      while (seg < lens.length && s >= lens[seg]) { s -= lens[seg]; seg++; }
+      if (seg >= lens.length) { const e = pts[pts.length - 1]; this.g.position.set(sx(this.floor, e[0]), e[1], e[2]); this.anim = 'idle'; return true; }
+      const A = pts[seg], B = pts[seg + 1], k = s / lens[seg];
+      this.g.position.set(sx(this.floor, A[0] + (B[0] - A[0]) * k), A[1] + (B[1] - A[1]) * k, A[2] + (B[2] - A[2]) * k);
+      if (Math.hypot(B[0] - A[0], B[2] - A[2]) > 0.01) { this.heading = Math.atan2(B[0] - A[0], B[2] - A[2]); this.g.rotation.y = this.heading; }
       return false;
     });
   }
@@ -805,7 +839,7 @@ async function aida(a) {
     const withMary = flags.maryAtDesk && !flags.meetingCall && Math.random() < 0.6;
     if (withMary) {
       flags.cafePair = pick(CAFE_PAIRS);
-      flags.cafeDone = false; flags.marySeated = false;
+      flags.cafeDone = false; flags.marySeated = false; flags.watchGo = false; flags.maryWatching = false;
       flags.cafeInvite = true;
       a.status = "Asked Mary along · taking the lift down to Joe's Café";
     } else {
@@ -822,7 +856,16 @@ async function aida(a) {
     }
     await a.sleep(R(14, 22));
     a.talking = false;
-    if (withMary) { flags.cafeDone = true; flags.cafeInvite = false; }
+    if (withMary) {                                  // then up onto the stage platform together to watch Hana
+      flags.watchGo = true;
+      await watchHana(a);
+      await a.waitFor(() => flags.maryWatching, 60);
+      a.talking = true;
+      await a.sleep(R(14, 20));
+      a.talking = false;
+      flags.cafeDone = true; flags.cafeInvite = false;
+      await leaveHana(a);
+    }
     a.status = 'Walking back up the stairs to Floor 3';
     await a.goSit(home, 'stairs');
     a.rig.cup.visible = false; a.holdCup = false;
@@ -856,8 +899,18 @@ async function mary(a) {
     flags.marySeated = true;
     a.status = "Coffee with Aida at Joe's Café";
     a.talking = true;
-    await a.waitFor(() => flags.cafeDone, 120);
+    await a.waitFor(() => flags.watchGo || flags.cafeDone, 120);
     a.talking = false;
+    if (flags.watchGo && !flags.cafeDone) {
+      await a.sleep(2);                              // a few steps behind Aida
+      await watchHana(a);
+      flags.maryWatching = true;
+      a.talking = true;
+      await a.waitFor(() => flags.cafeDone, 120);
+      a.talking = false;
+      await a.sleep(1.5);
+      await leaveHana(a);
+    }
     a.status = 'Walking back up the stairs to Floor 3';
     await a.goSit(home, 'stairs');
     a.rig.cup.visible = false; a.holdCup = false;

@@ -176,3 +176,20 @@ button.emp-task:hover { background: #fff3df; }
   #floors button { min-width: 0; border-radius: 14px; }
   #floors button .small { font-size: 9.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 }
+
+/* floor panel: narrow, one column of compact cards that scrolls up and down */
+.p-row { flex-direction: column; overflow-x: hidden; overflow-y: auto; scroll-snap-type: none; gap: 8px; }
+.emp-col {
+  flex: 0 0 auto; overflow: visible; scroll-snap-align: none;
+  display: grid; grid-template-columns: 46px 1fr; column-gap: 10px; row-gap: 6px; align-items: center;
+}
+.emp-head { grid-row: span 2; }
+.emp-head canvas { width: 46px; height: 46px; margin: 0; }
+.emp-name { grid-column: 2; text-align: left; font-size: 15px; }
+.emp-role { grid-column: 2; text-align: left; margin-top: -6px; }
+.emp-col > :not(.emp-head):not(.emp-name):not(.emp-role) { grid-column: 1 / -1; }
+.emp-empty { align-self: stretch; }
+@media (hover: hover) and (pointer: fine), (min-width: 900px) {
+  #panel { width: 320px; }
+  .p-row { overflow-y: auto; }
+}
