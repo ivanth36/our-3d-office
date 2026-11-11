@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { roundRect } from './helpers.js';
 
-const KRW_TARGET = 1150;              // same target as the "Hourly SGD to KRW rate" task
+const KRW_TARGET = 1150;              // same target as the "SGD rate target watch (silent)" task
 const REFRESH_MS = 60 * 60 * 1000;    // hourly
 
 async function getJSON(url, ms = 8000) {

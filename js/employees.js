@@ -6,6 +6,8 @@
 //   tasks: the scheduled tasks this employee runs. `when` is shown on their card; `at` is used to
 //          work out the next run (times are Singapore time):
 //            { every: 'hour', m }          -> every hour at minute m
+//            { every: 'hour', n, h0, m }   -> every n hours (hours h0, h0+n, …) at minute m
+//          silent: true = only messages Ivan when something needs attention
 //            { every: 'day', h, m }        -> every day at h:m
 //            { every: 'week', dow, h, m }  -> every week on day dow (0 = Sunday) at h:m
 //   home:  the floor whose panel (the infogram on the right) lists this person
@@ -18,7 +20,7 @@ export const EMPLOYEES = [
     hair: '#5a3a22', shirt: '#ffffff', tie: '#2b2a2c',
     tasks: [
       { name: 'Daily KRW trend analysis', when: 'Every day, 8:08 am', at: { every: 'day', h: 8, m: 8 } },
-      { name: 'Hourly SGD to KRW rate', when: 'Every hour at :39', at: { every: 'hour', m: 39 } },
+      { name: 'Daily SGD rates (KRW + CNY)', when: 'Every day, 8:05 am', at: { every: 'day', h: 8, m: 5 } },
     ],
   },
   {
@@ -26,7 +28,7 @@ export const EMPLOYEES = [
     hair: '#1f1a17', shirt: '#e3ecf6', tie: '#b23a3a', glasses: true,
     tasks: [
       { name: 'Xiaoming daily China news', when: 'Every day, 8:20 am', at: { every: 'day', h: 8, m: 20 } },
-      { name: 'Hourly SGD to CNY rate', when: 'Every hour at :04', at: { every: 'hour', m: 4 } },
+      { name: 'SGD rate target watch (silent)', when: 'Every 3 hours at :15 (2:15, 5:15, 8:15 … SGT) · messages you only when a target is hit', at: { every: 'hour', n: 3, h0: 2, m: 15 }, silent: true },
     ],
   },
   {
@@ -47,7 +49,7 @@ export const EMPLOYEES = [
     name: 'Kenny', home: 3, role: 'Manager · keeps the team on track', floor: 3,
     hair: '#1f1a17', outfit: 'blazer', shirt: '#2b3550', blouse: '#ffffff', pants: '#2b2a2c', glasses: true,
     tasks: [
-      { name: 'Kenny team check (manager)', when: 'Every day, 1:07 pm · messages you only if a task has a problem', at: { every: 'day', h: 13, m: 7 } },
+      { name: 'Kenny team check (manager)', when: 'Every day, 1:07 pm · messages you only if a task has a problem', at: { every: 'day', h: 13, m: 7 }, silent: true },
     ],
   },
   {

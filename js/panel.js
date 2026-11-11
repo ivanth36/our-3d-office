@@ -130,7 +130,9 @@ export function createPanel({ employees, floors }) {
         ? `${sent}<div class="t-prev">${esc(plain(rep.text).slice(0, 150))}…</div><div class="t-more">Tap to read ›</div>`
         : rep
           ? `${sent}<div class="t-prev">🔒 Content kept private (personal health details)</div>`
-          : `<div class="t-when">Nothing sent yet · ${esc(task.when)}</div>`);
+          : task.silent
+            ? `<div class="t-when">${esc(task.when)}</div><div class="t-prev">🔕 Quiet: no alerts sent, all good</div>`
+            : `<div class="t-when">Nothing sent yet · ${esc(task.when)}</div>`);
       if (readable) card.addEventListener('click', () => openReader(e, task, rep));
       col.append(card);
     }

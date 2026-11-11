@@ -270,6 +270,8 @@ function msUntil(at, now = Date.now()) {
   if (at.every === 'hour') {
     c.setUTCMinutes(at.m);
     if (c <= t) c.setUTCHours(c.getUTCHours() + 1);
+    const n = at.n ?? 1, h0 = at.h0 ?? 0;            // every n hours, starting from hour h0
+    while ((c.getUTCHours() - h0 + 24) % n) c.setUTCHours(c.getUTCHours() + 1);
   } else {
     c.setUTCHours(at.h, at.m);
     if (at.every === 'week') {
