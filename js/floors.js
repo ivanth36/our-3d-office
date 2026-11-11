@@ -340,7 +340,7 @@ export function floor1(p, anim) {
     roundTable(cafeG, x, z, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
     floorLantern(cafeG, x - 1.15, z - 0.4);
   });
-  lowTable(cafeG, -16.6, -3.3, { w: 1.4, d: 0.8 });                                  // low tea table on the ground
+  roundTable(cafeG, -16.6, -3.3, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });   // café table
   // low planter divider between the café and the lounge (gaps to walk through)
   [[-3.4, 2.4], [1.1, 3.0], [5.6, 2.0]].forEach(([cz, len], i) => {
     box(cafeG, 0.5, 0.5, len, '#2e2b29', -5.4, 0, cz);                         // bamboo planters
@@ -627,10 +627,19 @@ function atrium(p, anim) {
 
   // ---- the new space from the longer building: tea tables, lanterns, bamboo, roof beams with spotlights
   const fg = fillGroup(p);
+  // café side: normal café tables and chairs
+  for (const tz of [-3.35, 2.9]) roundTable(fg, -23.25, tz, { chairs: 4, start: Math.PI / 4, top: '#8a5f3c', chair: { seat: '#a8442e', color: '#4a3020' } });
+  for (const ox of [-1.6, 1.6]) floorLantern(fg, -23.25 + ox, -3.35);
+  // between the stage and reception: the same sofa setting as the welcome lounge
+  rug(fg, -9.35, 1.25, 4.4, 3.8, '#d9c7a0', '#5a3b26');
+  sofa(fg, -9.35, -0.05, 2.4, 0, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  sofa(fg, -9.35, 2.55, 2.4, Math.PI, { color: '#3d2a1e', cushion: '#2f4a6a', pillow: '#c8a24a' });
+  rectTable(fg, -9.35, 1.25, 1.4, 0.7, { h: 0.4, top: C.woodLight });
+  cyl(fg, 0.08, 0.2, C.white, -9.15, 0.47, 1.25, { seg: 10 });
+  sphere(fg, 0.1, '#f28cb0', -9.15, 0.75, 1.25);
+  box(fg, 0.5, 0.04, 0.35, '#e9e1cf', -9.75, 0.47, 1.2);
+  for (const ox of [-2.0, 2.0]) floorLantern(fg, -9.35 + ox, ox < 0 ? -0.1 : 2.6);
   for (const gx of [-23.25, -9.35]) {
-    lowTable(fg, gx, -3.35, { w: 1.4, d: 0.8 });
-    lowTable(fg, gx, gx < -20 ? 2.9 : 1.25, { w: 1.4, d: 0.8, cushion: '#2f4a6a' });
-    for (const ox of [-1.5, 1.5]) floorLantern(fg, gx + ox, -3.35);
     box(fg, 0.3, 0.35, 15.6, BEAM, gx, CEIL1 - 0.8, 0, { cast: false });
     for (const bz of [-5.85, -2.0, 2.0, 5.85]) cyl(fg, 0.11, 0.06, glowMat('#fff0c8', 1.4), gx, CEIL1 - 0.88, bz, { seg: 10, cast: false });
   }
@@ -904,7 +913,6 @@ export function floor2(p, anim = {}) {
   }
   for (let i = 0; i < 5; i++) stool(p, ix - 2.0 + i * 1.0, iz + 1.15, { color: '#7a3b3b', leg: '#2a1f19' });
   for (let i = 0; i < 4; i++) chochin(p, ix - 2.1 + i * 1.4, iz, { top: CEIL, drop: 1.7 });
-  noren(p, ix, 2.55, BACK_IN + 0.75, 2.2, 0.6, { text: 'おまかせ Omakase', color: '#f4efe4' }).children.forEach(() => {});
   rug(p, ix, iz + 1.0, 6.8, 1.2, '#cdbb8f', '#5a3b26');
 
   // ================= OPEN SPACE between living room & kitchen =================
